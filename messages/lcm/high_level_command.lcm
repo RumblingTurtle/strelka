@@ -1,0 +1,18 @@
+package a1_lcm_msgs;
+
+struct HighLevelCommand
+{
+    // Local planner command
+    float   linearSpeed[3];
+    float   angularVelocity[3];
+    float   footHeight;
+    float   footClearance;
+    float   hipOffsets[2]; //Front+Back
+    float   rpy[3];
+    float   comOffset[2];
+    float   bodyHeight;
+
+    boolean    stop;
+}
+    
+    

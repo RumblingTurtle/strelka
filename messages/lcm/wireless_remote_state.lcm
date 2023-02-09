@@ -1,0 +1,23 @@
+package a1_lcm_msgs;
+
+struct WirelessRemoteState
+{
+    float    left_joystick[2];
+    float    right_joystick[2];
+    boolean  R1;
+    boolean  R2;
+    boolean  L1;
+    boolean  L2;
+    boolean  F1;
+    boolean  F2;
+    boolean  A;
+    boolean  B;
+    boolean  X;
+    boolean  Y;
+    boolean  up;
+    boolean  right;
+    boolean  down;
+    boolean  left;
+    boolean  start;
+    boolean  select;
+}

@@ -1,0 +1,14 @@
+package a1_lcm_msgs;
+
+struct RobotHighCommand
+{
+    // Unitree's built in high level command
+    byte   mode;
+    byte   gait_type;
+    byte   speed_level; 
+    float   body_height;
+    float   foot_height;
+    float   euler[3];
+    float   position[2];
+    float   velocity[3];
+}

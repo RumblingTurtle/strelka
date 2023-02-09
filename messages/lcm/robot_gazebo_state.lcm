@@ -1,0 +1,9 @@
+package a1_lcm_msgs;
+
+struct RobotGazeboState
+{
+    float   quaternion[4];
+    float   position_world[3];
+    float   velocity_world[3];
+    float foot_forces[12];
+}

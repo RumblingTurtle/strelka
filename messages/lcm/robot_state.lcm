@@ -1,0 +1,18 @@
+package a1_lcm_msgs;
+
+struct RobotState
+{
+    // Robot state augmented with odometry data
+    float   quaternion[4];
+    float   gyro[3];
+    float   accel[3];
+    float   footForces[4];
+    float   q[12];
+    float   dq[12];
+    float   tick;
+
+    float   position[3];
+    float   velocityBody[3];
+    float   jacobians[36];
+    float   footPositions[12];
+}

@@ -1,0 +1,21 @@
+package a1_lcm_msgs;
+
+struct WbicCommand
+{
+    float   rpy[3];
+    float   angularVelocity[3];
+
+    float   pBody[3];
+    float   vBody[3];
+    float   aBody[3];
+
+    float   pFoot[12];
+    float   vFoot[12];
+    float   aFoot[12];
+    float   footState[4];
+    float   mpcForces[12];
+
+    boolean stop;
+}
+
+

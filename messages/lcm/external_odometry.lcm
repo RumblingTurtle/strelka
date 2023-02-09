@@ -1,0 +1,8 @@
+package a1_lcm_msgs;
+
+struct ExternalOdometry
+{
+    float   position[3];
+    float   quaternion[4];
+    boolean  enabled;
+}

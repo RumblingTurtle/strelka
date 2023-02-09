@@ -1,0 +1,10 @@
+package a1_lcm_msgs;
+
+struct RobotLowCommand
+{
+    float   q[12];
+    float   dq[12];
+    float   kp[12];
+    float   kd[12];
+    float   tau[12];
+}
