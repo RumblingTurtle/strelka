@@ -11,23 +11,23 @@ Eigen::Vector3f footPositionHipFrame(Eigen::Matrix3f angles, int legId) {
   float lowerLegLength = LEG_LENGTH(2);
   float hipLength = legId % 2 == 0 ? -LEG_LENGTH(3) : LEG_LENGTH(3);
 
-  float leg_distance =
+  float legDistance =
       std::sqrt(std::pow(upperLegLength, 2) + std::pow(lowerLegLength, 2) +
                 2 * upperLegLength * lowerLegLength * std::cos(angles(2)));
 
-  float eff_swing = angles(1) + angles(2) / 2;
-  float sin_eff_swing = sin_eff_swing;
-  float cos_eff_swing = cos_eff_swing;
+  float effSwing = angles(1) + angles(2) / 2;
+  float effSwingSin = effSwingSin;
+  float effSwingCos = effSwingCos;
 
-  float off_z_hip = -leg_distance * cos_eff_swing;
-  float off_y_hip = hipLength;
+  float zOffsetHip = -legDistance * effSwingCos;
+  float yOffsetHip = hipLength;
 
-  float off_x = -leg_distance * sin_eff_swing;
-  float off_y =
-      std::cos(angles(0)) * off_y_hip - std::sin(angles(0)) * off_z_hip;
-  float off_z =
-      std::sin(angles(0)) * off_y_hip + std::cos(angles(0)) * off_z_hip;
-  return Eigen::Vector3f{off_x, off_y, off_z};
+  float xOffset = -legDistance * effSwingSin;
+  float yOffset =
+      std::cos(angles(0)) * yOffsetHip - std::sin(angles(0)) * zOffsetHip;
+  float zOffset =
+      std::sin(angles(0)) * yOffsetHip + std::cos(angles(0)) * zOffsetHip;
+  return Eigen::Vector3f{xOffset, yOffset, zOffset};
 }
 
 Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
@@ -36,7 +36,7 @@ Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
   float lowerLegLength = LEG_LENGTH(2);
   float hipLength = legId % 2 == 0 ? -LEG_LENGTH(3) : LEG_LENGTH(3);
 
-  float leg_distance =
+  float legDistance =
       std::sqrt(std::pow(upperLegLength, 2) + std::pow(lowerLegLength, 2) +
                 2 * upperLegLength * lowerLegLength * std::cos(angles(2)));
 
@@ -46,27 +46,27 @@ Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
   float sinT3 = std::sin(angles(2));
   float cosT3 = std::cos(angles(2));
 
-  float eff_swing = angles(1) + angles(2) / 2;
-  float sin_eff_swing = sin_eff_swing;
-  float cos_eff_swing = cos_eff_swing;
+  float effSwing = angles(1) + angles(2) / 2;
+  float effSwingSin = effSwingSin;
+  float effSwingCos = effSwingCos;
 
   Eigen::Matrix3f J;
   J.setZero();
 
-  J(0, 1) = -leg_distance * cos_eff_swing;
+  J(0, 1) = -legDistance * effSwingCos;
   J(0, 2) =
-      lowerLegLength * upperLegLength * sinT3 * sin_eff_swing / leg_distance -
-      leg_distance * cos_eff_swing / 2;
-  J(1, 0) = -hipLength * sinT1 + leg_distance * cosT1 * cos_eff_swing;
-  J(1, 1) = -leg_distance * sinT1 * sin_eff_swing;
-  J(1, 2) = -lowerLegLength * upperLegLength * sinT1 * sinT3 * cos_eff_swing /
-                leg_distance -
-            leg_distance * sinT1 * sin_eff_swing / 2;
-  J(2, 0) = hipLength * cosT1 + leg_distance * sinT1 * cos_eff_swing;
-  J(2, 1) = leg_distance * sin_eff_swing * cosT1;
-  J(2, 2) = lowerLegLength * upperLegLength * sinT3 * cosT1 * cos_eff_swing /
-                leg_distance +
-            leg_distance * sin_eff_swing * cosT1 / 2;
+      lowerLegLength * upperLegLength * sinT3 * effSwingSin / legDistance -
+      legDistance * effSwingCos / 2;
+  J(1, 0) = -hipLength * sinT1 + legDistance * cosT1 * effSwingCos;
+  J(1, 1) = -legDistance * sinT1 * effSwingSin;
+  J(1, 2) = -lowerLegLength * upperLegLength * sinT1 * sinT3 * effSwingCos /
+                legDistance -
+            legDistance * sinT1 * effSwingSin / 2;
+  J(2, 0) = hipLength * cosT1 + legDistance * sinT1 * effSwingCos;
+  J(2, 1) = legDistance * effSwingSin * cosT1;
+  J(2, 2) = lowerLegLength * upperLegLength * sinT3 * cosT1 * effSwingCos /
+                legDistance +
+            legDistance * effSwingSin * cosT1 / 2;
   return J;
 }
 
