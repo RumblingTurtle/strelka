@@ -3,14 +3,16 @@ PrintPackageHeader(tests)
 SET(STRELKA_TESTS_DEPENDENCY_HEADERS 
     ${Eigen_INCLUDE_DIRS}
     ${STRELKA_COMMON_HEADERS}
+    ${STRELKA_INTERFACES_HEADERS}
+    ${STRELKA_STATE_ESTIMATION_HEADERS}
 )
 
 SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES 
     strelka_interfaces
+    strelka_state_estimation
 )
 
-file(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-message(${STRELKA_TESTS_SOURCES})
+file(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true  ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
 
 foreach(file_path ${STRELKA_TESTS_SOURCES})
     string( REPLACE ".cpp" "" new_name ${file_path} )

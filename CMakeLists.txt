@@ -21,4 +21,5 @@ endmacro()
 
 add_subdirectory(messages)
 add_subdirectory(interfaces)
+add_subdirectory(state_estimation)
 add_subdirectory(tests)

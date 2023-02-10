@@ -1,8 +1,7 @@
+#include <A1/constants.hpp>
 #include <a1_lcm_msgs/RobotLowCommand.hpp>
 #include <a1_lcm_msgs/RobotRawState.hpp>
-#include <constants.hpp>
 #include <interfaces/QuadrupedInterface.hpp>
-#include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
 #include <typedefs.hpp>
@@ -19,13 +18,14 @@ class GazeboInterface : public QuadrupedInterface {
   a1_lcm_msgs::RobotLowCommand commandMessage;
 
   struct MoveToHandle {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     float moveTime;
     float timeLeft;
     float prevTick;
     bool firstHandle;
 
-    const Eigen::VectorXf &desiredAngles;
     Eigen::VectorXf startAngles;
+    const Eigen::VectorXf &desiredAngles;
     GazeboInterface &interface;
 
     MoveToHandle(float moveTime, const Eigen::VectorXf &desiredAngles,
