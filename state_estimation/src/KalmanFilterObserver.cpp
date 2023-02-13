@@ -4,7 +4,20 @@ namespace strelka {
 
 KalmanFilterObserver::KalmanFilterObserver(
     KalmanFilterObserverParams &parameters)
-    : parameters(parameters) {
+    : initialized(false), parameters(parameters) {
+  initialize();
+}
+
+KalmanFilterObserver::KalmanFilterObserver()
+    : initialized(false), parameters() {}
+
+void KalmanFilterObserver::setParameters(
+    KalmanFilterObserverParams &parameters) {
+  this->parameters = parameters;
+  initialize();
+}
+
+void KalmanFilterObserver::initialize() {
   _xhat.setZero();
   _ps.setZero();
   _vs.setZero();
@@ -47,10 +60,15 @@ KalmanFilterObserver::KalmanFilterObserver(
   _Q0.block(6, 6, 12, 12) =
       parameters.dt * Eigen::Matrix<float, 12, 12>::Identity();
   _R0.setIdentity();
+
+  initialized = true;
 }
 
 void KalmanFilterObserver::update(KalmanFilterObserverInput &inputs,
                                   KalmanFilterObserverOutput &output) {
+  if (!initialized) {
+    throw UninitializedKalmanFilter();
+  }
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Q =
       Eigen::Matrix<float, STATE_DIM, STATE_DIM>::Identity();
 

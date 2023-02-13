@@ -10,6 +10,13 @@
 #define SENSOR_DIM 31
 
 namespace strelka {
+class UninitializedKalmanFilter : std::exception {
+  const char *what() {
+    return "KalmanFilterObserver haven't been provided with initial "
+           "parameters. Call setParameters(KalmanFilterObserverParams &) or "
+           "use constructor with KalmanFilterObserverParams";
+  }
+};
 
 class KalmanFilterObserver {
   Eigen::Matrix<float, STATE_DIM, 1> _xhat;
@@ -23,6 +30,9 @@ class KalmanFilterObserver {
   Eigen::Matrix<float, SENSOR_DIM, STATE_DIM> _C;
   Eigen::Matrix<float, STATE_DIM, 1> state;
   Eigen::Matrix<float, STATE_DIM, 1> covariance;
+  bool initialized;
+
+  void initialize();
 
 public:
   struct KalmanFilterObserverParams {
@@ -61,7 +71,11 @@ public:
     Eigen::Matrix3f positionCovariance;
   };
 
+  KalmanFilterObserver();
   KalmanFilterObserver(KalmanFilterObserverParams &);
+
+  void setParameters(KalmanFilterObserverParams &);
+
   void update(KalmanFilterObserverInput &inputs,
               KalmanFilterObserverOutput &output);
   void reset();
