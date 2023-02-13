@@ -3,4 +3,8 @@
 - Lowpass filter
 - External odometry
 - Resetable observer
-- Slowdown estimator for simulation (decouple strelka and ros entirely(at least for now))
++ Slowdown estimator for simulation (decouple strelka and ros entirely(at least for now))
+- Ensure lcm.good()
+- lcm.handle() == 0
+- Timeouts?
+        

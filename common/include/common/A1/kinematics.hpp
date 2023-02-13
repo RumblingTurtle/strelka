@@ -1,13 +1,13 @@
 #ifndef A1_KINEMATICS_H
 #define A1_KINEMATICS_H
 
-#include <A1/constants.hpp>
+#include <common/A1/constants.hpp>
 #include <math.h>
 
 namespace strelka {
-
-void footPositionHipFrame(const Eigen::Vector3f &angles, int legId,
-                          Eigen::Vector3f &footPosition) {
+namespace kinematics {
+inline void footPositionHipFrame(const Eigen::Vector3f &angles, int legId,
+                                 Eigen::Vector3f &footPosition) {
 
   float hipLength = LEG_LENGTH[0] * std::pow(-1, legId + 1);
   float legLength =
@@ -32,8 +32,8 @@ void footPositionHipFrame(const Eigen::Vector3f &angles, int legId,
   footPosition(2) = zOffset;
 }
 
-void analyticalLegJacobian(const Eigen::Vector3f &angles, int legId,
-                           Eigen::Matrix3f &J) {
+inline void analyticalLegJacobian(const Eigen::Vector3f &angles, int legId,
+                                  Eigen::Matrix3f &J) {
   float upperLegLength = LEG_LENGTH(1);
   float lowerLegLength = LEG_LENGTH(2);
   float hipLength = legId % 2 == 0 ? -LEG_LENGTH(0) : LEG_LENGTH(0);
@@ -69,7 +69,8 @@ void analyticalLegJacobian(const Eigen::Vector3f &angles, int legId,
             legDistance * effSwingSin * cosT1 / 2;
 }
 
-void quatToEulerMatrix(Eigen::Matrix<float, 4, 1> q, Eigen::Matrix3f &output) {
+inline void quatToEulerMatrix(Eigen::Matrix<float, 4, 1> q,
+                              Eigen::Matrix3f &output) {
   float w = q(0), x = q(1), y = q(2), z = q(3);
 
   output(0, 0) = 0.5 - std::pow(y, 2) - std::pow(z, 2);
@@ -86,7 +87,7 @@ void quatToEulerMatrix(Eigen::Matrix<float, 4, 1> q, Eigen::Matrix3f &output) {
 
   output *= 2;
 }
-
+} // namespace kinematics
 } // namespace strelka
 
 #endif // A1_KINEMATICS_H
