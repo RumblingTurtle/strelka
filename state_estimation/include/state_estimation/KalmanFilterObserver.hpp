@@ -1,10 +1,10 @@
+#ifndef KALMAN_FILTER_OBSERVER_H
+#define KALMAN_FILTER_OBSERVER_H
+
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/LU>
-
-#ifndef KALMAN_FILTER_OBSERVER_H
-#define KALMAN_FILTER_OBSERVER_H
 
 #define STATE_DIM 18
 #define SENSOR_DIM 31
