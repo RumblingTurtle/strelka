@@ -3,7 +3,6 @@
 
 #include <a1_lcm_msgs/RobotRawState.hpp>
 #include <a1_lcm_msgs/RobotState.hpp>
-#include <chrono>
 #include <common/A1/constants.hpp>
 #include <common/A1/kinematics.hpp>
 #include <lcm/lcm-cpp.hpp>
@@ -13,22 +12,10 @@
 namespace strelka {
 
 class A1StateEstimator {
-  KalmanFilterObserver::KalmanFilterObserverParams A1_KALMAN_FILTER_PARAMS = {
-      .dt = 0.001,
-      .imuPositionProcessNoise = 0.02,
-      .imuVelocityProcessNoise = 0.02,
-      .footPositionProcessNoise = 0.002,
-      .footPositionSensorNoise = 0.001,
-      .footVelocitySensorNoise = 0.1,
-      .contactHeightSensorNoise = 0.001,
-      .externalOdometryNoisePosition = {0.02, 0.02, 0.09},
-  };
-
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
   a1_lcm_msgs::RobotState *messageOut;
   lcm::Subscription *sub;
-  float dt;
 
   void update(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
               const a1_lcm_msgs::RobotRawState *messageIn);
@@ -39,6 +26,19 @@ public:
 
   ~A1StateEstimator();
 };
+
+static KalmanFilterObserver::KalmanFilterObserverParams
+    A1_DEFAULT_KALMAN_FILTER_PARAMS = {
+        .dt = 0.001,
+        .imuPositionProcessNoise = 0.02,
+        .imuVelocityProcessNoise = 0.02,
+        .footPositionProcessNoise = 0.002,
+        .footPositionSensorNoise = 0.001,
+        .footVelocitySensorNoise = 0.1,
+        .contactHeightSensorNoise = 0.001,
+        .externalOdometryNoisePosition = {0.02, 0.02, 0.09},
+};
+
 } // namespace strelka
 
 #endif // A1_STATE_ESITMATOR_H

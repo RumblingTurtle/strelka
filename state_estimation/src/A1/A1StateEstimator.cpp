@@ -2,7 +2,7 @@
 
 namespace strelka {
 
-A1StateEstimator::A1StateEstimator() : dt(0.001) {
+A1StateEstimator::A1StateEstimator() {
   messageOut = new a1_lcm_msgs::RobotState();
   observer = new KalmanFilterObserver();
 }
@@ -11,8 +11,8 @@ void A1StateEstimator::processLoop() {
   SlowdownEstimator slowdownEstimator(lcm);
   slowdownEstimator.estimateDt();
 
-  A1_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
-  observer->setParameters(A1_KALMAN_FILTER_PARAMS);
+  A1_DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
+  observer->setParameters(A1_DEFAULT_KALMAN_FILTER_PARAMS);
   sub = lcm.subscribe("raw_state", &A1StateEstimator::update, this);
   while (lcm.handle() == 0) {
   }

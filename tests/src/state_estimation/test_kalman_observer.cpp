@@ -13,6 +13,6 @@ int main() {
 
   KalmanFilterObserver observer(params);
   observer.update(input, output);
-  print(output.position);
+  std::cout << output.position << std::endl;
   return 0;
 }

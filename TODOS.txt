@@ -7,4 +7,14 @@
 - Ensure lcm.good()
 - lcm.handle() == 0
 - Timeouts?
-        
+- WBIC
+- MPC
+- Local planner
+    Ideally a builder LocalPlanner<Foot,Body,Gait>();
+    - Foot planner
+    - Gait scheduler
+    - Body trajectory planner
+- Sim/Hardware bridge to lcm
+- Macros for packages
+    - Automatic source file search
+    FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
