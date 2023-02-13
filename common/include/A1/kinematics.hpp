@@ -6,35 +6,37 @@
 
 namespace strelka {
 
-Eigen::Vector3f footPositionHipFrame(Eigen::Matrix3f angles, int legId) {
-  float upperLegLength = LEG_LENGTH(1);
-  float lowerLegLength = LEG_LENGTH(2);
-  float hipLength = legId % 2 == 0 ? -LEG_LENGTH(3) : LEG_LENGTH(3);
+void footPositionHipFrame(const Eigen::Vector3f &angles, int legId,
+                          Eigen::Vector3f &footPosition) {
 
-  float legDistance =
-      std::sqrt(std::pow(upperLegLength, 2) + std::pow(lowerLegLength, 2) +
-                2 * upperLegLength * lowerLegLength * std::cos(angles(2)));
+  float hipLength = LEG_LENGTH[0] * std::pow(-1, legId + 1);
+  float legLength =
+      std::sqrt(LEG_LENGTH[1] * LEG_LENGTH[1] + LEG_LENGTH[2] * LEG_LENGTH[2] +
+                2 * LEG_LENGTH[1] * LEG_LENGTH[2] * std::cos(angles[2]));
 
-  float effSwing = angles(1) + angles(2) / 2;
-  float effSwingSin = effSwingSin;
-  float effSwingCos = effSwingCos;
+  float effSwing = angles[1] + angles[2] / 2;
 
-  float zOffsetHip = -legDistance * effSwingCos;
-  float yOffsetHip = hipLength;
+  float hipOffsetX = -legLength * std::sin(effSwing);
+  float hipOffsetZ = -legLength * std::cos(effSwing);
+  float hipOffsetY = hipLength;
 
-  float xOffset = -legDistance * effSwingSin;
-  float yOffset =
-      std::cos(angles(0)) * yOffsetHip - std::sin(angles(0)) * zOffsetHip;
-  float zOffset =
-      std::sin(angles(0)) * yOffsetHip + std::cos(angles(0)) * zOffsetHip;
-  return Eigen::Vector3f{xOffset, yOffset, zOffset};
+  float cosTheta0 = std::cos(angles[0]);
+  float sinTheta0 = std::sin(angles[0]);
+
+  float xOffset = hipOffsetX;
+  float yOffset = cosTheta0 * hipOffsetY - sinTheta0 * hipOffsetZ;
+  float zOffset = sinTheta0 * hipOffsetY + cosTheta0 * hipOffsetZ;
+
+  footPosition(0) = xOffset;
+  footPosition(1) = yOffset;
+  footPosition(2) = zOffset;
 }
 
-Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
-                                             int legId) {
+void analyticalLegJacobian(const Eigen::Vector3f &angles, int legId,
+                           Eigen::Matrix3f &J) {
   float upperLegLength = LEG_LENGTH(1);
   float lowerLegLength = LEG_LENGTH(2);
-  float hipLength = legId % 2 == 0 ? -LEG_LENGTH(3) : LEG_LENGTH(3);
+  float hipLength = legId % 2 == 0 ? -LEG_LENGTH(0) : LEG_LENGTH(0);
 
   float legDistance =
       std::sqrt(std::pow(upperLegLength, 2) + std::pow(lowerLegLength, 2) +
@@ -47,12 +49,10 @@ Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
   float cosT3 = std::cos(angles(2));
 
   float effSwing = angles(1) + angles(2) / 2;
-  float effSwingSin = effSwingSin;
-  float effSwingCos = effSwingCos;
+  float effSwingSin = std::sin(effSwing);
+  float effSwingCos = std::cos(effSwing);
 
-  Eigen::Matrix3f J;
-  J.setZero();
-
+  J(0, 0) = 0.0;
   J(0, 1) = -legDistance * effSwingCos;
   J(0, 2) =
       lowerLegLength * upperLegLength * sinT3 * effSwingSin / legDistance -
@@ -67,7 +67,24 @@ Eigen::Matrix3f compactAnalyticalLegJacobian(Eigen::Vector3f angles,
   J(2, 2) = lowerLegLength * upperLegLength * sinT3 * cosT1 * effSwingCos /
                 legDistance +
             legDistance * effSwingSin * cosT1 / 2;
-  return J;
+}
+
+void quatToEulerMatrix(Eigen::Matrix<float, 4, 1> q, Eigen::Matrix3f &output) {
+  float w = q(0), x = q(1), y = q(2), z = q(3);
+
+  output(0, 0) = 0.5 - std::pow(y, 2) - std::pow(z, 2);
+  output(0, 1) = x * y - w * z;
+  output(0, 2) = x * z + w * y;
+
+  output(1, 0) = x * y + w * z;
+  output(1, 1) = 0.5 - std::pow(x, 2) - std::pow(z, 2);
+  output(1, 2) = y * z - w * x;
+
+  output(2, 0) = x * z - w * y;
+  output(2, 1) = y * z + w * x;
+  output(2, 2) = 0.5 - std::pow(x, 2) - std::pow(y, 2);
+
+  output *= 2;
 }
 
 } // namespace strelka

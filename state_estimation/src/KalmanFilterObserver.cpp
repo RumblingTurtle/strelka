@@ -5,6 +5,7 @@ namespace strelka {
 KalmanFilterObserver::KalmanFilterObserver(
     KalmanFilterObserverParams &parameters)
     : parameters(parameters) {
+  _xhat.setZero();
   _ps.setZero();
   _vs.setZero();
 
@@ -15,14 +16,12 @@ KalmanFilterObserver::KalmanFilterObserver(
   _A.block(6, 6, 12, 12) = Eigen::Matrix<float, 12, 12>::Identity();
   _B.setZero();
   _B.block(3, 0, 3, 3) = parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
-
   Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> C1(3, 6);
   C1 << Eigen::Matrix<float, 3, 3>::Identity(),
       Eigen::Matrix<float, 3, 3>::Zero();
   Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> C2(3, 6);
   C2 << Eigen::Matrix<float, 3, 3>::Zero(),
       Eigen::Matrix<float, 3, 3>::Identity();
-
   _C.setZero();
   _C.block(0, 0, 3, 6) = C1;
   _C.block(3, 0, 3, 6) = C1;
@@ -40,7 +39,6 @@ KalmanFilterObserver::KalmanFilterObserver(
 
   _P.setIdentity();
   _P = float(0.001) * _P;
-
   _Q0.setIdentity();
   _Q0.block(0, 0, 3, 3) =
       parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
@@ -51,8 +49,8 @@ KalmanFilterObserver::KalmanFilterObserver(
   _R0.setIdentity();
 }
 
-KalmanFilterObserver::KalmanFilterObserverOutput
-KalmanFilterObserver::update(KalmanFilterObserverInput &inputs) {
+void KalmanFilterObserver::update(KalmanFilterObserverInput &inputs,
+                                  KalmanFilterObserverOutput &output) {
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Q =
       Eigen::Matrix<float, STATE_DIM, STATE_DIM>::Identity();
 
@@ -69,10 +67,8 @@ KalmanFilterObserver::update(KalmanFilterObserverInput &inputs) {
       _R0.block(0, 0, 12, 12) * parameters.footPositionSensorNoise;
   R.block(12, 12, 12, 12) =
       _R0.block(12, 12, 12, 12) * parameters.footVelocitySensorNoise;
-
   R.block(24, 24, 4, 4) =
       _R0.block(24, 24, 4, 4) * parameters.contactHeightSensorNoise;
-
   R.block(28, 28, 1, 1) =
       _R0.block(28, 28, 1, 1) * parameters.externalOdometryNoisePosition[0];
   R.block(29, 29, 1, 1) =
@@ -105,8 +101,8 @@ KalmanFilterObserver::update(KalmanFilterObserverInput &inputs) {
   float h_i = 0.0f;
   for (int i = 0; i < 4; i++) {
     int i1 = 3 * i;
-    Eigen::Vector3f p_rel = inputs.footPositions.row(i);
-    Eigen::Vector3f dp_rel = inputs.footVelocities.row(i);
+    Eigen::Vector3f p_rel = inputs.footPositionsTrunkFrame.row(i);
+    Eigen::Vector3f dp_rel = inputs.footVelocitiesTrunkFrame.row(i);
     Eigen::Vector3f p_f = inputs.bodyToWorldMat * p_rel;
     Eigen::Vector3f dp_f =
         inputs.bodyToWorldMat * (inputs.gyroscope.cross(p_rel) + dp_rel);
@@ -151,11 +147,10 @@ KalmanFilterObserver::update(KalmanFilterObserverInput &inputs) {
   Eigen::Matrix<float, SENSOR_DIM, 1> ey = y - yModel;
   Eigen::Matrix<float, SENSOR_DIM, SENSOR_DIM> S = _C * Pm * Ct + R;
 
-  auto S_LU = S.lu();
-  Eigen::Matrix<float, SENSOR_DIM, 1> S_ey = S_LU.solve(ey);
+  Eigen::Matrix<float, SENSOR_DIM, 1> S_ey = S.lu().solve(ey);
   _xhat += Pm * Ct * S_ey;
 
-  Eigen::Matrix<float, SENSOR_DIM, STATE_DIM> S_C = S_LU.solve(_C);
+  Eigen::Matrix<float, SENSOR_DIM, STATE_DIM> S_C = S.lu().solve(_C);
   _P =
       (Eigen::Matrix<float, STATE_DIM, STATE_DIM>::Identity() - Pm * Ct * S_C) *
       Pm;
@@ -163,14 +158,12 @@ KalmanFilterObserver::update(KalmanFilterObserverInput &inputs) {
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Pt = _P.transpose();
   _P = (_P + Pt) / float(2);
 
-  KalmanFilterObserverOutput output;
   output.position = _xhat.block(0, 0, 3, 1);
   output.velocityWorld = _xhat.block(3, 0, 3, 1);
   output.velocityBody =
       inputs.bodyToWorldMat.transpose() * _xhat.block(3, 0, 3, 1);
   output.footPositionsWorld = _xhat.block(6, 0, 12, 1);
   output.positionCovariance = _P.block(0, 0, 3, 3);
-  return output;
 }
 
 void KalmanFilterObserver::reset() { _xhat.setZero(); }

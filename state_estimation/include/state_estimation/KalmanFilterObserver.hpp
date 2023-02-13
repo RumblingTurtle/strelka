@@ -12,7 +12,6 @@
 namespace strelka {
 
 class KalmanFilterObserver {
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Eigen::Matrix<float, STATE_DIM, 1> _xhat;
   Eigen::Matrix<float, 12, 1> _ps;
   Eigen::Matrix<float, 12, 1> _vs;
@@ -39,25 +38,22 @@ public:
 
     float contactHeightSensorNoise;
 
-    Eigen::VectorXf initialState;
     Eigen::Vector3f externalOdometryNoisePosition;
   } parameters;
 
   struct KalmanFilterObserverInput {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::Matrix3f bodyToWorldMat; // BodyToWorld
-    Eigen::Matrix<float, 4, 1> footContacts;
-    Eigen::Matrix<float, 4, 3> footPositions;  // COM frame
-    Eigen::Matrix<float, 4, 3> footVelocities; // COM frame
-    Eigen::Vector3f gyroscope;                 // angular rates in body frame
-    Eigen::Vector3f accelerometer;             // world frame base acceleration
-    Eigen::Matrix<float, 4, 1> footContactHeights; // world frame
-    Eigen::Vector3f externalOdometryPosition;      // world frame
+    Eigen::Vector4f footContacts;
+    Eigen::Matrix<float, 4, 3> footPositionsTrunkFrame;  // Trunk frame
+    Eigen::Matrix<float, 4, 3> footVelocitiesTrunkFrame; // Trunk frame
+    Eigen::Vector3f gyroscope;                // angular rates in body frame
+    Eigen::Vector3f accelerometer;            // world frame base acceleration
+    Eigen::Vector4f footContactHeights;       // world frame
+    Eigen::Vector3f externalOdometryPosition; // world frame
     bool useExternalOdometry;
   };
 
   struct KalmanFilterObserverOutput {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     Eigen::Vector3f position;
     Eigen::Vector3f velocityBody;
     Eigen::Vector3f velocityWorld;
@@ -66,7 +62,8 @@ public:
   };
 
   KalmanFilterObserver(KalmanFilterObserverParams &);
-  KalmanFilterObserverOutput update(KalmanFilterObserverInput &);
+  void update(KalmanFilterObserverInput &inputs,
+              KalmanFilterObserverOutput &output);
   void reset();
 };
 

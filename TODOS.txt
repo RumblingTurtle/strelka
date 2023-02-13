@@ -1,0 +1,6 @@
+- Make lcm message names more comprehensive
+- Multinomial Moving Window filter
+- Lowpass filter
+- External odometry
+- Resetable observer
+- Slowdown estimator for simulation (decouple strelka and ros entirely(at least for now))

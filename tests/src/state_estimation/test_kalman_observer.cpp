@@ -12,7 +12,7 @@ int main() {
   strelka::KalmanFilterObserver::KalmanFilterObserverOutput output;
 
   KalmanFilterObserver observer(params);
-  output = observer.update(input);
+  observer.update(input, output);
   print(output.position);
   return 0;
 }

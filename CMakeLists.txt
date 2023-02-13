@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(strelka)
 
+set(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 SET(STRELKA_MESSAGES_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/messages/autosrc/include)
