@@ -1,13 +1,13 @@
 #ifndef A1WBIC_H
 #define A1WBIC_H
 
-#include <a1_lcm_msgs/RobotLowCommand.hpp>
-#include <a1_lcm_msgs/RobotState.hpp>
-#include <a1_lcm_msgs/WbicCommand.hpp>
 #include <common/A1/constants.hpp>
 #include <common/A1/kinematics.hpp>
 #include <common/typedefs.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
+#include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
+#include <messages/a1_lcm_msgs/RobotState.hpp>
+#include <messages/a1_lcm_msgs/WbicCommand.hpp>
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
@@ -78,9 +78,9 @@ class A1WBIC {
 
     for (int motorId = 0; motorId < 12; motorId++) {
       commandMessage->q[motorId] = outs.q[motorId];
-      commandMessage->kp[motorId] = POSITION_GAINS[motorId % 3];
+      commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
       commandMessage->dq[motorId] = outs.dq[motorId];
-      commandMessage->kd[motorId] = DAMPING_GAINS[motorId % 3];
+      commandMessage->kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
       commandMessage->tau[motorId] = outs.tau[motorId];
     }
 

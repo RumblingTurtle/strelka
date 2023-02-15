@@ -85,9 +85,9 @@ void GazeboInterface::setAngles(const Eigen::VectorXf &q) {
   assert(q.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
-    commandMessage.kp[motorId] = POSITION_GAINS[motorId % 3];
+    commandMessage.kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
     commandMessage.dq[motorId] = 0;
-    commandMessage.kd[motorId] = DAMPING_GAINS[motorId % 3];
+    commandMessage.kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
     commandMessage.tau[motorId] = 0;
   }
 
@@ -100,9 +100,9 @@ void GazeboInterface::setAngles(const Eigen::VectorXf &q,
   assert(dq.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
-    commandMessage.kp[motorId] = POSITION_GAINS[motorId % 3];
+    commandMessage.kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
     commandMessage.dq[motorId] = dq[motorId];
-    commandMessage.kd[motorId] = DAMPING_GAINS[motorId % 3];
+    commandMessage.kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
     commandMessage.tau[motorId] = 0;
   }
 
@@ -130,8 +130,9 @@ void GazeboInterface::moveToInit(float moveTime) {
   moveAngles.resize(12);
   for (int motorId = 0; motorId < 12; motorId++) {
     bool rightLeg = motorId % 6 == 0;
-    moveAngles[motorId] = -INIT_ANGLES[motorId % 3] * rightLeg +
-                          INIT_ANGLES[motorId % 3] * (1 - rightLeg);
+    moveAngles[motorId] =
+        -constants::A1::INIT_ANGLES[motorId % 3] * rightLeg +
+        constants::A1::INIT_ANGLES[motorId % 3] * (1 - rightLeg);
   }
   moveTo(moveAngles, moveTime);
 }
@@ -142,8 +143,9 @@ void GazeboInterface::moveToStand(float moveTime) {
   moveAngles.resize(12);
   for (int motorId = 0; motorId < 12; motorId++) {
     bool rightLeg = motorId % 6 == 0;
-    moveAngles[motorId] = -STAND_ANGLES[motorId % 3] * rightLeg +
-                          STAND_ANGLES[motorId % 3] * (1 - rightLeg);
+    moveAngles[motorId] =
+        -constants::A1::STAND_ANGLES[motorId % 3] * rightLeg +
+        constants::A1::STAND_ANGLES[motorId % 3] * (1 - rightLeg);
   }
   moveTo(moveAngles, moveTime);
 }

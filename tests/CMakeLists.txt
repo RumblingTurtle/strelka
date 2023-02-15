@@ -9,9 +9,10 @@ SET(STRELKA_TESTS_DEPENDENCY_HEADERS
 )
 
 SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES 
+    strelka_robots
     strelka_interfaces
     strelka_state_estimation
-    strelka_control_wbic_controller
+    strelka_control
 )
 
 file(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true  ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)

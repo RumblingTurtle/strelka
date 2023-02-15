@@ -5,6 +5,7 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/LU>
+#include <robots/Robot.hpp>
 
 #define STATE_DIM 18
 #define SENSOR_DIM 31
@@ -32,6 +33,13 @@ class KalmanFilterObserver {
   Eigen::Matrix<float, STATE_DIM, 1> covariance;
   bool initialized;
 
+  /*Outputs*/
+  Eigen::Vector3f _position;
+  Eigen::Vector3f _velocityBody;
+  Eigen::Vector3f _velocityWorld;
+  Eigen::Matrix<float, 12, 1> _footPositionsWorld;
+  Eigen::Matrix3f _positionCovariance;
+
   void initialize();
 
 public:
@@ -51,33 +59,20 @@ public:
     Eigen::Vector3f externalOdometryNoisePosition;
   } parameters;
 
-  struct KalmanFilterObserverInput {
-    Eigen::Matrix3f bodyToWorldMat; // BodyToWorld
-    Eigen::Vector4f footContacts;
-    Eigen::Matrix<float, 4, 3> footPositionsTrunkFrame;  // Trunk frame
-    Eigen::Matrix<float, 4, 3> footVelocitiesTrunkFrame; // Trunk frame
-    Eigen::Vector3f gyroscope;                // angular rates in body frame
-    Eigen::Vector3f accelerometer;            // world frame base acceleration
-    Eigen::Vector4f footContactHeights;       // world frame
-    Eigen::Vector3f externalOdometryPosition; // world frame
-    bool useExternalOdometry;
-  };
-
-  struct KalmanFilterObserverOutput {
-    Eigen::Vector3f position;
-    Eigen::Vector3f velocityBody;
-    Eigen::Vector3f velocityWorld;
-    Eigen::Matrix<float, 12, 1> footPositionsWorld;
-    Eigen::Matrix3f positionCovariance;
-  };
+  Eigen::Vector3f position() const;
+  Eigen::Vector3f velocityBody() const;
+  Eigen::Vector3f velocityWorld() const;
+  Eigen::Matrix<float, 12, 1> footPositionsWorld() const;
+  Eigen::Matrix3f positionCovariance() const;
 
   KalmanFilterObserver();
   KalmanFilterObserver(KalmanFilterObserverParams &);
 
   void setParameters(KalmanFilterObserverParams &);
 
-  void update(KalmanFilterObserverInput &inputs,
-              KalmanFilterObserverOutput &output);
+  void update(robots::Robot &robot, bool useExternalOdometry,
+              Vec3<float> externalOdometryPosition);
+
   void reset();
 };
 

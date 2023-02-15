@@ -3,7 +3,7 @@
 namespace strelka {
 
 A1StateEstimator::A1StateEstimator() {
-  messageOut = new a1_lcm_msgs::RobotState();
+  robotStateMsg = new a1_lcm_msgs::RobotState();
   observer = new KalmanFilterObserver();
 }
 
@@ -19,78 +19,55 @@ void A1StateEstimator::processLoop() {
 }
 
 A1StateEstimator::~A1StateEstimator() {
-  delete messageOut;
+  delete robotStateMsg;
   delete observer;
   if (sub)
     lcm.unsubscribe(sub);
 }
 
-void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
-                              const std::string &chan,
-                              const a1_lcm_msgs::RobotRawState *messageIn) {
-  KalmanFilterObserver::KalmanFilterObserverInput input;
-
-  Eigen::Matrix<float, 36, 3> footJacobians;
-
-  kinematics::quatToEulerMatrix(
-      Eigen::Map<const Eigen::Matrix<float, 4, 1>>(messageIn->quaternion, 4),
-      input.bodyToWorldMat);
-
-  for (int legId = 0; legId < 4; legId++) {
-    Eigen::Vector3f q =
-        Eigen::Map<const Eigen::Vector3f>(messageIn->q + legId * 3, 3);
-    Eigen::Vector3f dq =
-        Eigen::Map<const Eigen::Vector3f>(messageIn->dq + legId * 3, 3);
-
-    Eigen::Vector3f footPosition;
-    Eigen::Matrix3f footJacobian;
-
-    kinematics::analyticalLegJacobian(q, legId, footJacobian);
-    kinematics::footPositionHipFrame(q, legId, footPosition);
-
-    input.footPositionsTrunkFrame.block(legId, 0, 1, 3) =
-        footPosition.transpose() +
-        Eigen::Map<const Eigen::Vector3f>(TRUNK_TO_HIP_OFFSETS + 3 * legId, 3)
-            .transpose();
-
-    input.footVelocitiesTrunkFrame.block(legId, 0, 1, 3) =
-        (footJacobian * dq).transpose();
-    footJacobians.block(legId * 3, 0, 3, 3) = footJacobian;
-    input.footContacts(legId) =
-        messageIn->footForces[legId] > FOOT_FORCE_THRESHOLD;
-    input.footContactHeights(legId) = 0;
-  }
-
-  input.gyroscope = Eigen::Map<const Eigen::Vector3f>(messageIn->gyro, 3);
-
-  input.accelerometer =
-      input.bodyToWorldMat *
-          Eigen::Map<const Eigen::Vector3f>(messageIn->accel, 3) +
-      GRAVITY_CONSTANT;
-
-  input.externalOdometryPosition.setZero();
-  input.useExternalOdometry = false;
-
-  KalmanFilterObserver::KalmanFilterObserverOutput output;
-  observer->update(input, output);
-
+void A1StateEstimator::propagateRobotRawState(
+    const a1_lcm_msgs::RobotRawState *messageIn,
+    a1_lcm_msgs::RobotState *messageOut) {
   memcpy(messageOut->quaternion, messageIn->quaternion, sizeof(float) * 4);
   memcpy(messageOut->gyro, messageIn->gyro, sizeof(float) * 3);
   memcpy(messageOut->accel, messageIn->accel, sizeof(float) * 3);
   memcpy(messageOut->footForces, messageIn->footForces, sizeof(float) * 4);
   memcpy(messageOut->q, messageIn->q, sizeof(float) * 12);
   memcpy(messageOut->dq, messageIn->dq, sizeof(float) * 12);
-
-  memcpy(messageOut->position, output.position.data(), sizeof(float) * 3);
-  memcpy(messageOut->velocityBody, output.velocityBody.data(),
-         sizeof(float) * 3);
-  memcpy(messageOut->footPositions, input.footPositionsTrunkFrame.data(),
-         sizeof(float) * 12);
-
-  memcpy(messageOut->jacobians, footJacobians.data(), sizeof(float) * 36);
-
   messageOut->tick = messageIn->tick;
+}
 
-  lcm.publish("robot_state", messageOut);
+void A1StateEstimator::fillStateEstimatorData(
+    robots::UnitreeA1 &robot, const KalmanFilterObserver *observer,
+    a1_lcm_msgs::RobotState *messageOut) {
+
+  memcpy(messageOut->position, observer->position().data(), sizeof(float) * 3);
+  memcpy(messageOut->velocityBody, observer->velocityBody().data(),
+         sizeof(float) * 3);
+
+  Vec12<float> footPosititons;
+  FOR_EACH_LEG {
+    footPosititons.block(LEG_ID * 3, 0, 3, 1) =
+        robot.footPositionTrunkFrame(LEG_ID);
+  }
+
+  memcpy(messageOut->footPositions, footPosititons.data(), sizeof(float) * 12);
+  memcpy(messageOut->jacobians, robot.footJacobians().data(),
+         sizeof(float) * 36);
+}
+
+void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
+                              const std::string &chan,
+                              const a1_lcm_msgs::RobotRawState *messageIn) {
+
+  robots::UnitreeA1 robot(messageIn);
+
+  // TODO: Add external odometry listener
+  observer->update(robot, false, Vec3<float>::Zero());
+
+  propagateRobotRawState(messageIn, robotStateMsg);
+  fillStateEstimatorData(robot, observer, robotStateMsg);
+
+  lcm.publish("robot_state", robotStateMsg);
 }
 } // namespace strelka

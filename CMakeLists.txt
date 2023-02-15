@@ -5,9 +5,6 @@ set(CMAKE_CXX_FLAGS "-O3 -ggdb")
 set(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-SET(STRELKA_MESSAGES_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/messages/autosrc/include)
-SET(STRELKA_COMMON_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/common/include)
-
 find_package(lcm REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -21,7 +18,9 @@ message("_________________________________________\n
 _________________________________________")
 endmacro()
 
+add_subdirectory(common)
 add_subdirectory(messages)
+add_subdirectory(robots)
 add_subdirectory(interfaces)
 add_subdirectory(state_estimation)
 add_subdirectory(control)

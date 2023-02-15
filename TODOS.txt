@@ -1,20 +1,45 @@
-- Make lcm message names more comprehensive
-- Multinomial Moving Window filter
-- Lowpass filter
-- External odometry
-- Resetable observer
-+ Slowdown estimator for simulation (decouple strelka and ros entirely(at least for now))
-- Ensure lcm.good()
-- lcm.handle() == 0
-- Timeouts?
-- WBIC
-- MPC
++ WBIC
+
 - Local planner
-    Ideally a builder LocalPlanner<Foot,Body,Gait>();
-    - Foot planner
-    - Gait scheduler
+    Ideally a builder LocalPlanner<FootPlanner,BodyTrajectoryPlanner,Sequencer>();
+    + Gait scheduler
+    + Gait sequencer
+        - Common interface
     - Body trajectory planner
-- Sim/Hardware bridge to lcm
-- Macros for packages
+        - TESTS
+        - Common interface
+        - Lowpass filter for pitch and height
+    - Foot planner
+        - Common interface
+        - Remove A1 constants
+    - MPC
+
+- Code structure
+    - Ensure lcm.good()
+    - lcm.handle() == 0
+    - Timeouts?
+    - Sim/Hardware bridge to lcm
+    - Decouple strelka and ros entirely(at least for now)
+    - Make lcm message names more comprehensive 
+
+- Testing
+    - add gtest to deps
+    - write actual tests
+
+- State estimation
+    - Multinomial Moving Window filter
+    - External odometry
+    - Resetable observer
+    + Slowdown estimator for simulation 
+
+- Build system
+    - Macros for packages
     - Automatic source file search
-    FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
+            FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
+
+- Elevation mapping???
+
+- Replace defines with constants?
+
+
+Robot() -> A1Robot(RobotState.lcm)

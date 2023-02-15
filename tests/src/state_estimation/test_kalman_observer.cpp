@@ -1,18 +1,34 @@
 #include <common/A1/constants.hpp>
+#include <common/macros.hpp>
 #include <interfaces/GazeboInterface.hpp>
-#include <state_estimation/KalmanFilterObserver.hpp>
-
 #include <iostream>
+#include <robots/UnitreeA1.hpp>
+#include <state_estimation/KalmanFilterObserver.hpp>
 
 using strelka::KalmanFilterObserver;
 
 int main() {
-  strelka::KalmanFilterObserver::KalmanFilterObserverParams params;
-  strelka::KalmanFilterObserver::KalmanFilterObserverInput input;
-  strelka::KalmanFilterObserver::KalmanFilterObserverOutput output;
+  strelka::KalmanFilterObserver::KalmanFilterObserverParams params{
+      .dt = 0.001,
+      .imuPositionProcessNoise = 0.02,
+      .imuVelocityProcessNoise = 0.02,
+      .footPositionProcessNoise = 0.002,
+      .footPositionSensorNoise = 0.001,
+      .footVelocitySensorNoise = 0.1,
+      .contactHeightSensorNoise = 0.001,
+      .externalOdometryNoisePosition = {0.02, 0.02, 0.09},
+  };
 
   KalmanFilterObserver observer(params);
-  observer.update(input, output);
-  std::cout << output.position << std::endl;
+  strelka::robots::UnitreeA1 robot =
+      strelka::robots::createDummyA1RobotWithRawState();
+
+  for (int updateCount = 0; updateCount < 10; updateCount++) {
+    observer.update(robot, false, Vec3<float>::Zero());
+  }
+
+  std::cout << observer.position() << std::endl;
+
+  assert(APPROX_EQUAL(observer.position()(2), 0.308643));
   return 0;
 }

@@ -1,13 +1,11 @@
 #ifndef SLOWDOWN_ESTIMATOR_H
 #define SLOWDOWN_ESTIMATOR_H
 
-#include <a1_lcm_msgs/RobotRawState.hpp>
 #include <chrono>
-#include <common/typedefs.hpp>
 #include <exception>
 #include <lcm/lcm-cpp.hpp>
+#include <messages/a1_lcm_msgs/RobotRawState.hpp>
 
-#define MAX_MEASUREMENT_COUNT 1000
 namespace strelka {
 
 class InvalidSlowdownEstimate : std::exception {
@@ -19,6 +17,10 @@ class InvalidSlowdownEstimate : std::exception {
 };
 
 class SlowdownEstimator {
+  typedef std::chrono::time_point<std::chrono::high_resolution_clock>
+      chrono_time_point;
+
+  static const int MAX_MEASUREMENT_COUNT = 1000;
   int measurementCount;
 
   float dtEstimateSim;

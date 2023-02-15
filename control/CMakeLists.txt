@@ -14,9 +14,11 @@ set(STRELKA_CONTROL_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/WBIC/include
 )
 
-add_library(strelka_control_wbic_controller ${CMAKE_CURRENT_SOURCE_DIR}/src/WholeBodyImpedanceController.cpp)
-target_include_directories(strelka_control_wbic_controller PUBLIC ${STRELKA_CONTROL_HEADERS} ${STRELKA_CONTROL_DEPENDENCY_HEADERS})
-target_link_libraries(strelka_control_wbic_controller strelka_control_wbic)
+FILE(GLOB_RECURSE STRELKA_CONTROL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+
+add_library(strelka_control ${STRELKA_CONTROL_SOURCES})
+target_include_directories(strelka_control PUBLIC ${STRELKA_CONTROL_HEADERS} ${STRELKA_CONTROL_DEPENDENCY_HEADERS})
+target_link_libraries(strelka_control strelka_control_wbic)
 
 
 

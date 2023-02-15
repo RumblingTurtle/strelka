@@ -1,12 +1,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-#include <chrono>
 #include <eigen3/Eigen/Core>
 #include <iostream>
-
-typedef std::chrono::time_point<std::chrono::high_resolution_clock>
-    chrono_time_point;
 
 // Rotation Matrix
 template <typename T> using RotMat = typename Eigen::Matrix<T, 3, 3>;
@@ -19,6 +15,9 @@ template <typename T> using Vec3 = typename Eigen::Matrix<T, 3, 1>;
 
 // 4x1 Vector
 template <typename T> using Vec4 = typename Eigen::Matrix<T, 4, 1>;
+
+// 4x1 Vector
+template <typename T> using Vec43 = typename Eigen::Matrix<T, 4, 3>;
 
 // 6x1 Vector
 template <typename T> using Vec6 = Eigen::Matrix<T, 6, 1>;
@@ -65,4 +64,7 @@ template <typename T> using Mat23 = Eigen::Matrix<T, 2, 3>;
 // 4x3 Matrix
 template <typename T> using Mat43 = typename Eigen::Matrix<T, 4, 3>;
 
+// Dynamically sized matrix
+template <typename T>
+using DMat = typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 #endif // TYPEDEFS_H

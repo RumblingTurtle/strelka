@@ -57,7 +57,7 @@ for INFILE in $INFILES ; do
     
     echo -n -e "\tGenerating CPP message autosrc/$PACKAGE_NAME/$MESSAGE_TYPE.hpp with lcm-gen..."
     # Create lcm CPP header (in package subfolder)
-    lcm-gen -x $INFILE --cpp-hpath autosrc/include
+    lcm-gen -x $INFILE --cpp-hpath autosrc/include/messages
     test $? != 0  && { echo "LCM conversion failed, skipping $INFILE"; continue; }
     echo "done."
     
