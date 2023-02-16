@@ -13,7 +13,7 @@ WholeBodyImpedanceController::WholeBodyImpedanceController(
 WholeBodyImpedanceController::~WholeBodyImpedanceController() { delete wbic; }
 
 void WholeBodyImpedanceController::update(robots::Robot &robot,
-                                          control::WBIC::WBICCommand &command,
+                                          messages::WBICCommand &command,
                                           WBICOutput &output) {
 
   wbic->update(robot.bodyToWorldQuat(), robot.positionWorldFrame(),

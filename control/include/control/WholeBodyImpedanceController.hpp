@@ -4,7 +4,7 @@
 #include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <common/typedefs.hpp>
 #include <control/A1WbicDynamics.hpp>
-#include <control/WBICCommand.hpp>
+#include <messages/WBICCommand.hpp>
 #include <robots/Robot.hpp>
 
 namespace strelka {
@@ -31,7 +31,7 @@ public:
   WholeBodyImpedanceController(WBICParams &parameters);
   ~WholeBodyImpedanceController();
 
-  void update(robots::Robot &robot, control::WBIC::WBICCommand &command,
+  void update(robots::Robot &robot, messages::WBICCommand &command,
               WBICOutput &output);
 };
 } // namespace strelka

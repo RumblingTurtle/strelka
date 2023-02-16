@@ -3,8 +3,7 @@
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
 
 namespace strelka {
-namespace control {
-namespace WBIC {
+namespace messages {
 
 class WBICCommand {
   /*
@@ -59,8 +58,7 @@ public:
   Vec12<float> desiredFootForceWorld() { return _desiredFootForceWorld; }
 };
 
-} // namespace WBIC
-} // namespace control
+} // namespace messages
 } // namespace strelka
 
 #endif // WBIC_CMD_H

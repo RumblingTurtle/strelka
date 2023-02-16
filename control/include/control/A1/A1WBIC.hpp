@@ -50,7 +50,7 @@ class A1WBIC {
   void commandHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                      const a1_lcm_msgs::WbicCommand *commandMsg) {
 
-    strelka::control::WBIC::WBICCommand command(commandMsg);
+    messages::WBICCommand command(commandMsg);
     strelka::robots::UnitreeA1 robot(currentState);
 
     strelka::WholeBodyImpedanceController::WBICOutput outs;

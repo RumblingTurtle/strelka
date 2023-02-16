@@ -7,12 +7,19 @@
 #include <common/macros.hpp>
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
+#include <exception>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
 #include <robots/Robot.hpp>
 
 namespace strelka {
 namespace robots {
+class NoStateEstimateException : std::exception {
+  const char *what() {
+    return "UnitreeA1 robot has no state estimate. Build a UnitreeA1 class "
+           "using a1_lcm_msgs::RobotState";
+  }
+};
 class UnitreeA1 : public Robot {
   Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
@@ -54,6 +61,9 @@ public:
 
   virtual Vec3<float> footPositionTrunkFrame(int legId);
   virtual Vec3<float> footVelocityTrunkFrame(int legId);
+
+  virtual Vec3<float> footPositionWorldFrame(int legId);
+
   virtual float footContactHeightWorldFrame(int legId);
   virtual Eigen::Matrix<float, 12, 3> footJacobians();
 

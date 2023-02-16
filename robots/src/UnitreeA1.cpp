@@ -88,6 +88,11 @@ Vec3<float> UnitreeA1::footVelocityTrunkFrame(int legId) {
   return _footVelocitiesTrunkFrame.row(legId);
 }
 
+Vec3<float> UnitreeA1::footPositionWorldFrame(int legId) {
+  return _bodyToWorldMat * _footPositionsTrunkFrame.row(legId).transpose() +
+         positionWorldFrame();
+}
+
 Vec3<float> UnitreeA1::gyroscopeBodyFrame() { return _gyroscopeBodyFrame; }
 
 Vec3<float> UnitreeA1::accelerometerWorldFrame() {
@@ -101,10 +106,20 @@ float UnitreeA1::footContactHeightWorldFrame(int legId) {
 Vec12<float> UnitreeA1::q() { return _q; };
 Vec12<float> UnitreeA1::dq() { return _dq; };
 
-Vec3<float> UnitreeA1::positionWorldFrame() { return _positionWorldFrame; };
+Vec3<float> UnitreeA1::positionWorldFrame() {
+  if (hasStateEstimates) {
+    return _positionWorldFrame;
+  } else {
+    throw NoStateEstimateException();
+  }
+};
 
 Vec3<float> UnitreeA1::linearVelocityBodyFrame() {
-  return _linearVelocityBodyFrame;
+  if (hasStateEstimates) {
+    return _linearVelocityBodyFrame;
+  } else {
+    throw NoStateEstimateException();
+  }
 };
 
 Quat<float> UnitreeA1::bodyToWorldQuat() { return _bodyToWorldQuat; };

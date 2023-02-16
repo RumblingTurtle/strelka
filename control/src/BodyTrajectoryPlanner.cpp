@@ -2,28 +2,28 @@
 
 namespace strelka {
 
-BodyTrajectoryPlanner::BodyTrajectoryPlanner() : firstRun(true) {
+BodyTrajectoryPlanner::BodyTrajectoryPlanner(float dt, int horizonSteps)
+    : firstRun(true), dt(dt), horizonSteps(horizonSteps) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }
 
 void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
-    BodyTrajectoryPlannerInput &input, DMat<float> &trajectory) {
+    robots::Robot &robot, messages::HighLevelCommand &command,
+    DMat<float> &trajectory) {
 
   Vec3<float> currentRPY;
   Mat3<float> bodyToWorldRot;
 
-  rotation::quat2euler(input.currentQuaternion, currentRPY);
-  rotation::quat2rot(input.currentQuaternion, bodyToWorldRot);
+  rotation::quat2euler(robot.bodyToWorldQuat(), currentRPY);
+  rotation::quat2rot(robot.bodyToWorldQuat(), bodyToWorldRot);
 
-  for (int legId = 0; legId < 4; legId++) {
-    if (input.currentContacts[legId] || firstRun) {
-      Vec3<float> currentFootPosBody = Eigen::Map<const Vec3<float>>(
-          input.currentFootPositions.data() + legId * 3, 3);
-      prevContactPosBody.block(legId, 0, 1, 3) = currentFootPosBody.transpose();
-      prevContactPosWorld.block(legId, 0, 1, 3) =
-          (bodyToWorldRot * currentFootPosBody + input.currentPosition)
-              .transpose();
+  FOR_EACH_LEG {
+    if (robot.footContact(LEG_ID) || firstRun) {
+      prevContactPosBody.block(LEG_ID, 0, 1, 3) =
+          robot.footPositionTrunkFrame(LEG_ID);
+      prevContactPosWorld.block(LEG_ID, 0, 1, 3) =
+          robot.footPositionWorldFrame(LEG_ID);
     }
   }
 
@@ -46,33 +46,38 @@ void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   float estimatedTerrainPitch = 0;
   float estimatedContactHeight = prevContactPosWorld.col(2).mean();
 
-  for (int h = 0; h < input.horizonSteps; h++) {
-    trajectory(h, 0) = input.desiredRPY(0);
+  Vec3<float> desiredAngularVelocity =
+      command.desiredAngularVelocityBodyFrame();
+  Vec3<float> desiredLinearVelocity = command.desiredLinearVelocityBodyFrame();
+
+  for (int h = 0; h < horizonSteps; h++) {
+    trajectory(h, 0) = command.desiredRPY()(0);
     trajectory(h, 1) = estimatedTerrainPitch;
-    trajectory(h, 2) =
-        currentRPY(2) + input.dt * (h + 1) * input.desiredAngularVelocity(2);
+    trajectory(h, 2) = currentRPY(2) + dt * (h + 1) * desiredAngularVelocity(2);
 
     // Desired rotation and linear velocity of the body at horizon step h
     Mat3<float> rotation_h;
     Vec3<float> velocity_h;
     Vec3<float> rpy_h = trajectory.block(h, 0, 1, 3);
     rotation::rpy2rot(rpy_h, rotation_h);
-    velocity_h = rotation_h * input.desiredLinearVelocity;
+    velocity_h = rotation_h * desiredLinearVelocity;
 
     if (h == 0) {
-      Vec3<float> comOffsetWorld = rotation_h * input.comOffset;
-      trajectory(h, 3) = input.currentPosition(0) + comOffsetWorld(0);
-      trajectory(h, 4) = input.currentPosition[1] + comOffsetWorld(1);
-      trajectory(h, 5) =
-          input.desiredBodyHeight + estimatedContactHeight + comOffsetWorld(2);
+      Vec3<float> comOffsetWorld = rotation_h * command.desiredComOffset();
+      Vec3<float> currentRobotPos = robot.positionWorldFrame();
+
+      trajectory(h, 3) = currentRobotPos(0) + comOffsetWorld(0);
+      trajectory(h, 4) = currentRobotPos(1) + comOffsetWorld(1);
+      trajectory(h, 5) = command.desiredBodyHeight() + estimatedContactHeight +
+                         comOffsetWorld(2);
     } else {
       trajectory.block(h, 3, 1, 3) = trajectory.block(h - 1, 3, 1, 3);
     }
 
-    trajectory.block(h, 3, 1, 3) += input.dt * velocity_h;
+    trajectory.block(h, 3, 1, 3) += dt * velocity_h;
 
     // Prefer to stablize roll and pitch.
-    trajectory.block(h, 6, 1, 3) = input.desiredAngularVelocity;
+    trajectory.block(h, 6, 1, 3) = desiredAngularVelocity;
     trajectory.block(h, 9, 1, 3) = velocity_h;
     trajectory(h, 12) = constants::GRAVITY_CONSTANT(2);
   }

@@ -22,6 +22,9 @@ public:
 
   virtual Vec3<float> footPositionTrunkFrame(int legId) = 0;
   virtual Vec3<float> footVelocityTrunkFrame(int legId) = 0;
+
+  virtual Vec3<float> footPositionWorldFrame(int legId) = 0;
+
   virtual float footContactHeightWorldFrame(int legId) = 0;
   virtual Eigen::Matrix<float, 12, 3> footJacobians() = 0;
 
