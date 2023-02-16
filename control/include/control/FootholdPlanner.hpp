@@ -7,6 +7,7 @@
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
 #include <control/gait/GaitScheduler.hpp>
+#include <exception>
 #include <messages/HighLevelCommand.hpp>
 #include <robots/Robot.hpp>
 #include <vector>
@@ -17,10 +18,16 @@
 namespace strelka {
 namespace control {
 
+class InvalidFootholdIdx {
+  const char *what() {
+    return "FootholdPlanner: invalid foothold index in getFoothold";
+  }
+};
+
 class FootholdPlanner {
   GaitScheduler &gaitScheduler;
 
-  std::vector<std::vector<Vec3<float>>> footholds;
+  std::vector<std::vector<Vec3<float>>> _footholds;
 
   float swingHeight[4];
   bool swingBack[4];
@@ -34,8 +41,20 @@ public:
   enum class FOOTHOLD_PREDICTION_TYPE { SIMPLE, RAIBERT, CONTINUOUS };
 
   FootholdPlanner(GaitScheduler &gaitScheduler) : gaitScheduler(gaitScheduler) {
-    footholds.resize(4);
-    FOR_EACH_LEG { footholds[LEG_ID].reserve(5); }
+    _footholds.resize(4);
+    FOR_EACH_LEG { _footholds[LEG_ID].reserve(5); }
+  }
+
+  int footholdCount(int legId) {
+    assert(legId >= 0 && legId <= 3);
+    return _footholds[legId].size();
+  }
+
+  Vec3<float> getFoothold(int legId, int footholdId) {
+    if (footholdId < footholdCount(legId)) {
+      return _footholds[legId][footholdId];
+    }
+    throw InvalidFootholdIdx();
   }
 
   void calculateFootholds(robots::Robot &robot,
@@ -47,7 +66,7 @@ public:
     FOR_EACH_LEG {
 
       if (firstRun) {
-        footholds[LEG_ID][0] = robot.footPositionWorldFrame(LEG_ID);
+        _footholds[LEG_ID][0] = robot.footPositionWorldFrame(LEG_ID);
       }
 
       bool updateAsStance = gaitScheduler.footInContact(LEG_ID) ||
@@ -55,14 +74,15 @@ public:
 
       if (updateAsStance) {
         lastContactPosWorld.block(LEG_ID, 0, 1, 3) =
-            robot.footPositionWorldFrame(LEG_ID);
+            robot.footPositionWorldFrame(LEG_ID).transpose();
       }
 
       if (updateAsStance or gaitScheduler.swingStarted(LEG_ID) or
           updateContinuously) {
 
-        footholds[LEG_ID].clear();
-        footholds[LEG_ID].push_back(lastContactPosWorld.block(LEG_ID, 0, 1, 3));
+        _footholds[LEG_ID].clear();
+        _footholds[LEG_ID].push_back(
+            lastContactPosWorld.block(LEG_ID, 0, 1, 3).transpose());
 
         FOOTHOLD_PREDICTION_TYPE predictType;
         if (updateContinuously) {
@@ -80,7 +100,7 @@ public:
         }
 
         Vec3<float> predictedFootPosition = predictNextFootPos(
-            robot.positionWorldFrame(), bodyToWorldRot, footholds[LEG_ID][0],
+            robot.positionWorldFrame(), bodyToWorldRot, _footholds[LEG_ID][0],
             command.desiredLinearVelocityBodyFrame(),
             command.desiredAngularVelocityBodyFrame(),
             robot.linearVelocityBodyFrame(), LEG_ID, predictType);
@@ -88,9 +108,9 @@ public:
         // Skip adjustment for now (no elevation map)
         Vec3<float> adjustedFootPosition;
 
-        footholds[LEG_ID].push_back(predictedFootPosition);
+        _footholds[LEG_ID].push_back(predictedFootPosition);
 
-        float heightDiff = footholds[LEG_ID][0](0) - footholds[LEG_ID][1](1);
+        float heightDiff = _footholds[LEG_ID][0](0) - _footholds[LEG_ID][1](1);
 
         bool steppingUp = heightDiff > command.desiredFootHeight();
         bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
@@ -132,17 +152,17 @@ public:
 
                             calculate_new_foothold = \
                                 foothold_idx[LEG_ID] ==
-       len(footholds[LEG_ID])
+       len(_footholds[LEG_ID])
 
                             if calculate_new_foothold:
                                 new_foothold = calculate_next_foot_pos(
                                     robot_p_h, robot_R_h,
-        footholds[LEG_ID][-1], high_level_command.linearSpeed,
+        _footholds[LEG_ID][-1], high_level_command.linearSpeed,
         high_level_command.angularVelocity[2], None, LEG_ID, "simple")
-                                footholds[LEG_ID].append(new_foothold)
+                                _footholds[LEG_ID].append(new_foothold)
 
                     foot_table[LEG_ID][3*h:3*h+3] =
-        footholds[LEG_ID][foothold_idx[LEG_ID]]-(
+        _footholds[LEG_ID][foothold_idx[LEG_ID]]-(
                         robot_p_h+robot_R_h@TRUNK_TO_COM_OFFSET)-np.array([0, 0,
         FOOT_RADIUS])
 
@@ -216,8 +236,8 @@ public:
           foot_accelerations[LEG_ID];
 
       getSwingTrajectory(
-          footholds[LEG_ID][0],
-          footholds[LEG_ID][1] + Vec3<float>{0, 0, FOOT_CLEARANCE},
+          _footholds[LEG_ID][0],
+          _footholds[LEG_ID][1] + Vec3<float>{0, 0, FOOT_CLEARANCE},
           swingHeight[LEG_ID], gaitScheduler.normalizedPhase(LEG_ID),
           gaitScheduler.swingDuration(LEG_ID), swingBack[LEG_ID]);
 

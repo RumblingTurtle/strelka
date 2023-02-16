@@ -23,10 +23,12 @@ void GaitScheduler::reset() {
   }
 }
 
-void GaitScheduler::getContactTable(float dt, int horizonSteps,
-                                    Vec4<bool> currentContacts,
-                                    DMat<bool> &contactTable) {
+DMat<bool> GaitScheduler::getContactTable(float dt, int horizonSteps,
+                                          Vec4<bool> currentContacts) {
   // TODO: assert matrix dims to 4xhorizonSteps
+  DMat<bool> contactTable(4, horizonSteps);
+  contactTable.setZero();
+
   GaitSequencer sequencerCopy = this->sequencer;
   LegState lastState[4];
   Vec4<bool> earlyContact = currentContacts;
@@ -56,6 +58,7 @@ void GaitScheduler::getContactTable(float dt, int horizonSteps,
     }
     sequencerCopy.step(dt * scale);
   }
+  return contactTable;
 }
 
 void GaitScheduler::step(float dt, Vec4<bool> contacts) {

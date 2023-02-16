@@ -29,8 +29,8 @@ public:
 
   void reset();
 
-  void getContactTable(float dt, int horizonSteps, Vec4<bool> currentContacts,
-                       DMat<bool> &contactTable);
+  DMat<bool> getContactTable(float dt, int horizonSteps,
+                             Vec4<bool> currentContacts);
 
   bool isLegScheduledToSwing(int legId);
 

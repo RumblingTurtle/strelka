@@ -32,8 +32,7 @@ GaitSequencer::GaitSequencer(Gait gait) {
 }
 
 GaitSequencer::GaitSequencer(const GaitSequencer &sequencer) {
-  std::copy(sequencer.sequence.begin(), sequencer.sequence.end(),
-            sequence.begin());
+  sequence = sequencer.sequence;
   memcpy(legState, sequencer.legState, sizeof(LegState) * 4);
   memcpy(normalizedPhase, sequencer.normalizedPhase, sizeof(float) * 4);
   currentGaitTime = sequencer.currentGaitTime;
