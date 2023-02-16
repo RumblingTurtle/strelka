@@ -8,6 +8,7 @@
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
+#include <robots/UnitreeA1.hpp>
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
@@ -49,32 +50,12 @@ class A1WBIC {
   void commandHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                      const a1_lcm_msgs::WbicCommand *commandMsg) {
 
-    strelka::WholeBodyImpedanceController::WBICInput ins;
+    strelka::control::WBIC::WBICCommand command(commandMsg);
+    strelka::robots::UnitreeA1 robot(currentState);
+
     strelka::WholeBodyImpedanceController::WBICOutput outs;
 
-    ins.bodyOrientation = Eigen::Map<Vec4<float>>(currentState->quaternion, 4);
-    ins.bodyPosition = Eigen::Map<Vec3<float>>(currentState->position, 3);
-    ins.angularVelocity = Eigen::Map<Vec3<float>>(currentState->gyro, 3);
-    ins.linearVelocity = Eigen::Map<Vec3<float>>(currentState->velocityBody, 3);
-    ins.q = Eigen::Map<Vec12<float>>(currentState->q, 12);
-    ins.dq = Eigen::Map<Vec12<float>>(currentState->dq, 12);
-    ins.contact_state = Eigen::Map<const Vec4<float>>(commandMsg->footState, 4);
-
-    ins.pBody_RPY_des = Eigen::Map<const Vec3<float>>(commandMsg->rpy, 3);
-    ins.vBody_Ori_des =
-        Eigen::Map<const Vec3<float>>(commandMsg->angularVelocity, 3);
-
-    ins.pBody_des = Eigen::Map<const Vec3<float>>(commandMsg->pBody, 3);
-    ins.vBody_des = Eigen::Map<const Vec3<float>>(commandMsg->vBody, 3);
-    ins.aBody_des = Eigen::Map<const Vec3<float>>(commandMsg->aBody, 3);
-
-    ins.pFoot_des = Eigen::Map<const Vec12<float>>(commandMsg->pFoot, 12);
-    ins.vFoot_des = Eigen::Map<const Vec12<float>>(commandMsg->vFoot, 12);
-    ins.aFoot_des = Eigen::Map<const Vec12<float>>(commandMsg->aFoot, 12);
-
-    ins.Fr_des_MPC = Eigen::Map<const Vec12<float>>(commandMsg->mpcForces, 12);
-
-    controller.update(ins, outs);
+    controller.update(robot, command, outs);
 
     for (int motorId = 0; motorId < 12; motorId++) {
       commandMessage->q[motorId] = outs.q[motorId];

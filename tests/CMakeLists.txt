@@ -1,11 +1,11 @@
-PrintPackageHeader(tests)
+printPackageHeader(tests)
 
-SET(STRELKA_TESTS_DEPENDENCY_HEADERS 
+SET(STRELKA_TESTS_DEPENDENCY_INCLUDE_DIRS 
     ${Eigen_INCLUDE_DIRS}
-    ${STRELKA_COMMON_HEADERS}
-    ${STRELKA_INTERFACES_HEADERS}
-    ${STRELKA_STATE_ESTIMATION_HEADERS}
-    ${STRELKA_CONTROL_HEADERS}
+    ${STRELKA_COMMON_INCLUDE_DIRS}
+    ${STRELKA_INTERFACES_INCLUDE_DIRS}
+    ${STRELKA_STATE_ESTIMATION_INCLUDE_DIRS}
+    ${STRELKA_CONTROL_INCLUDE_DIRS}
 )
 
 SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES 
@@ -22,6 +22,6 @@ foreach(file_path ${STRELKA_TESTS_SOURCES})
     get_filename_component(filename ${new_name} NAME)
     message("Building " ${filename})
     add_executable( ${filename} ${file_path} )
-    #target_include_directories(${filename} ${STRELKA_TESTS_DEPENDENCY_HEADERS})
+    #target_include_directories(${filename} ${STRELKA_TESTS_DEPENDENCY_INCLUDE_DIRS})
     target_link_libraries(${filename} ${STRELKA_TESTS_DEPENDENCY_LIBRARIES})
 endforeach()

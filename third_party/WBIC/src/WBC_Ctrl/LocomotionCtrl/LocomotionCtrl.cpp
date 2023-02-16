@@ -20,8 +20,8 @@ LocomotionCtrl<T>::LocomotionCtrl(FloatingBaseModel<T> model, T *Kp, T *Kd,
     Kp_kin_link[i] = Kp_kin[i + 6];
   }
 
-
-  this->setWeights(std::vector<T>(floating_W,floating_W+6), std::vector<T>(rf_W,rf_W+12));
+  this->setWeights(std::vector<T>(floating_W, floating_W + 6),
+                   std::vector<T>(rf_W, rf_W + 12));
 
   _body_pos_task = new BodyPosTask<T>(&(WBCtrl::_model));
   _body_ori_task = new BodyOriTask<T>(&(WBCtrl::_model));
@@ -53,44 +53,47 @@ template <typename T> LocomotionCtrl<T>::~LocomotionCtrl() {
 
 template <typename T>
 void LocomotionCtrl<T>::_ContactTaskUpdate(
-    Vec3<T> pBody_RPY_des, Vec3<T> vBody_Ori_des, Vec3<T> pBody_des,
-    Vec3<T> vBody_des, Vec3<T> aBody_des, Vec12<T> pFoot_des,
-    Vec12<T> vFoot_des, Vec12<T> aFoot_des, Vec4<T> contact_state,
-    Vec12<T> Fr_des_MPC) {
+    Vec3<T> desiredBodyRPY, Vec3<T> desiredBodyAngularVelocity,
+    Vec3<T> desiredBodyPosition, Vec3<T> desiredBodyVelocity,
+    Vec3<T> desiredBodyAcceleration, Vec12<T> desiredFootPosition,
+    Vec12<T> desiredFootVelocity, Vec12<T> desiredFootAcceleration,
+    Vec4<T> desiredContactState, Vec12<T> desiredFootForceWorld) {
 
   _ParameterSetup();
 
   // Wash out the previous setup
   _CleanUp();
 
-  _quat_des = ori::rpyToQuat(pBody_RPY_des);
+  _quat_des = ori::rpyToQuat(desiredBodyRPY);
 
   Vec3<T> zero_vec3;
   zero_vec3.setZero();
-  _body_ori_task->UpdateTask(&_quat_des, vBody_Ori_des, zero_vec3);
-  _body_pos_task->UpdateTask(&(pBody_des), vBody_des, aBody_des);
+  _body_ori_task->UpdateTask(&_quat_des, desiredBodyAngularVelocity, zero_vec3);
+  _body_pos_task->UpdateTask(&(desiredBodyPosition), desiredBodyVelocity,
+                             desiredBodyAcceleration);
 
   WBCtrl::_task_list.push_back(_body_ori_task);
   WBCtrl::_task_list.push_back(_body_pos_task);
 
   for (size_t leg(0); leg < 4; ++leg) {
-    if (contact_state[leg] > 0.) { // Contact
-      _foot_contact[leg]->setRFDesired(Fr_des_MPC.block(leg * 3, 0, 3, 1));
+    if (desiredContactState[leg] > 0.) { // Contact
+      _foot_contact[leg]->setRFDesired(
+          desiredFootForceWorld.block(leg * 3, 0, 3, 1));
       _foot_contact[leg]->UpdateContactSpec();
       WBCtrl::_contact_list.push_back(_foot_contact[leg]);
 
     } else { // No Contact (swing)
-      Vec3<T> pf = pFoot_des.block(leg * 3, 0, 3, 1);
-      _foot_task[leg]->UpdateTask(&(pf), vFoot_des.block(leg * 3, 0, 3, 1),
-                                  aFoot_des.block(leg * 3, 0, 3, 1));
+      Vec3<T> pf = desiredFootPosition.block(leg * 3, 0, 3, 1);
+      _foot_task[leg]->UpdateTask(
+          &(pf), desiredFootVelocity.block(leg * 3, 0, 3, 1),
+          desiredFootAcceleration.block(leg * 3, 0, 3, 1));
       // zero_vec3);
       WBCtrl::_task_list.push_back(_foot_task[leg]);
     }
   }
 }
 
-template <typename T> 
-void LocomotionCtrl<T>::_ParameterSetup() {
+template <typename T> void LocomotionCtrl<T>::_ParameterSetup() {
 
   for (size_t i(0); i < 3; ++i) {
     ((BodyPosTask<T> *)_body_pos_task)->_Kp[i] = Kp_body[i];
@@ -109,8 +112,7 @@ void LocomotionCtrl<T>::_ParameterSetup() {
   }
 }
 
-template <typename T> 
-void LocomotionCtrl<T>::_CleanUp() {
+template <typename T> void LocomotionCtrl<T>::_CleanUp() {
   WBCtrl::_contact_list.clear();
   WBCtrl::_task_list.clear();
 }

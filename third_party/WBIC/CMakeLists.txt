@@ -1,0 +1,15 @@
+SET(WBIC_DEPENDENCY_INCLUDE_DIRS 
+    ${Eigen_INCLUDE_DIRS};
+    ${GOLDFARB_INCLUDE_DIRS};
+)
+
+FILE(GLOB_RECURSE WBIC_SOURCES src/*.cpp)
+
+add_library(wbic ${WBIC_SOURCES})
+target_include_directories(wbic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/WBIC ${WBIC_DEPENDENCY_INCLUDE_DIRS})
+target_link_libraries(wbic Goldfarb_Optimizer)
+
+set(WBIC_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include 
+    CACHE INTERNAL "WBIC_INCLUDE_DIRS"
+)
+

@@ -1,8 +1,8 @@
-#ifndef UNITREE_A1_H
-#define UNITREE_A1_H
+#ifndef WBIC_UNITREE_A1_H
+#define WBIC_UNITREE_A1_H
 
-#include "FloatingBaseModel.h"
-#include "Quadruped.h"
+#include <WBIC/Dynamics/FloatingBaseModel.h>
+#include <WBIC/Dynamics/Quadruped.h>
 
 /*!
  * Generate a Quadruped model of Unitree A1

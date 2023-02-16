@@ -1,35 +1,27 @@
 #include <control/A1/A1WBIC.hpp>
+#include <control/WBICCommand.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
+#include <robots/UnitreeA1.hpp>
 
 int main() {
   strelka::WholeBodyImpedanceController controller{
       strelka::A1_DEFAULT_WBIC_PARAMS};
 
-  strelka::WholeBodyImpedanceController::WBICInput ins;
-  ins.bodyOrientation = {0, 0, 0, 1};
-  ins.bodyPosition.setZero();
-  ins.angularVelocity.setZero();
-  ins.linearVelocity.setZero();
-  ins.q.setZero();
-  ins.dq.setZero();
-  ins.pBody_RPY_des.setZero();
-  ins.vBody_Ori_des.setZero();
-  ins.pBody_des.setZero();
-  ins.vBody_des.setZero();
-  ins.aBody_des.setZero();
-  ins.pFoot_des.setZero();
-  ins.vFoot_des.setZero();
-  ins.aFoot_des.setZero();
-  ins.Fr_des_MPC.setZero();
-  ins.contact_state = {1, 1, 0, 1};
-
   strelka::WholeBodyImpedanceController::WBICOutput outs;
 
-  for (int i = 0; i < 10; i++) {
-    std::cout << "Iter: " << i << std::endl;
-    ins.bodyPosition += Vec3<float>{1, 0, 0};
+  strelka::robots::UnitreeA1 robot =
+      strelka::robots::createDummyA1RobotWithRawState();
 
-    controller.update(ins, outs);
+  a1_lcm_msgs::RobotState robotState;
+  a1_lcm_msgs::WbicCommand wbicCommand;
+
+  strelka::control::WBIC::WBICCommand command(&wbicCommand);
+
+  for (int i = 0; i < 10; i++) {
+    strelka::robots::UnitreeA1 robot(&robotState);
+    std::cout << "Iter: " << i << std::endl;
+    wbicCommand.pBody[0] += 1;
+    controller.update(robot, command, outs);
 
     std::cout << "q" << std::endl;
     std::cout << outs.q.transpose() << std::endl;

@@ -3,6 +3,7 @@ project(strelka)
 
 set(CMAKE_CXX_FLAGS "-O3 -ggdb")
 set(CMAKE_BUILD_TYPE Debug)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(lcm REQUIRED)
@@ -12,14 +13,11 @@ if (LCM_FOUND)
     include_directories(${LCM_INCLUDE_DIRS})
 endif (LCM_FOUND)
 
-macro(PrintPackageHeader name)
-message("_________________________________________\n
-\t\t\t\t Strelka ${name} package
-_________________________________________")
-endmacro()
+include(Macros)
 
-add_subdirectory(common)
+add_subdirectory(third_party)
 add_subdirectory(messages)
+add_subdirectory(common)
 add_subdirectory(robots)
 add_subdirectory(interfaces)
 add_subdirectory(state_estimation)

@@ -22,10 +22,11 @@ public:
               Vec3<T> linearVelocity, // Vec6
               DVec<T> q,              // Vec12
               DVec<T> qd,             // Vec12
-              Vec3<T> pBody_RPY_des, Vec3<T> vBody_Ori_des, Vec3<T> pBody_des,
-              Vec3<T> vBody_des, Vec3<T> aBody_des, Vec12<T> pFoot_des,
-              Vec12<T> vFoot_des, Vec12<T> aFoot_des, Vec4<T> contact_state,
-              Vec12<T> Fr_des_MPC);
+              Vec3<T> desiredBodyRPY, Vec3<T> desiredBodyAngularVelocity,
+              Vec3<T> desiredBodyPosition, Vec3<T> desiredBodyVelocity,
+              Vec3<T> desiredBodyAcceleration, Vec12<T> desiredFootPosition,
+              Vec12<T> desiredFootVelocity, Vec12<T> desiredFootAcceleration,
+              Vec4<T> desiredContactState, Vec12<T> desiredFootForceWorld);
 
   void compute_tau();
 
@@ -39,7 +40,7 @@ public:
     _wbic_data->_W_rf = Eigen::Map<DVec<T>>(rf_w.data(), rf_w.size());
   }
 
-  DVec<T> get_tau() {
+  DVec<T> getTau() {
     DVec<T> tau{_tau_ff};
     return tau;
   };
@@ -54,13 +55,15 @@ public:
   FloatingBaseModel<T> _model;
 
 protected:
-  virtual void _ContactTaskUpdate(Vec3<T> pBody_RPY_des, Vec3<T> vBody_Ori_des,
-                                  Vec3<T> pBody_des, Vec3<T> vBody_des,
-                                  Vec3<T> aBody_des, Vec12<T> pFoot_des,
-                                  Vec12<T> vFoot_des, Vec12<T> aFoot_des,
-                                  Vec4<T> contact_state,
-                                  Vec12<T> Fr_des_MPC // MPC res
-                                  ) = 0;
+  virtual void
+  _ContactTaskUpdate(Vec3<T> desiredBodyRPY, Vec3<T> desiredBodyAngularVelocity,
+                     Vec3<T> desiredBodyPosition, Vec3<T> desiredBodyVelocity,
+                     Vec3<T> desiredBodyAcceleration,
+                     Vec12<T> desiredFootPosition, Vec12<T> desiredFootVelocity,
+                     Vec12<T> desiredFootAcceleration,
+                     Vec4<T> desiredContactState,
+                     Vec12<T> desiredFootForceWorld // MPC res
+                     ) = 0;
 
   void _UpdateModel(Quat<T> bodyOrientation, Vec3<T> bodyPosition,
                     Vec3<T> angularVelocity,

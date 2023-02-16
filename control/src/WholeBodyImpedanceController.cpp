@@ -12,15 +12,20 @@ WholeBodyImpedanceController::WholeBodyImpedanceController(
 
 WholeBodyImpedanceController::~WholeBodyImpedanceController() { delete wbic; }
 
-void WholeBodyImpedanceController::update(WBICInput &input,
+void WholeBodyImpedanceController::update(robots::Robot &robot,
+                                          control::WBIC::WBICCommand &command,
                                           WBICOutput &output) {
-  wbic->update(input.bodyOrientation, input.bodyPosition, input.angularVelocity,
-               input.linearVelocity, input.q, input.dq, input.pBody_RPY_des,
-               input.vBody_Ori_des, input.pBody_des, input.vBody_des,
-               input.aBody_des, input.pFoot_des, input.vFoot_des,
-               input.aFoot_des, input.contact_state, input.Fr_des_MPC);
 
-  output.tau = wbic->get_tau();
+  wbic->update(robot.bodyToWorldQuat(), robot.positionWorldFrame(),
+               robot.gyroscopeBodyFrame(), robot.linearVelocityBodyFrame(),
+               robot.q(), robot.dq(), command.desiredBodyRPY(),
+               command.desiredBodyAngularVelocity(),
+               command.desiredBodyPosition(), command.desiredBodyVelocity(),
+               command.desiredBodyAcceleration(), command.desiredFootPosition(),
+               command.desiredFootVelocity(), command.desiredFootAcceleration(),
+               command.desiredContactState(), command.desiredFootForceWorld());
+
+  output.tau = wbic->getTau();
   output.q = wbic->get_qDes();
   output.dq = wbic->get_dqDes();
 }

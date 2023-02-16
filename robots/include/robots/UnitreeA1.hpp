@@ -16,6 +16,7 @@ namespace robots {
 class UnitreeA1 : public Robot {
   Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
+  Quat<float> _bodyToWorldQuat;
   Vec43<float> _footPositionsTrunkFrame;
   Vec4<float> _footContacts;
   Vec43<float> _footVelocitiesTrunkFrame;
@@ -26,20 +27,41 @@ class UnitreeA1 : public Robot {
   Vec12<float> _q;
   Vec12<float> _dq;
 
+  Vec3<float> _positionWorldFrame;
+  Vec3<float> _linearVelocityBodyFrame;
+
+  bool hasStateEstimates;
+
 public:
   ~UnitreeA1();
-  UnitreeA1(a1_lcm_msgs::RobotRawState const *rawStateMessage);
+  UnitreeA1(const a1_lcm_msgs::RobotRawState *rawStateMessage);
+  UnitreeA1(const a1_lcm_msgs::RobotState *robotStateMessage);
 
-  Mat3<float> bodyToWorldMat();
-  Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector);
-  Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector);
-  float footContact(int legId);
-  Vec3<float> footPositionTrunkFrame(int legId);
-  Vec3<float> footVelocityTrunkFrame(int legId);
-  Vec3<float> gyroscopeBodyFrame();
-  Vec3<float> accelerometerWorldFrame();
-  Eigen::Matrix<float, 12, 3> footJacobians();
-  float footContactHeightWorldFrame(int legId);
+  template <class MessageType>
+  void initRawStateEntries(const MessageType *message);
+  void initStateEstimateEntries(const a1_lcm_msgs::RobotState *message);
+
+  virtual Vec12<float> q();
+  virtual Vec12<float> dq();
+
+  virtual float footContact(int legId);
+
+  virtual Vec3<float> gyroscopeBodyFrame();
+  virtual Vec3<float> accelerometerWorldFrame();
+
+  virtual Vec3<float> positionWorldFrame();
+  virtual Vec3<float> linearVelocityBodyFrame();
+
+  virtual Vec3<float> footPositionTrunkFrame(int legId);
+  virtual Vec3<float> footVelocityTrunkFrame(int legId);
+  virtual float footContactHeightWorldFrame(int legId);
+  virtual Eigen::Matrix<float, 12, 3> footJacobians();
+
+  virtual Quat<float> bodyToWorldQuat();
+  virtual Mat3<float> bodyToWorldMat();
+
+  virtual Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector);
+  virtual Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector);
 };
 
 UnitreeA1 createDummyA1RobotWithRawState();

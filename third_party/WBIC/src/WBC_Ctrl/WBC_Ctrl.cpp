@@ -41,25 +41,22 @@ template <typename T> WBC_Ctrl<T>::~WBC_Ctrl() {
 }
 
 template <typename T>
-void WBC_Ctrl<T>::update(Quat<T> bodyOrientation, Vec3<T> bodyPosition,
-                         Vec3<T> angularVelocity, Vec3<T> linearVelocity,
-                         DVec<T> q,  // Vec12
-                         DVec<T> qd, // Vec12
-                         Vec3<T> pBody_RPY_des, Vec3<T> vBody_Ori_des,
-                         Vec3<T> pBody_des, Vec3<T> vBody_des,
-                         Vec3<T> aBody_des, Vec12<T> pFoot_des,
-                         Vec12<T> vFoot_des, Vec12<T> aFoot_des,
-                         Vec4<T> contact_state, Vec12<T> Fr_des_MPC) {
+void WBC_Ctrl<T>::update(
+    Quat<T> bodyOrientation, Vec3<T> bodyPosition, Vec3<T> angularVelocity,
+    Vec3<T> linearVelocity,
+    DVec<T> q,  // Vec12
+    DVec<T> qd, // Vec12
+    Vec3<T> desiredBodyRPY, Vec3<T> desiredBodyAngularVelocity,
+    Vec3<T> desiredBodyPosition, Vec3<T> desiredBodyVelocity,
+    Vec3<T> desiredBodyAcceleration, Vec12<T> desiredFootPosition,
+    Vec12<T> desiredFootVelocity, Vec12<T> desiredFootAcceleration,
+    Vec4<T> desiredContactState, Vec12<T> desiredFootForceWorld) {
   ++_iter;
 
-  // Update Model
-  // auto t_start = std::chrono::high_resolution_clock::now();
   Quat<T> oriInverseQuat =
       rotationMatrixToQuaternion(quaternionToRotationMatrix(bodyOrientation));
 
-  _UpdateModel(oriInverseQuat, bodyPosition, angularVelocity,
-               linearVelocity, // Vec6
-               q,              // Vec12
+  _UpdateModel(oriInverseQuat, bodyPosition, angularVelocity, linearVelocity, q,
                qd);
   // auto t_end = std::chrono::high_resolution_clock::now();
   // double elapsed_time_ms = std::chrono::duration<double,
@@ -67,9 +64,11 @@ void WBC_Ctrl<T>::update(Quat<T> bodyOrientation, Vec3<T> bodyPosition,
   // elapsed_time_ms << endl;
 
   // Task & Contact Update
-  _ContactTaskUpdate(pBody_RPY_des, vBody_Ori_des, pBody_des, vBody_des,
-                     aBody_des, pFoot_des, vFoot_des, aFoot_des, contact_state,
-                     Fr_des_MPC);
+  _ContactTaskUpdate(desiredBodyRPY, desiredBodyAngularVelocity,
+                     desiredBodyPosition, desiredBodyVelocity,
+                     desiredBodyAcceleration, desiredFootPosition,
+                     desiredFootVelocity, desiredFootAcceleration,
+                     desiredContactState, desiredFootForceWorld);
 
   // Kin WBC Computation
   // auto t_start2 = std::chrono::high_resolution_clock::now();

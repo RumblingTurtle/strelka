@@ -11,19 +11,19 @@
 
 template <typename T> class LocomotionCtrlData {
 public:
-  Vec3<T> pBody_des;
-  Vec3<T> vBody_des;
-  Vec3<T> aBody_des;
+  Vec3<T> desiredBodyPosition;
+  Vec3<T> desiredBodyVelocity;
+  Vec3<T> desiredBodyAcceleration;
 
-  Vec3<T> pBody_RPY_des;
-  Vec3<T> vBody_Ori_des;
+  Vec3<T> desiredBodyRPY;
+  Vec3<T> desiredBodyAngularVelocity;
 
-  Vec3<T> pFoot_des[4];
-  Vec3<T> vFoot_des[4];
-  Vec3<T> aFoot_des[4];
+  Vec3<T> desiredFootPosition[4];
+  Vec3<T> desiredFootVelocity[4];
+  Vec3<T> desiredFootAcceleration[4];
   Vec3<T> Fr_des[4];
 
-  Vec4<T> contact_state;
+  Vec4<T> desiredContactState;
 };
 
 template <typename T> class LocomotionCtrl : public WBC_Ctrl<T> {
@@ -54,11 +54,12 @@ public:
   float max_fz;
 
 protected:
-  virtual void _ContactTaskUpdate(Vec3<T> pBody_RPY_des, Vec3<T> vBody_Ori_des,
-                                  Vec3<T> pBody_des, Vec3<T> vBody_des,
-                                  Vec3<T> aBody_des, Vec12<T> pFoot_des,
-                                  Vec12<T> vFoot_des, Vec12<T> aFoot_des,
-                                  Vec4<T> contact_state, Vec12<T> Fr_des_MPC);
+  virtual void _ContactTaskUpdate(
+      Vec3<T> desiredBodyRPY, Vec3<T> desiredBodyAngularVelocity,
+      Vec3<T> desiredBodyPosition, Vec3<T> desiredBodyVelocity,
+      Vec3<T> desiredBodyAcceleration, Vec12<T> desiredFootPosition,
+      Vec12<T> desiredFootVelocity, Vec12<T> desiredFootAcceleration,
+      Vec4<T> desiredContactState, Vec12<T> desiredFootForceWorld);
 
   void _ParameterSetup();
   void _CleanUp();

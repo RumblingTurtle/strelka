@@ -42,4 +42,5 @@
 - Replace defines with constants?
 
 
-Robot() -> A1Robot(RobotState.lcm)
++ Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 
+- Add compatible methods to LocomotionCtrl and remove WholeBodyImpedanceController'
