@@ -61,5 +61,15 @@ int main() {
       robot, command, bodyTrajectory, contactTable);
 
   std::cout << footholdTable.row(0) << std::endl;
+  Vec12<float> p;
+  Vec12<float> v;
+  Vec12<float> a;
+  p.setZero();
+  v.setZero();
+  a.setZero();
+  for (int i = 0; i < 100; i++) {
+    footPlanner.getFootDesiredPVA(robot, p, v, a);
+  }
+
   return 0;
 }

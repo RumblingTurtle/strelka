@@ -6,13 +6,12 @@
     + Gait sequencer
         - Common interface
     - Body trajectory planner
-        - TESTS
-        - Common interface
+        + Common interface
         - Lowpass filter for pitch and height
-    - Foot planner
-        - Common interface
-        - Remove A1 constants
+    + Foot planner
+        + Common interface
     - MPC
+    - Move A1 constants into UnitreeA1
 
 - Code structure
     - Ensure lcm.good()
@@ -43,4 +42,3 @@
 
 
 + Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 
-- Add compatible methods to LocomotionCtrl and remove WholeBodyImpedanceController'

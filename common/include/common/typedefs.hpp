@@ -67,4 +67,6 @@ template <typename T> using Mat43 = typename Eigen::Matrix<T, 4, 3>;
 // Dynamically sized matrix
 template <typename T>
 using DMat = typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+template <typename T> using DVec = typename Eigen::Matrix<T, Eigen::Dynamic, 1>;
 #endif // TYPEDEFS_H
