@@ -48,7 +48,8 @@ int main() {
   DMat<bool> contactTable =
       scheduler.getContactTable(dt, horizonSteps, {1, 1, 1, 1});
 
-  footPlanner.calculateFootholds(robot, command, bodyTrajectory, contactTable);
+  footPlanner.calculateNextFootholdPositions(robot, command);
+
   FOR_EACH_LEG {
     float footholdDist = (footPlanner.getFoothold(LEG_ID, 0) -
                           robot.footPositionWorldFrame(LEG_ID))
@@ -56,5 +57,9 @@ int main() {
     assert(footholdDist == 0.0);
   }
 
+  DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
+      robot, command, bodyTrajectory, contactTable);
+
+  std::cout << footholdTable.row(0) << std::endl;
   return 0;
 }

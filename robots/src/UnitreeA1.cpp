@@ -78,6 +78,14 @@ Vec3<float> UnitreeA1::rotateWorldToBodyFrame(Vec3<float> vector) {
   return _bodyToWorldMat.transpose() * vector;
 }
 
+Vec3<float> UnitreeA1::transformBodyToWorldFrame(Vec3<float> vector) {
+  return rotateBodyToWorldFrame(vector) + positionWorldFrame();
+}
+
+Vec3<float> UnitreeA1::transformWorldToBodyFrame(Vec3<float> vector) {
+  return rotateWorldToBodyFrame(vector - positionWorldFrame());
+}
+
 float UnitreeA1::footContact(int legId) { return _footContacts(legId); }
 
 Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {

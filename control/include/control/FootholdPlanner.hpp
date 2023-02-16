@@ -57,10 +57,66 @@ public:
     throw InvalidFootholdIdx();
   }
 
-  void calculateFootholds(robots::Robot &robot,
-                          messages::HighLevelCommand &command,
-                          DMat<float> &bodyTrajectory,
-                          DMat<bool> &contactTable) {
+  DMat<float> calculateBodyFrameFootholds(robots::Robot &robot,
+                                          messages::HighLevelCommand &command,
+                                          DMat<float> &bodyTrajectory,
+                                          DMat<bool> &contactTable) {
+
+    int horizonSteps = bodyTrajectory.rows();
+    DMat<float> footholdTable(4, 3 * horizonSteps);
+
+    int currentFootholdIdx[4] = {0, 0, 0, 0};
+
+    for (int h = 0; h < horizonSteps; h++) {
+      Mat3<float> bodyToWorldRot_h;
+
+      Vec3<float> bodyPosWorld;
+      rotation::rpy2rot(bodyTrajectory.block(h, 0, 1, 3).transpose(),
+                        bodyToWorldRot_h);
+      bodyPosWorld = bodyTrajectory.block(h, 3, 1, 3).transpose();
+
+      Mat3<float> bodyToWorldRotInv_h = bodyToWorldRot_h.transpose();
+
+      FOR_EACH_LEG {
+        bool inStance = contactTable(LEG_ID, h);
+        if (h != 0) {
+          bool wasInSwing = !contactTable(LEG_ID, h - 1);
+          if (wasInSwing && inStance) {
+            currentFootholdIdx[LEG_ID] += 1;
+            bool calculateNewFoothold =
+                footholdCount(LEG_ID) == currentFootholdIdx[LEG_ID];
+
+            if (calculateNewFoothold) {
+              // Setting linear desired and actual velocities to the same value
+              // as a hackish way to remove feedback term
+              Vec3<float> newFoothold = predictNextFootPos(
+                  bodyPosWorld, bodyToWorldRot_h,
+                  _footholds[LEG_ID][footholdCount(LEG_ID) - 1],
+                  command.desiredLinearVelocityBodyFrame(),
+                  command.desiredAngularVelocityBodyFrame(),
+                  command.desiredLinearVelocityBodyFrame(), 0.0, LEG_ID,
+                  FOOTHOLD_PREDICTION_TYPE::SIMPLE);
+
+              _footholds[LEG_ID].push_back(newFoothold);
+            }
+          }
+        }
+
+        Vec3<float> footholdWorld =
+            _footholds[LEG_ID][currentFootholdIdx[LEG_ID]] -
+            Vec3<float>{0, 0, constants::A1::FOOT_RADIUS};
+
+        Vec3<float> footholdBody_h =
+            bodyToWorldRotInv_h * (footholdWorld - bodyPosWorld);
+
+        footholdTable.block(LEG_ID, 3 * h, 1, 3) = footholdBody_h.transpose();
+      }
+    }
+    return footholdTable;
+  }
+
+  void calculateNextFootholdPositions(robots::Robot &robot,
+                                      messages::HighLevelCommand &command) {
 
     Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
     FOR_EACH_LEG {
@@ -103,7 +159,8 @@ public:
             robot.positionWorldFrame(), bodyToWorldRot, _footholds[LEG_ID][0],
             command.desiredLinearVelocityBodyFrame(),
             command.desiredAngularVelocityBodyFrame(),
-            robot.linearVelocityBodyFrame(), LEG_ID, predictType);
+            robot.linearVelocityBodyFrame(), FEEDBACK_GAIN, LEG_ID,
+            predictType);
 
         // Skip adjustment for now (no elevation map)
         Vec3<float> adjustedFootPosition;
@@ -132,56 +189,16 @@ public:
       }
     }
 
-    /*
-            foot_table = np.zeros((4, len(body_plan)*3))
-            foothold_idx = [0 for LEG_ID in range(4)]
-
-            for h in range(len(body_plan))
-                robot_R_h = rpy_to_R(body_plan[h][:3])
-                robot_p_h = body_plan[h][3:6]
-
-                for LEG_ID in range(4):
-                    now_in_contact = contact_table[LEG_ID][h] == 1
-
-                    first_horizon_step = h == 0
-
-                    if not first_horizon_step:
-                        was_in_swing = contact_table[LEG_ID][h-1] == 0
-                        if was_in_swing and now_in_contact:
-                            foothold_idx[LEG_ID] += 1
-
-                            calculate_new_foothold = \
-                                foothold_idx[LEG_ID] ==
-       len(_footholds[LEG_ID])
-
-                            if calculate_new_foothold:
-                                new_foothold = calculate_next_foot_pos(
-                                    robot_p_h, robot_R_h,
-        _footholds[LEG_ID][-1], high_level_command.linearSpeed,
-        high_level_command.angularVelocity[2], None, LEG_ID, "simple")
-                                _footholds[LEG_ID].append(new_foothold)
-
-                    foot_table[LEG_ID][3*h:3*h+3] =
-        _footholds[LEG_ID][foothold_idx[LEG_ID]]-(
-                        robot_p_h+robot_R_h@TRUNK_TO_COM_OFFSET)-np.array([0, 0,
-        FOOT_RADIUS])
-
-            return foot_table
-
-        */
-
     if (firstRun) {
       firstRun = false;
     }
   }
 
-  Vec3<float> predictNextFootPos(Vec3<float> currentPosition,
-                                 Mat3<float> bodyToWorldRot,
-                                 Vec3<float> prevFootPosition,
-                                 Vec3<float> desiredLinearVelocity,
-                                 Vec3<float> desiredAngularVelocity,
-                                 Vec3<float> bodyLinearVelocity, int legId,
-                                 FOOTHOLD_PREDICTION_TYPE predictType) {
+  Vec3<float> predictNextFootPos(
+      Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
+      Vec3<float> prevFootPosition, Vec3<float> desiredLinearVelocity,
+      Vec3<float> desiredAngularVelocity, Vec3<float> bodyLinearVelocity,
+      float feedbackGain, int legId, FOOTHOLD_PREDICTION_TYPE predictType) {
 
     Vec3<float> predictedFootWorld;
 
@@ -221,7 +238,7 @@ public:
 
     if (predictType != FOOTHOLD_PREDICTION_TYPE::SIMPLE) {
       predictedFootWorld +=
-          FEEDBACK_GAIN *
+          feedbackGain *
           (bodyToWorldRot * bodyLinearVelocity - desiredVelocityWorld);
     }
     return predictedFootWorld;

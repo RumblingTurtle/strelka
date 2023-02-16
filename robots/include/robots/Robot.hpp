@@ -33,6 +33,9 @@ public:
 
   virtual Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector) = 0;
   virtual Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector) = 0;
+
+  virtual Vec3<float> transformBodyToWorldFrame(Vec3<float> vector) = 0;
+  virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector) = 0;
 };
 } // namespace robots
 } // namespace strelka
