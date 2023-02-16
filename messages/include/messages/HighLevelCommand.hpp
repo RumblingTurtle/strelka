@@ -10,25 +10,27 @@ class HighLevelCommand {
   Vec3<float> _desiredLinearVelocityBodyFrame;
   Vec3<float> _desiredRPY;
   Vec3<float> _desiredComOffset;
+  float _desiredFootHeight;
   float _desiredBodyHeight;
+  /*
+    float linearSpeed[3];
 
-  float linearSpeed[3];
+    float angularVelocity[3];
 
-  float angularVelocity[3];
+    float footHeight;
 
-  float footHeight;
+    float footClearance;
 
-  float footClearance;
+    float hipOffsets[2];
 
-  float hipOffsets[2];
+    float rpy[3];
 
-  float rpy[3];
+    float comOffset[2];
 
-  float comOffset[2];
+    float bodyHeight;
 
-  float bodyHeight;
-
-  int8_t stop;
+    int8_t stop;
+    */
 
 public:
   HighLevelCommand(const a1_lcm_msgs::HighLevelCommand *commandMsg) {
@@ -43,6 +45,7 @@ public:
     _desiredComOffset(0) = commandMsg->comOffset[1];
 
     _desiredBodyHeight = commandMsg->bodyHeight;
+    _desiredFootHeight = = commandMsg->footHeight;
   }
 
   Vec3<float> desiredAngularVelocityBodyFrame() {
@@ -54,6 +57,7 @@ public:
   Vec3<float> desiredRPY() { return _desiredRPY; };
   Vec3<float> desiredComOffset() { return _desiredComOffset; };
   float desiredBodyHeight() { return _desiredBodyHeight; };
+  float desiredFootHeight() { return _desiredFootHeight; };
 };
 
 } // namespace messages

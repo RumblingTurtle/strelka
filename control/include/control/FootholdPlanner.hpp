@@ -7,6 +7,8 @@
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
 #include <control/gait/GaitScheduler.hpp>
+#include <messages/HighLevelCommand.hpp>
+#include <robots/Robot.hpp>
 #include <vector>
 
 #define FOOT_CLEARANCE 0.02
@@ -22,7 +24,6 @@ class FootholdPlanner {
   float swingHeight[4];
   bool swingBack[4];
 
-  Mat43<float> currentFootPosWorld;
   Mat43<float> lastContactPosWorld;
 
   bool firstRun;
@@ -36,37 +37,16 @@ public:
     FOR_EACH_LEG { footholds[LEG_ID].reserve(5); }
   }
 
-  struct FootholdPlannerInput {
-    Vec4<float> currentQuaternion;
-    Vec3<float> currentPosition;
-    Vec3<float> bodyLinearVelocity;
-    Vec12<float> currentFootPositionsBody;
+  void calculateFootholds(robots::Robot &robot,
+                          messages::HighLevelCommand &command,
+                          DMat<float> &bodyTrajectory,
+                          DMat<bool> &contactTable) {
 
-    Vec3<float> desiredAngularVelocity;
-    Vec3<float> desiredLinearVelocity;
-    Vec3<float> desiredRPY;
-    Vec3<float> comOffset;
-    float desiredFootHeight;
-
-    DMat<float> &bodyTrajectory;
-    DMat<bool> &contactTable;
-
-    float dt;
-    int horizonSteps;
-  };
-
-  void calculateFootholds(FootholdPlannerInput &input) {
-    Mat3<float> bodyToWorldRot;
-    rotation::quat2rot(input.currentQuaternion, bodyToWorldRot);
-
+    Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
     FOR_EACH_LEG {
-      currentFootPosWorld.block(LEG_ID, 0, 1, 3) =
-          bodyToWorldRot *
-              input.currentFootPositionsBody.block(LEG_ID, 0, 1, 3) +
-          input.currentPosition;
 
       if (firstRun) {
-        footholds[LEG_ID][0] = currentFootPosWorld.block(LEG_ID, 0, 1, 3);
+        footholds[LEG_ID][0] = robot.footPositionWorldFrame(LEG_ID);
       }
 
       bool updateAsStance = gaitScheduler.footInContact(LEG_ID) ||
@@ -74,7 +54,7 @@ public:
 
       if (updateAsStance) {
         lastContactPosWorld.block(LEG_ID, 0, 1, 3) =
-            currentFootPosWorld.block(LEG_ID, 0, 1, 3);
+            robot.footPositionWorldFrame(LEG_ID);
       }
 
       if (updateAsStance or gaitScheduler.swingStarted(LEG_ID) or
@@ -99,9 +79,10 @@ public:
         }
 
         Vec3<float> predictedFootPosition = predictNextFootPos(
-            input.currentPosition, bodyToWorldRot, footholds[LEG_ID][0],
-            input.desiredLinearVelocity, input.desiredAngularVelocity,
-            input.bodyLinearVelocity, LEG_ID, predictType);
+            robot.positionWorldFrame(), bodyToWorldRot, footholds[LEG_ID][0],
+            command.desiredLinearVelocityBodyFrame(),
+            command.desiredAngularVelocityBodyFrame(),
+            robot.linearVelocityBodyFrame(), LEG_ID, predictType);
 
         // Skip adjustment for now (no elevation map)
         Vec3<float> adjustedFootPosition;
@@ -110,8 +91,8 @@ public:
 
         float heightDiff = footholds[LEG_ID][0](0) - footholds[LEG_ID][1](1);
 
-        bool steppingUp = heightDiff > input.desiredFootHeight;
-        bool steppingDown = heightDiff < -input.desiredFootHeight / 4;
+        bool steppingUp = heightDiff > command.desiredFootHeight();
+        bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
 
         if (steppingUp) {
           swingHeight[LEG_ID] = heightDiff + 0.02;
@@ -124,7 +105,7 @@ public:
         }
 
         if (!steppingUp && !steppingDown) {
-          swingHeight[LEG_ID] = input.desiredFootHeight;
+          swingHeight[LEG_ID] = command.desiredFootHeight();
           swingBack[LEG_ID] = false;
         }
       }

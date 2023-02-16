@@ -2,15 +2,14 @@
 
 namespace strelka {
 
-BodyTrajectoryPlanner::BodyTrajectoryPlanner(float dt, int horizonSteps)
-    : firstRun(true), dt(dt), horizonSteps(horizonSteps) {
+BodyTrajectoryPlanner::BodyTrajectoryPlanner() : firstRun(true) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }
 
 void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
-    robots::Robot &robot, messages::HighLevelCommand &command,
-    DMat<float> &trajectory) {
+    robots::Robot &robot, messages::HighLevelCommand &command, float dt,
+    int horizonSteps, DMat<float> &trajectory) {
 
   Vec3<float> currentRPY;
   Mat3<float> bodyToWorldRot;

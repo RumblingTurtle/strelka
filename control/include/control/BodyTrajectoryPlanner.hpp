@@ -13,15 +13,13 @@ class BodyTrajectoryPlanner {
   Mat34<float> prevContactPosWorld;
   Mat34<float> prevContactPosBody;
   bool firstRun;
-  float dt;
-  int horizonSteps;
 
 public:
-  BodyTrajectoryPlanner(float dt, int horizonSteps);
+  BodyTrajectoryPlanner();
 
   void getDesiredBodyTrajectory(robots::Robot &robot,
-                                messages::HighLevelCommand &command,
-                                DMat<float> &trajectory);
+                                messages::HighLevelCommand &command, float dt,
+                                int horizonSteps, DMat<float> &trajectory);
 };
 } // namespace strelka
 
