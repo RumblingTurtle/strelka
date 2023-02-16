@@ -8,19 +8,21 @@
 #include <robots/Robot.hpp>
 
 namespace strelka {
+namespace control {
 
 class BodyTrajectoryPlanner {
-  Mat34<float> prevContactPosWorld;
-  Mat34<float> prevContactPosBody;
+  Mat43<float> prevContactPosWorld;
+  Mat43<float> prevContactPosBody;
   bool firstRun;
 
 public:
   BodyTrajectoryPlanner();
 
-  void getDesiredBodyTrajectory(robots::Robot &robot,
-                                messages::HighLevelCommand &command, float dt,
-                                int horizonSteps, DMat<float> &trajectory);
+  DMat<float> getDesiredBodyTrajectory(robots::Robot &robot,
+                                       messages::HighLevelCommand &command,
+                                       float dt, int horizonSteps);
 };
+} // namespace control
 } // namespace strelka
 
 #endif // BODY_TRAJECTORY_PLANNER_H

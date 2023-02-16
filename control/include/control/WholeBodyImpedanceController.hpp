@@ -8,6 +8,7 @@
 #include <robots/Robot.hpp>
 
 namespace strelka {
+namespace control {
 class WholeBodyImpedanceController {
   LocomotionCtrl<float> *wbic;
 
@@ -34,6 +35,7 @@ public:
   void update(robots::Robot &robot, messages::WBICCommand &command,
               WBICOutput &output);
 };
+} // namespace control
 } // namespace strelka
 
 #endif // WHOLEBODYIMPEDANCE_CTRL_H

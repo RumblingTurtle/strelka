@@ -7,8 +7,13 @@
 
 using strelka::KalmanFilterObserver;
 
+using namespace strelka::robots;
+
 int main() {
-  strelka::KalmanFilterObserver::KalmanFilterObserverParams params{
+  using namespace strelka::robots;
+  using namespace strelka;
+
+  KalmanFilterObserver::KalmanFilterObserverParams params{
       .dt = 0.001,
       .imuPositionProcessNoise = 0.02,
       .imuVelocityProcessNoise = 0.02,
@@ -20,8 +25,7 @@ int main() {
   };
 
   KalmanFilterObserver observer(params);
-  strelka::robots::UnitreeA1 robot =
-      strelka::robots::createDummyA1RobotWithRawState();
+  UnitreeA1 robot = createDummyA1RobotWithRawState();
 
   for (int updateCount = 0; updateCount < 10; updateCount++) {
     observer.update(robot, false, Vec3<float>::Zero());

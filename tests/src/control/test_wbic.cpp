@@ -4,21 +4,22 @@
 #include <robots/UnitreeA1.hpp>
 
 int main() {
-  strelka::WholeBodyImpedanceController controller{
-      strelka::A1_DEFAULT_WBIC_PARAMS};
+  using namespace strelka::control;
+  using namespace strelka::messages;
+  using namespace strelka::robots;
 
-  strelka::WholeBodyImpedanceController::WBICOutput outs;
+  WholeBodyImpedanceController controller{strelka::A1_DEFAULT_WBIC_PARAMS};
 
-  strelka::robots::UnitreeA1 robot =
-      strelka::robots::createDummyA1RobotWithRawState();
+  WholeBodyImpedanceController::WBICOutput outs;
+
+  UnitreeA1 robot = createDummyA1RobotWithRawState();
 
   a1_lcm_msgs::RobotState robotState;
   a1_lcm_msgs::WbicCommand wbicCommand;
 
-  strelka::messages::WBICCommand command(&wbicCommand);
+  WBICCommand command(&wbicCommand);
 
   for (int i = 0; i < 10; i++) {
-    strelka::robots::UnitreeA1 robot(&robotState);
     std::cout << "Iter: " << i << std::endl;
     wbicCommand.pBody[0] += 1;
     controller.update(robot, command, outs);

@@ -126,7 +126,7 @@ Quat<float> UnitreeA1::bodyToWorldQuat() { return _bodyToWorldQuat; };
 
 UnitreeA1 createDummyA1RobotWithRawState() {
   a1_lcm_msgs::RobotRawState dummyState{
-      .quaternion = {0, 0, 0, 1},
+      .quaternion = {1, 0, 0, 0},
       .gyro = {0, 0, 0},
       .accel = {0, 0, 0},
       .footForces = {30, 30, 30, 30},
@@ -136,6 +136,20 @@ UnitreeA1 createDummyA1RobotWithRawState() {
       .dq = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
       .tick = 0.0,
   };
+
+  memcpy(dummyState.q, constants::A1::INIT_ANGLES.data(), sizeof(float) * 12);
+  return UnitreeA1(&dummyState);
+}
+
+UnitreeA1 createDummyA1RobotWithStateEstimates() {
+  a1_lcm_msgs::RobotState dummyState{.quaternion = {1, 0, 0, 0},
+                                     .gyro = {0, 0, 0},
+                                     .accel = {0, 0, 0},
+                                     .footForces = {30, 30, 30, 30},
+                                     .dq = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                     .tick = 0.0,
+                                     .position = {0, 0, 0.25},
+                                     .velocityBody = {0, 0, 0}};
 
   memcpy(dummyState.q, constants::A1::INIT_ANGLES.data(), sizeof(float) * 12);
   return UnitreeA1(&dummyState);

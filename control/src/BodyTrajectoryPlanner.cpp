@@ -1,15 +1,18 @@
 #include <control/BodyTrajectoryPlanner.hpp>
 
 namespace strelka {
-
+namespace control {
 BodyTrajectoryPlanner::BodyTrajectoryPlanner() : firstRun(true) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }
 
-void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
+DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     robots::Robot &robot, messages::HighLevelCommand &command, float dt,
-    int horizonSteps, DMat<float> &trajectory) {
+    int horizonSteps) {
+
+  DMat<float> trajectory(horizonSteps, 12);
+  trajectory.setZero();
 
   Vec3<float> currentRPY;
   Mat3<float> bodyToWorldRot;
@@ -20,9 +23,9 @@ void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   FOR_EACH_LEG {
     if (robot.footContact(LEG_ID) || firstRun) {
       prevContactPosBody.block(LEG_ID, 0, 1, 3) =
-          robot.footPositionTrunkFrame(LEG_ID);
+          robot.footPositionTrunkFrame(LEG_ID).transpose();
       prevContactPosWorld.block(LEG_ID, 0, 1, 3) =
-          robot.footPositionWorldFrame(LEG_ID);
+          robot.footPositionWorldFrame(LEG_ID).transpose();
     }
   }
 
@@ -56,10 +59,9 @@ void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
 
     // Desired rotation and linear velocity of the body at horizon step h
     Mat3<float> rotation_h;
-    Vec3<float> velocity_h;
-    Vec3<float> rpy_h = trajectory.block(h, 0, 1, 3);
+    Vec3<float> rpy_h = trajectory.block(h, 0, 1, 3).transpose();
     rotation::rpy2rot(rpy_h, rotation_h);
-    velocity_h = rotation_h * desiredLinearVelocity;
+    Vec3<float> velocity_h = rotation_h * desiredLinearVelocity;
 
     if (h == 0) {
       Vec3<float> comOffsetWorld = rotation_h * command.desiredComOffset();
@@ -73,14 +75,16 @@ void BodyTrajectoryPlanner::getDesiredBodyTrajectory(
       trajectory.block(h, 3, 1, 3) = trajectory.block(h - 1, 3, 1, 3);
     }
 
-    trajectory.block(h, 3, 1, 3) += dt * velocity_h;
+    trajectory.block(h, 3, 1, 3) += (dt * velocity_h).transpose();
 
     // Prefer to stablize roll and pitch.
-    trajectory.block(h, 6, 1, 3) = desiredAngularVelocity;
-    trajectory.block(h, 9, 1, 3) = velocity_h;
-    trajectory(h, 12) = constants::GRAVITY_CONSTANT(2);
+    trajectory.block(h, 6, 1, 3) = desiredAngularVelocity.transpose();
+    trajectory.block(h, 9, 1, 3) = velocity_h.transpose();
+    trajectory(h, 11) = constants::GRAVITY_CONSTANT(2);
   }
 
   firstRun = false;
+  return trajectory;
 }
+} // namespace control
 } // namespace strelka

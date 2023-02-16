@@ -74,6 +74,7 @@ public:
   virtual Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector);
 };
 
+UnitreeA1 createDummyA1RobotWithStateEstimates();
 UnitreeA1 createDummyA1RobotWithRawState();
 } // namespace robots
 } // namespace strelka

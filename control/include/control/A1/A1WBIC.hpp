@@ -12,29 +12,31 @@
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
-static WholeBodyImpedanceController::WBICParams A1_STAND_WBIC_PARAMS = {
-    .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
-    .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
-    .Kp_kin = {1, 1, 1, 1, 1, 1, 1, 1, 1},
-    .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
-    .rf_W = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    .mu = 0.4,
-    .max_fz = 1500,
+static control::WholeBodyImpedanceController::WBICParams A1_STAND_WBIC_PARAMS =
+    {
+        .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
+        .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
+        .Kp_kin = {1, 1, 1, 1, 1, 1, 1, 1, 1},
+        .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+        .rf_W = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        .mu = 0.4,
+        .max_fz = 1500,
 };
 
-static WholeBodyImpedanceController::WBICParams A1_DEFAULT_WBIC_PARAMS = {
-    .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
-    .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
-    .Kp_kin = {0, 0, 0, 0.8, 0.8, 0.8, 1, 1, 1},
-    .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
-    .rf_W = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
-    .mu = 0.4,
-    .max_fz = 1500,
+static control::WholeBodyImpedanceController::WBICParams
+    A1_DEFAULT_WBIC_PARAMS = {
+        .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
+        .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
+        .Kp_kin = {0, 0, 0, 0.8, 0.8, 0.8, 1, 1, 1},
+        .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+        .rf_W = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+        .mu = 0.4,
+        .max_fz = 1500,
 };
 
 class A1WBIC {
   lcm::LCM lcm;
-  WholeBodyImpedanceController controller;
+  control::WholeBodyImpedanceController controller;
 
   a1_lcm_msgs::RobotLowCommand *commandMessage;
   a1_lcm_msgs::RobotState *currentState;
@@ -53,7 +55,7 @@ class A1WBIC {
     messages::WBICCommand command(commandMsg);
     strelka::robots::UnitreeA1 robot(currentState);
 
-    strelka::WholeBodyImpedanceController::WBICOutput outs;
+    strelka::control::WholeBodyImpedanceController::WBICOutput outs;
 
     controller.update(robot, command, outs);
 
@@ -74,7 +76,7 @@ class A1WBIC {
   }
 
 public:
-  A1WBIC(WholeBodyImpedanceController::WBICParams &parameters)
+  A1WBIC(control::WholeBodyImpedanceController::WBICParams &parameters)
       : controller(parameters) {
     initialize();
   }

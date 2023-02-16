@@ -42,10 +42,9 @@ public:
 
     _desiredComOffset(0) = commandMsg->comOffset[0];
     _desiredComOffset(1) = commandMsg->comOffset[1];
-    _desiredComOffset(0) = commandMsg->comOffset[1];
-
+    _desiredComOffset(2) = 0;
     _desiredBodyHeight = commandMsg->bodyHeight;
-    _desiredFootHeight = = commandMsg->footHeight;
+    _desiredFootHeight = commandMsg->footHeight;
   }
 
   Vec3<float> desiredAngularVelocityBodyFrame() {

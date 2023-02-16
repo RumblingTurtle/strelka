@@ -15,6 +15,7 @@
 #define FEEDBACK_GAIN 0.1
 
 namespace strelka {
+namespace control {
 
 class FootholdPlanner {
   GaitScheduler &gaitScheduler;
@@ -230,7 +231,7 @@ public:
     }
   }
 };
-
+} // namespace control
 } // namespace strelka
 
 #endif // FOOTHOLD_PLANNER_H

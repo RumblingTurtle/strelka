@@ -2,6 +2,8 @@
 
 namespace strelka {
 
+namespace control {
+
 WholeBodyImpedanceController::WholeBodyImpedanceController(
     WBICParams &parameters) {
   wbic = new LocomotionCtrl<float>(buildA1<float>().buildModel(), parameters.Kp,
@@ -29,4 +31,5 @@ void WholeBodyImpedanceController::update(robots::Robot &robot,
   output.q = wbic->get_qDes();
   output.dq = wbic->get_dqDes();
 }
+} // namespace control
 } // namespace strelka
