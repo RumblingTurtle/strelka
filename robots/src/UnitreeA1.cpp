@@ -53,8 +53,9 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
     _footContactHeights(LEG_ID) = 0;
   }
 
-  _accelerometerWorldFrame = rotateBodyToWorldFrame(
-      _accelerometerBodyFrame + constants::GRAVITY_CONSTANT);
+  _accelerometerWorldFrame =
+      rotateBodyToWorldFrame(_accelerometerBodyFrame) +
+      Vec3<float>{0.0f, 0.0f, constants::GRAVITY_CONSTANT};
 }
 
 void UnitreeA1::initStateEstimateEntries(
@@ -132,6 +133,12 @@ Vec3<float> UnitreeA1::linearVelocityBodyFrame() {
 
 Quat<float> UnitreeA1::bodyToWorldQuat() { return _bodyToWorldQuat; };
 
+Vec3<float> UnitreeA1::currentRPY() {
+  static Vec3<float> result;
+  rotation::quat2euler(bodyToWorldQuat(), result);
+  return result;
+}
+
 UnitreeA1 createDummyA1RobotWithRawState() {
   a1_lcm_msgs::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
@@ -159,8 +166,9 @@ UnitreeA1 createDummyA1RobotWithStateEstimates() {
                                      .position = {0, 0, 0.25},
                                      .velocityBody = {0, 0, 0}};
 
-  memcpy(dummyState.q, constants::A1::INIT_ANGLES.data(), sizeof(float) * 12);
+  memcpy(dummyState.q, constants::A1::STAND_ANGLES.data(), sizeof(float) * 12);
   return UnitreeA1(&dummyState);
 }
+
 } // namespace robots
 } // namespace strelka

@@ -52,6 +52,23 @@ inline void rpy2rot(Vec3<float> rpy, Mat3<float> &output) {
   output(2, 2) = c_p * c_r;
 }
 
+inline void rpy2rot(Vec3<double> rpy, Mat3<double> &output) {
+  float c_r = std::cos(rpy(0)), c_p = std::cos(rpy(1)), c_y = std::cos(rpy(2)),
+        s_r = std::sin(rpy(0)), s_p = std::sin(rpy(1)), s_y = std::sin(rpy(2));
+
+  output(0, 0) = c_y * c_p;
+  output(0, 1) = c_y * s_p * s_r - s_y * c_r;
+  output(0, 2) = c_y * s_p * c_r + s_y * s_r;
+
+  output(1, 0) = s_y * c_p;
+  output(1, 1) = s_y * s_p * s_r + c_y * c_r;
+  output(1, 2) = s_y * s_p * c_r - c_y * s_r;
+
+  output(2, 0) = -s_p;
+  output(2, 1) = c_p * s_r;
+  output(2, 2) = c_p * c_r;
+}
+
 } // namespace rotation
 } // namespace strelka
 

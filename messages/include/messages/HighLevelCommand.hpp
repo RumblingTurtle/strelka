@@ -57,6 +57,21 @@ public:
   Vec3<float> desiredComOffset() { return _desiredComOffset; };
   float desiredBodyHeight() { return _desiredBodyHeight; };
   float desiredFootHeight() { return _desiredFootHeight; };
+
+  static HighLevelCommand makeDummyCommandMessage(float desiredVelocityX) {
+    a1_lcm_msgs::HighLevelCommand highCommandMsg{
+        .linearSpeed = {desiredVelocityX, 0, 0},
+        .angularVelocity = {0, 0, 0},
+        .footHeight = 0.12,
+        .footClearance = 0.02,
+        .hipOffsets = {0, 0},
+        .rpy = {0, 0, 0},
+        .comOffset = {0, 0},
+        .bodyHeight = 0.25,
+        .stop = false};
+
+    return HighLevelCommand(&highCommandMsg);
+  }
 };
 
 } // namespace messages

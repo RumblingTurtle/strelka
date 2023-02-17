@@ -75,6 +75,8 @@ public:
 
   virtual Vec3<float> transformBodyToWorldFrame(Vec3<float> vector);
   virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector);
+
+  virtual Vec3<float> currentRPY();
 };
 
 UnitreeA1 createDummyA1RobotWithStateEstimates();

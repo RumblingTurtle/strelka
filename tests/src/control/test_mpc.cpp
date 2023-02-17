@@ -2,6 +2,7 @@
 #include <common/macros.hpp>
 #include <control/BodyTrajectoryPlanner.hpp>
 #include <control/FootholdPlanner.hpp>
+#include <control/MPC.hpp>
 #include <iostream>
 #include <messages/HighLevelCommand.hpp>
 #include <robots/UnitreeA1.hpp>
@@ -18,16 +19,25 @@ int main() {
                     .phaseDuration = {0.5, 0.5, 0.5, 0.5},
                     .phaseOffset = {0.0, 0.0, 0.0, 0.0}};
 
+  const DVec<double> MPC_WEIGHTS =
+      Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
+
   const float desiredVelocityX = 0.2;
   const float dt = 0.001;
   const int horizonSteps = 10;
 
-  UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
   HighLevelCommand command =
       HighLevelCommand::makeDummyCommandMessage(desiredVelocityX);
+  UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
   GaitScheduler scheduler{TEST_GAIT};
   BodyTrajectoryPlanner bodyPlanner{};
   FootholdPlanner footPlanner{scheduler};
+
+  MPC mpc(constants::A1::MPC_BODY_MASS, constants::A1::MPC_BODY_INERTIA,
+          horizonSteps, dt, MPC_WEIGHTS, constants::A1::MPC_ALPHA,
+          constants::A1::MPC_FRICTION_COEFFS,
+          constants::A1::MPC_CONSTRAINT_MAX_SCALE,
+          constants::A1::MPC_CONSTRAINT_MIN_SCALE);
 
   DMat<float> bodyTrajectory =
       bodyPlanner.getDesiredBodyTrajectory(robot, command, dt, horizonSteps);
@@ -35,27 +45,10 @@ int main() {
   DMat<bool> contactTable =
       scheduler.getContactTable(dt, horizonSteps, {1, 1, 1, 1});
 
-  footPlanner.calculateNextFootholdPositions(robot, command);
-
-  FOR_EACH_LEG {
-    float footholdDist = (footPlanner.getFoothold(LEG_ID, 0) -
-                          robot.footPositionWorldFrame(LEG_ID))
-                             .norm();
-    assert(footholdDist == 0.0);
-  }
-
   DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
       robot, command, bodyTrajectory, contactTable);
 
-  std::cout << footholdTable.row(0) << std::endl;
-
-  Vec12<float> p;
-  Vec12<float> v;
-  Vec12<float> a;
-
-  for (int i = 0; i < 100; i++) {
-    footPlanner.getFootDesiredPVA(robot, p, v, a);
-  }
+  mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);
 
   return 0;
 }

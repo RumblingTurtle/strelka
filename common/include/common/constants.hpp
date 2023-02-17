@@ -1,10 +1,10 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef STRELKA_COMMON_CONSTANTS_H
+#define STRELKA_COMMON_CONSTANTS_H
 
 #include <eigen3/Eigen/Core>
 namespace strelka {
 namespace constants {
-const Eigen::Vector3f GRAVITY_CONSTANT{0, 0, -9.80665};
+const float GRAVITY_CONSTANT = -9.80665f;
 } // namespace constants
 } // namespace strelka
-#endif // CONSTANTS_H
+#endif // STRELKA_COMMON_CONSTANTS_H

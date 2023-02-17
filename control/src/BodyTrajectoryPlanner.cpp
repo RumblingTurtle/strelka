@@ -80,7 +80,7 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     // Prefer to stablize roll and pitch.
     trajectory.block(h, 6, 1, 3) = desiredAngularVelocity.transpose();
     trajectory.block(h, 9, 1, 3) = velocity_h.transpose();
-    trajectory(h, 11) = constants::GRAVITY_CONSTANT(2);
+    trajectory(h, 11) = constants::GRAVITY_CONSTANT;
   }
 
   firstRun = false;
