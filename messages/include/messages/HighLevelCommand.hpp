@@ -67,7 +67,7 @@ public:
         .hipOffsets = {0, 0},
         .rpy = {0, 0, 0},
         .comOffset = {0, 0},
-        .bodyHeight = 0.25,
+        .bodyHeight = 0.27,
         .stop = false};
 
     return HighLevelCommand(&highCommandMsg);

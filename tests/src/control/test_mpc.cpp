@@ -22,13 +22,14 @@ int main() {
   const DVec<double> MPC_WEIGHTS =
       Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
 
-  const float desiredVelocityX = 0.2;
+  const float desiredVelocityX = 0.0;
   const float dt = 0.001;
   const int horizonSteps = 10;
 
   HighLevelCommand command =
       HighLevelCommand::makeDummyCommandMessage(desiredVelocityX);
   UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
+
   GaitScheduler scheduler{TEST_GAIT};
   BodyTrajectoryPlanner bodyPlanner{};
   FootholdPlanner footPlanner{scheduler};
@@ -47,6 +48,8 @@ int main() {
 
   DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
       robot, command, bodyTrajectory, contactTable);
+
+  mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);
 
   mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);
 

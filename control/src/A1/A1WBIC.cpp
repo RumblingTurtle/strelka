@@ -12,21 +12,23 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
                            const a1_lcm_msgs::WbicCommand *commandMsg) {
 
   messages::WBICCommand command(commandMsg);
-  strelka::robots::UnitreeA1 robot(currentState);
+  if (currentState) {
+    strelka::robots::UnitreeA1 robot(currentState);
 
-  strelka::control::WholeBodyImpedanceController::WBICOutput outs;
+    strelka::control::WholeBodyImpedanceController::WBICOutput outs;
 
-  controller.update(robot, command, outs);
+    controller.update(robot, command, outs);
 
-  for (int motorId = 0; motorId < 12; motorId++) {
-    commandMessage->q[motorId] = outs.q[motorId];
-    commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
-    commandMessage->dq[motorId] = outs.dq[motorId];
-    commandMessage->kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
-    commandMessage->tau[motorId] = outs.tau[motorId];
+    for (int motorId = 0; motorId < 12; motorId++) {
+      commandMessage->q[motorId] = outs.q[motorId];
+      commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
+      commandMessage->dq[motorId] = outs.dq[motorId];
+      commandMessage->kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
+      commandMessage->tau[motorId] = outs.tau[motorId];
+    }
+
+    lcm.publish("robot_low_command", commandMessage);
   }
-
-  lcm.publish("robot_low_command", commandMessage);
 }
 
 void A1WBIC::initialize() {

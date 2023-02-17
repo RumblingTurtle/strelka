@@ -2,7 +2,7 @@
 #define TYPEDEFS_H
 
 #include <eigen3/Eigen/Core>
-#include <iostream>
+#include <eigen3/Eigen/Geometry>
 
 // Rotation Matrix
 template <typename T> using RotMat = typename Eigen::Matrix<T, 3, 3>;

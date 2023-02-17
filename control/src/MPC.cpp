@@ -1,3 +1,5 @@
+
+#include <common/utilities.hpp>
 #include <control/MPC.hpp>
 #include <iostream>
 namespace strelka {
@@ -15,8 +17,7 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
       inv_inertia_(inertia_.inverse()), planning_horizon_(planning_horizon),
       timestep_(timestep),
       qp_weights_(qp_weights.replicate(planning_horizon, 1).asDiagonal()),
-      alpha_(alpha * DMat<double>::Identity(NUM_LEGS * 3, NUM_LEGS * 3)),
-      _currentState(STATE_DIM),
+      alpha_(alpha), _currentState(STATE_DIM),
       _desiredStateTrajectory(STATE_DIM * planning_horizon),
       _contactStates(NUM_LEGS, planning_horizon), _a_mat(STATE_DIM, STATE_DIM),
       _b_mat(STATE_DIM, ACTION_DIM),
@@ -60,10 +61,9 @@ MPC::~MPC() { osqp_cleanup(workspace_); }
 void MPC::computeABExponentials() {
   // A mat calculation
   double avg_yaw = 0;
-  for (int i = 0; i < planning_horizon_; i++)
+  for (int i = 0; i < planning_horizon_; i++) {
     avg_yaw += _desiredStateTrajectory(i * STATE_DIM + 2) / planning_horizon_;
-  DVec<double> current_foot_state_(4);
-  current_foot_state_.setZero();
+  }
   // The transformation of angular velocity to roll pitch yaw rate. Caveat:
   // rpy rate is not a proper vector and does not follow the common vector
   // transformation dicted by the rotation matrix. Here we assume the input
@@ -84,7 +84,7 @@ void MPC::computeABExponentials() {
   _a_mat(11, 12) = 1;
   ab_concatenated_.block<STATE_DIM, STATE_DIM>(0, 0) = _a_mat * timestep_;
 
-  const int action_dim = _b_mat.cols();
+  const int ACTION_DIM = _b_mat.cols();
 
   Mat3<double> skew_mat;
   // B mat and A mat exponentials calculation
@@ -101,7 +101,6 @@ void MPC::computeABExponentials() {
           _contactPositionsBodyFrame.block(leg_id, h * 3, 1, 3).transpose();
       skew_mat << 0, -footPos(2), footPos(1), footPos(2), 0, -footPos(0),
           -footPos(1), footPos(0), 0;
-      current_foot_state_(leg_id) = _contactStates(leg_id, h);
 
       _b_mat.block<3, 3>(6, leg_id * 3) = inv_inertia_world * skew_mat;
 
@@ -111,22 +110,21 @@ void MPC::computeABExponentials() {
     }
 
     // Exponentiation
-    ab_concatenated_.block(0, STATE_DIM, STATE_DIM, action_dim) =
+    ab_concatenated_.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) =
         _b_mat * timestep_;
 
     DMat<double> ab_exp = ab_concatenated_.exp();
     if (h == 0) {
       _a_exp = ab_exp.block<STATE_DIM, STATE_DIM>(0, 0);
-      _b_exp = ab_exp.block(0, STATE_DIM, STATE_DIM, action_dim);
+      _b_exp = ab_exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
     }
 
-    _b_exps.block(h * STATE_DIM, 0, STATE_DIM, action_dim) =
-        ab_exp.block(0, STATE_DIM, STATE_DIM, action_dim);
+    _b_exps.block(h * STATE_DIM, 0, STATE_DIM, ACTION_DIM) =
+        ab_exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
   }
 }
 
 void MPC::computeQpMatrices() {
-  const int action_dim = _b_exp.cols();
   _a_qp.block<STATE_DIM, STATE_DIM>(0, 0) = _a_exp;
   for (int i = 1; i < planning_horizon_; ++i) {
     _a_qp.block<STATE_DIM, STATE_DIM>(i * STATE_DIM, 0) =
@@ -135,23 +133,21 @@ void MPC::computeQpMatrices() {
 
   for (int i = 0; i < planning_horizon_; ++i) {
     // Diagonal block.
-    _b_qp.block(i * STATE_DIM, i * action_dim, STATE_DIM, action_dim) =
-        _b_exps.block(i * STATE_DIM, 0, STATE_DIM, action_dim);
-    // Off diagonal Diagonal blocks = A^(i - j - 1) * B_exp.
+    _b_qp.block(i * STATE_DIM, i * ACTION_DIM, STATE_DIM, ACTION_DIM) =
+        _b_exps.block(i * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
+    // Off diagonal Diagonal blocks = A^(i - j - 1) * B_exp_j.
     for (int j = 0; j < i; ++j) {
       const int power = i - j;
-      _b_qp.block(i * STATE_DIM, j * action_dim, STATE_DIM, action_dim) =
+      _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
           _a_qp.block<STATE_DIM, STATE_DIM>((power - 1) * STATE_DIM, 0) *
-          _b_exps.block(j * STATE_DIM, 0, STATE_DIM, action_dim);
+          _b_exps.block(j * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
     }
   }
 
-  _p_mat = _b_qp.transpose() * qp_weights_ * _b_qp;
+  _p_mat = _b_qp.transpose() * qp_weights_ * _b_qp * 2;
 
-  _p_mat *= 2.0;
-  for (int i = 0; i < planning_horizon_; ++i) {
-    _p_mat.block(i * action_dim, i * action_dim, action_dim, action_dim) +=
-        alpha_;
+  for (int i = 0; i < planning_horizon_ * ACTION_DIM; ++i) {
+    _p_mat(i, i) += alpha_;
   }
 }
 
@@ -197,10 +193,11 @@ void MPC::computeConstraintBounds() {
 
 DVec<double> &MPC::solveQP() {
   static DVec<double> error_result;
-  Eigen::SparseMatrix<double, Eigen::ColMajor, long long> objective_matrix =
-      _p_mat.sparseView();
 
   DVec<double> objective_vector = _q_vec;
+
+  Eigen::SparseMatrix<double, Eigen::ColMajor, long long> objective_matrix =
+      _p_mat.sparseView();
 
   Eigen::SparseMatrix<double, Eigen::ColMajor, long long> constraint_matrix =
       _constraint.sparseView();
@@ -247,8 +244,8 @@ DVec<double> &MPC::solveQP() {
       const_cast<long long *>(constraint_matrix.innerIndexPtr()),
       const_cast<double *>(constraint_matrix.valuePtr()),
       -1};
-  data.A = &osqp_constraint_matrix;
 
+  data.A = &osqp_constraint_matrix;
   data.q = const_cast<double *>(objective_vector.data());
   data.l = clipped_lower_bounds.data();
   data.u = clipped_upper_bounds.data();

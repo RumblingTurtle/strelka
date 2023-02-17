@@ -89,6 +89,8 @@ Vec3<float> UnitreeA1::transformWorldToBodyFrame(Vec3<float> vector) {
 
 float UnitreeA1::footContact(int legId) { return _footContacts(legId); }
 
+Vec4<float> UnitreeA1::footContacts() { return _footContacts; }
+
 Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {
   return _footPositionsTrunkFrame.row(legId);
 }

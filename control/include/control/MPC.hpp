@@ -1,5 +1,6 @@
 
-// #include <Eigen/Geometry>
+#ifndef STRELKA_MPC_H
+#define STRELKA_MPC_H
 #include <common/constants.hpp>
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
@@ -22,7 +23,7 @@ class MPC {
   const DMat<double> qp_weights_;
 
   // NUM_LEGS * 3 * horizon diagonal matrix.
-  const DMat<double> alpha_;
+  const double alpha_;
 
   // The following matrices will be updated for every call. However, their sizes
   // can be determined at class initialization time.
@@ -93,3 +94,5 @@ public:
 };
 
 } // namespace strelka
+
+#endif // STRELKA_MPC_H

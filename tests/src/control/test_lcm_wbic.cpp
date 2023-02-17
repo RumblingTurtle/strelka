@@ -4,7 +4,7 @@ int main() {
   using namespace strelka;
   using namespace strelka::control;
 
-  A1WBIC wbicController{strelka::A1_STAND_WBIC_PARAMS};
+  A1WBIC wbicController{strelka::A1_DEFAULT_WBIC_PARAMS};
   wbicController.processLoop();
   return 0;
 }

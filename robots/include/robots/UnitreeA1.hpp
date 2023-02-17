@@ -52,6 +52,7 @@ public:
   virtual Vec12<float> dq();
 
   virtual float footContact(int legId);
+  virtual Vec4<float> footContacts();
 
   virtual Vec3<float> gyroscopeBodyFrame();
   virtual Vec3<float> accelerometerWorldFrame();
