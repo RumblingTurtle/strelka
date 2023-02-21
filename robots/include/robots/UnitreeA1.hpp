@@ -25,7 +25,7 @@ class UnitreeA1 : public Robot {
   Mat3<float> _bodyToWorldMat;
   Quat<float> _bodyToWorldQuat;
   Vec43<float> _footPositionsTrunkFrame;
-  Vec4<float> _footContacts;
+  Vec4<bool> _footContacts;
   Vec43<float> _footVelocitiesTrunkFrame;
   Vec3<float> _gyroscopeBodyFrame;
   Vec3<float> _accelerometerBodyFrame;
@@ -51,8 +51,8 @@ public:
   virtual Vec12<float> q();
   virtual Vec12<float> dq();
 
-  virtual float footContact(int legId);
-  virtual Vec4<float> footContacts();
+  virtual bool footContact(int legId);
+  virtual Vec4<bool> footContacts();
 
   virtual Vec3<float> gyroscopeBodyFrame();
   virtual Vec3<float> accelerometerWorldFrame();

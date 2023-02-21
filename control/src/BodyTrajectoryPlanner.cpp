@@ -11,13 +11,12 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     robots::Robot &robot, messages::HighLevelCommand &command, float dt,
     int horizonSteps) {
 
-  DMat<float> trajectory(horizonSteps, 12);
+  DMat<float> trajectory(horizonSteps, 13);
   trajectory.setZero();
 
-  Vec3<float> currentRPY;
+  Vec3<float> currentRPY = rotation::quat2euler(robot.bodyToWorldQuat());
   Mat3<float> bodyToWorldRot;
 
-  rotation::quat2euler(robot.bodyToWorldQuat(), currentRPY);
   rotation::quat2rot(robot.bodyToWorldQuat(), bodyToWorldRot);
 
   FOR_EACH_LEG {
@@ -80,7 +79,7 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     // Prefer to stablize roll and pitch.
     trajectory.block(h, 6, 1, 3) = desiredAngularVelocity.transpose();
     trajectory.block(h, 9, 1, 3) = velocity_h.transpose();
-    trajectory(h, 11) = constants::GRAVITY_CONSTANT;
+    trajectory(h, 12) = constants::GRAVITY_CONSTANT;
   }
 
   firstRun = false;

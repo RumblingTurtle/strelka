@@ -26,13 +26,15 @@ inline void quat2rot(Vec4<float> q, Mat3<float> &output) {
   output *= 2;
 }
 
-inline void quat2euler(Vec4<float> q, Vec3<float> &output) {
+inline Vec3<float> quat2euler(Vec4<float> q) {
 
-  output(0) = std::atan2((2 * (q[0] * q[1] + q[2] * q[3])),
-                         (1 - 2 * (q[1] * q[1] + q[2] * q[2])));
-  output(1) = std::asin(2 * (q[0] * q[2] - q[3] * q[1]));
-  output(2) = std::atan2((2 * (q[0] * q[3] + q[1] * q[2])),
+  float roll = std::atan2((2 * (q[0] * q[1] + q[2] * q[3])),
+                          (1 - 2 * (q[1] * q[1] + q[2] * q[2])));
+  float pitch = std::asin(2 * (q[0] * q[2] - q[3] * q[1]));
+  float yaw = std::atan2((2 * (q[0] * q[3] + q[1] * q[2])),
                          (1 - 2 * (q[2] * q[2] + q[3] * q[3])));
+
+  return Vec3<float>{roll, pitch, yaw};
 }
 
 inline void rpy2rot(Vec3<float> rpy, Mat3<float> &output) {

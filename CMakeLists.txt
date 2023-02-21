@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(strelka)
 
+#set(CMAKE_CXX_FLAGS "-O3 ")
+set(CMAKE_BUILD_TYPE Debug)
 #set(CMAKE_CXX_FLAGS "-O3 -ggdb")
-#set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "-O3")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

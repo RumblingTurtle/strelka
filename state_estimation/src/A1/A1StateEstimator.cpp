@@ -14,6 +14,7 @@ void A1StateEstimator::processLoop() {
   A1_DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
   observer->setParameters(A1_DEFAULT_KALMAN_FILTER_PARAMS);
   sub = lcm.subscribe("raw_state", &A1StateEstimator::update, this);
+  sub->setQueueCapacity(1);
   while (lcm.handle() == 0) {
   }
 }

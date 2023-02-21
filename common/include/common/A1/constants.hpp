@@ -28,6 +28,7 @@ const float TRUNK_TO_THIGH_OFFSETS[12] = {0.1805, -0.1308, 0.0,     0.1805,
 
 const float FOOT_RADIUS = 0.02;
 const float FOOT_FORCE_THRESHOLD = 10.0;
+
 const double MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
                                 0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
@@ -36,7 +37,7 @@ const double MPC_CONSTRAINT_MIN_SCALE = 0.1;
 const double MPC_ALPHA = 1e-5;
 const double MPC_BODY_MASS = 12.8;
 const Vec4<double> MPC_FRICTION_COEFFS{0.45, 0.45, 0.45, 0.45};
-const Vec3<double> MPC_BODY_INERTIA{0.15, 0.340, 0.36};
+const Vec3<double> MPC_BODY_INERTIA{0.15, 0.34, 0.36};
 
 } // namespace A1
 } // namespace constants

@@ -70,6 +70,7 @@ void KalmanFilterObserver::update(robots::Robot &robot,
   if (!initialized) {
     throw UninitializedKalmanFilter();
   }
+
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Q =
       Eigen::Matrix<float, STATE_DIM, STATE_DIM>::Identity();
 

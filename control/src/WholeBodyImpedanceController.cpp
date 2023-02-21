@@ -26,10 +26,10 @@ void WholeBodyImpedanceController::update(robots::Robot &robot,
                command.desiredBodyAcceleration(), command.desiredFootPosition(),
                command.desiredFootVelocity(), command.desiredFootAcceleration(),
                command.desiredContactState(), command.desiredFootForceWorld());
-
-  output.tau = wbic->getTau();
   output.q = wbic->get_qDes();
   output.dq = wbic->get_dqDes();
+  wbic->compute_tau();
+  output.tau = wbic->getTau();
 }
 } // namespace control
 } // namespace strelka

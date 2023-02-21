@@ -27,7 +27,7 @@ class LocalPlanner {
   lcm::Subscription *stateSub;
   lcm::Subscription *commandSub;
 
-  const float MPC_DT = 0.001;
+  const float MPC_DT = 0.05;
   const int horizonSteps = 10;
   float prevTick;
 

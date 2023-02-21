@@ -21,6 +21,7 @@ template <class MessageType>
 void UnitreeA1::initRawStateEntries(const MessageType *message) {
   _bodyToWorldQuat =
       Eigen::Map<const Eigen::Matrix<float, 4, 1>>(message->quaternion, 4);
+
   rotation::quat2rot(_bodyToWorldQuat, _bodyToWorldMat);
 
   _q = Eigen::Map<const Vec12<float>>(message->q, 12);
@@ -50,7 +51,7 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
     _footContacts(LEG_ID) =
         message->footForces[LEG_ID] > constants::A1::FOOT_FORCE_THRESHOLD;
 
-    _footContactHeights(LEG_ID) = 0;
+    _footContactHeights(LEG_ID) = constants::A1::FOOT_RADIUS;
   }
 
   _accelerometerWorldFrame =
@@ -87,9 +88,9 @@ Vec3<float> UnitreeA1::transformWorldToBodyFrame(Vec3<float> vector) {
   return rotateWorldToBodyFrame(vector - positionWorldFrame());
 }
 
-float UnitreeA1::footContact(int legId) { return _footContacts(legId); }
+bool UnitreeA1::footContact(int legId) { return _footContacts(legId); }
 
-Vec4<float> UnitreeA1::footContacts() { return _footContacts; }
+Vec4<bool> UnitreeA1::footContacts() { return _footContacts; }
 
 Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {
   return _footPositionsTrunkFrame.row(legId);
@@ -136,9 +137,7 @@ Vec3<float> UnitreeA1::linearVelocityBodyFrame() {
 Quat<float> UnitreeA1::bodyToWorldQuat() { return _bodyToWorldQuat; };
 
 Vec3<float> UnitreeA1::currentRPY() {
-  static Vec3<float> result;
-  rotation::quat2euler(bodyToWorldQuat(), result);
-  return result;
+  return rotation::quat2euler(bodyToWorldQuat());
 }
 
 UnitreeA1 createDummyA1RobotWithRawState() {

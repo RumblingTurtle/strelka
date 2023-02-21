@@ -4,7 +4,7 @@ namespace strelka {
 namespace control {
 
 LocalPlanner::LocalPlanner()
-    : scheduler(GAITS::TROT), bodyPlanner(), footPlanner(scheduler),
+    : scheduler(GAITS::STAND), bodyPlanner(), footPlanner(scheduler),
       prevTick(-1) {
   const DVec<double> MPC_WEIGHTS =
       Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
@@ -29,7 +29,7 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
                                const a1_lcm_msgs::RobotState *messageIn) {
 
   messages::HighLevelCommand command =
-      messages::HighLevelCommand::makeDummyCommandMessage(0.2);
+      messages::HighLevelCommand::makeDummyCommandMessage(0.0);
   robots::UnitreeA1 robot{messageIn};
 
   if (prevTick == -1) {
@@ -37,22 +37,23 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
   }
 
   float dt = messageIn->tick - prevTick;
+  Vec4<bool> footContacts = robot.footContacts();
+  scheduler.step(dt, footContacts);
 
-  scheduler.step(dt, robot.footContacts().cast<bool>());
-
-  DMat<float> bodyTrajectory =
-      bodyPlanner.getDesiredBodyTrajectory(robot, command, dt, horizonSteps);
+  DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
+      robot, command, MPC_DT, horizonSteps);
 
   DMat<bool> contactTable =
-      scheduler.getContactTable(MPC_DT, horizonSteps, {1, 1, 1, 1});
+      scheduler.getContactTable(MPC_DT, horizonSteps, footContacts);
 
+  footPlanner.calculateNextFootholdPositions(robot, command);
   DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
       robot, command, bodyTrajectory, contactTable);
 
   DVec<double> forces = mpc->computeContactForces(
       robot, contactTable, footholdTable, bodyTrajectory);
 
-  Vec12<float> mpcForces = forces.block(0, 0, 12, 1).cast<float>();
+  Vec12<float> mpcForces = -forces.block(0, 0, 12, 1).cast<float>();
 
   Vec12<float> footP;
   Vec12<float> footV;

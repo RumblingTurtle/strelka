@@ -21,8 +21,8 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
 
     for (int motorId = 0; motorId < 12; motorId++) {
       commandMessage->q[motorId] = outs.q[motorId];
-      commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
       commandMessage->dq[motorId] = outs.dq[motorId];
+      commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
       commandMessage->kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
       commandMessage->tau[motorId] = outs.tau[motorId];
     }
@@ -45,7 +45,8 @@ void A1WBIC::processLoop() {
   // TODO: split into threads
   stateSub = lcm.subscribe("robot_state", &A1WBIC::stateHandle, this);
   commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
-
+  stateSub->setQueueCapacity(1);
+  commandSub->setQueueCapacity(1);
   while (lcm.handle() == 0) {
   }
 }
