@@ -3,7 +3,7 @@ namespace strelka {
 namespace control {
 
 FootholdPlanner::FootholdPlanner(GaitScheduler &gaitScheduler)
-    : gaitScheduler(gaitScheduler) {
+    : gaitScheduler(gaitScheduler), updateContinuously(false) {
   _footholds.resize(4);
   FOR_EACH_LEG { _footholds[LEG_ID].reserve(5); }
 }
@@ -20,24 +20,39 @@ Vec3<float> FootholdPlanner::getFoothold(int legId, int footholdId) {
   throw InvalidFootholdIdx();
 }
 
-DMat<float> FootholdPlanner::calculateBodyFrameFootholds(
+DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholdsTest(
+    robots::Robot &robot, messages::HighLevelCommand &command,
+    DMat<float> &bodyTrajectory, DMat<bool> &contactTable) {
+  const int horizonSteps = bodyTrajectory.rows();
+  DMat<float> footholdTable(4, 3 * horizonSteps);
+  footholdTable.setZero();
+  for (int h = 0; h < horizonSteps; h++) {
+    FOR_EACH_LEG {
+      footholdTable.block(LEG_ID, 3 * h, 1, 3) =
+          (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)))
+              .transpose();
+
+      footholdTable(LEG_ID, 3 * h + 2) -= constants::A1::FOOT_RADIUS;
+    }
+  }
+  return footholdTable;
+}
+
+DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
     robots::Robot &robot, messages::HighLevelCommand &command,
     DMat<float> &bodyTrajectory, DMat<bool> &contactTable) {
 
-  int horizonSteps = bodyTrajectory.rows();
+  const int horizonSteps = bodyTrajectory.rows();
   DMat<float> footholdTable(4, 3 * horizonSteps);
-
+  footholdTable.setZero();
   int currentFootholdIdx[4] = {0, 0, 0, 0};
 
   for (int h = 0; h < horizonSteps; h++) {
-    Mat3<float> bodyToWorldRot_h;
 
-    Vec3<float> bodyPosWorld;
+    Vec3<float> bodyPosWorld = bodyTrajectory.block(h, 3, 1, 3).transpose();
+    Mat3<float> bodyToWorldRot_h;
     rotation::rpy2rot(bodyTrajectory.block(h, 0, 1, 3).transpose(),
                       bodyToWorldRot_h);
-    bodyPosWorld = bodyTrajectory.block(h, 3, 1, 3).transpose();
-
-    Mat3<float> bodyToWorldRotInv_h = bodyToWorldRot_h.transpose();
 
     FOR_EACH_LEG {
       bool inStance = contactTable(LEG_ID, h);
@@ -68,10 +83,8 @@ DMat<float> FootholdPlanner::calculateBodyFrameFootholds(
           _footholds[LEG_ID][currentFootholdIdx[LEG_ID]] -
           Vec3<float>{0, 0, constants::A1::FOOT_RADIUS};
 
-      Vec3<float> footholdBody_h =
-          bodyToWorldRotInv_h * (footholdWorld - bodyPosWorld);
-
-      footholdTable.block(LEG_ID, 3 * h, 1, 3) = footholdBody_h.transpose();
+      footholdTable.block(LEG_ID, 3 * h, 1, 3) =
+          (footholdWorld - bodyPosWorld).transpose();
     }
   }
   return footholdTable;
@@ -82,22 +95,16 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
   Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
   FOR_EACH_LEG {
-
-    if (firstRun) {
-      _footholds[LEG_ID][0] = robot.footPositionWorldFrame(LEG_ID);
-    }
-
     bool updateAsStance = gaitScheduler.footInContact(LEG_ID) ||
                           gaitScheduler.lostContact(LEG_ID);
+    bool swingStarted = gaitScheduler.swingStarted(LEG_ID);
 
-    if (updateAsStance) {
+    if (updateAsStance || firstRun) {
       lastContactPosWorld.block(LEG_ID, 0, 1, 3) =
           robot.footPositionWorldFrame(LEG_ID).transpose();
     }
 
-    if (updateAsStance or gaitScheduler.swingStarted(LEG_ID) or
-        updateContinuously) {
-
+    if (updateAsStance || swingStarted || updateContinuously) {
       _footholds[LEG_ID].clear();
       _footholds[LEG_ID].push_back(
           lastContactPosWorld.block(LEG_ID, 0, 1, 3).transpose());
@@ -124,7 +131,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
           robot.linearVelocityBodyFrame(), FEEDBACK_GAIN, LEG_ID, predictType);
 
       // Skip adjustment for now (no elevation map)
-      Vec3<float> adjustedFootPosition;
+      // Vec3<float> adjustedFootPosition;
 
       _footholds[LEG_ID].push_back(predictedFootPosition);
 
@@ -132,21 +139,24 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
       bool steppingUp = heightDiff > command.desiredFootHeight();
       bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
+      /*
+          if (steppingUp) {
+            swingHeight[LEG_ID] = heightDiff + 0.02;
+            swingBack[LEG_ID] = true;
+          }
 
-      if (steppingUp) {
-        swingHeight[LEG_ID] = heightDiff + 0.02;
-        swingBack[LEG_ID] = true;
-      }
+          if (steppingDown) {
+            swingHeight[LEG_ID] = 0.02;
+            swingBack[LEG_ID] = false;
+          }
 
-      if (steppingDown) {
-        swingHeight[LEG_ID] = 0.02;
-        swingBack[LEG_ID] = false;
-      }
-
-      if (!steppingUp && !steppingDown) {
-        swingHeight[LEG_ID] = command.desiredFootHeight();
-        swingBack[LEG_ID] = false;
-      }
+          if (!steppingUp && !steppingDown) {
+            swingHeight[LEG_ID] = command.desiredFootHeight();
+            swingBack[LEG_ID] = false;
+          }
+    */
+      swingHeight[LEG_ID] = command.desiredFootHeight();
+      swingBack[LEG_ID] = false;
     }
   }
 
@@ -201,6 +211,8 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
     predictedFootWorld += feedbackGain * (bodyToWorldRot * bodyLinearVelocity -
                                           desiredVelocityWorld);
   }
+
+  predictedFootWorld(2) = constants::A1::FOOT_RADIUS;
   return predictedFootWorld;
 }
 

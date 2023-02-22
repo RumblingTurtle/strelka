@@ -44,7 +44,7 @@ int main() {
     assert(footholdDist == 0.0);
   }
 
-  DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
+  DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
   std::cout << footholdTable.row(0) << std::endl;

@@ -47,11 +47,13 @@ public:
 
   Vec3<float> getFoothold(int legId, int footholdId);
 
-  DMat<float> calculateBodyFrameFootholds(robots::Robot &robot,
-                                          messages::HighLevelCommand &command,
-                                          DMat<float> &bodyTrajectory,
-                                          DMat<bool> &contactTable);
+  DMat<float> calculateWorldFrameRotatedFootholds(
+      robots::Robot &robot, messages::HighLevelCommand &command,
+      DMat<float> &bodyTrajectory, DMat<bool> &contactTable);
 
+  DMat<float> calculateWorldFrameRotatedFootholdsTest(
+      robots::Robot &robot, messages::HighLevelCommand &command,
+      DMat<float> &bodyTrajectory, DMat<bool> &contactTable);
   void calculateNextFootholdPositions(robots::Robot &robot,
                                       messages::HighLevelCommand &command);
   Vec3<float> predictNextFootPos(

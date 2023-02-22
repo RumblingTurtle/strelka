@@ -46,7 +46,7 @@ int main() {
   DMat<bool> contactTable =
       scheduler.getContactTable(dt, horizonSteps, {1, 1, 1, 1});
 
-  DMat<float> footholdTable = footPlanner.calculateBodyFrameFootholds(
+  DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
   mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);

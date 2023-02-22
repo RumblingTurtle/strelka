@@ -101,7 +101,7 @@ Vec3<float> UnitreeA1::footVelocityTrunkFrame(int legId) {
 }
 
 Vec3<float> UnitreeA1::footPositionWorldFrame(int legId) {
-  return _bodyToWorldMat * _footPositionsTrunkFrame.row(legId).transpose() +
+  return rotateBodyToWorldFrame(footPositionTrunkFrame(legId)) +
          positionWorldFrame();
 }
 

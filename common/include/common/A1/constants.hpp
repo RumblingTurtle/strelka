@@ -29,8 +29,8 @@ const float TRUNK_TO_THIGH_OFFSETS[12] = {0.1805, -0.1308, 0.0,     0.1805,
 const float FOOT_RADIUS = 0.02;
 const float FOOT_FORCE_THRESHOLD = 10.0;
 
-const double MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
-                                0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
+const double MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 10.0, 10.0, 50.0, 0.0f,
+                                0.0, 1.0, 1.0, 1.0,  0.0,  0.0};
 
 const double MPC_CONSTRAINT_MAX_SCALE = 10;
 const double MPC_CONSTRAINT_MIN_SCALE = 0.1;

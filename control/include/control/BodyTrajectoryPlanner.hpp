@@ -21,6 +21,9 @@ public:
   DMat<float> getDesiredBodyTrajectory(robots::Robot &robot,
                                        messages::HighLevelCommand &command,
                                        float dt, int horizonSteps);
+  DMat<float> getDesiredBodyTrajectoryTest(robots::Robot &robot,
+                                           messages::HighLevelCommand &command,
+                                           float dt, int horizonSteps);
 };
 } // namespace control
 } // namespace strelka

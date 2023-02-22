@@ -27,15 +27,11 @@ class MPC {
 
   // The following matrices will be updated for every call. However, their sizes
   // can be determined at class initialization time.
-  DVec<double> _currentState;           // 13
-  DVec<double> _desiredStateTrajectory; // 13 * horizon
-  DMat<bool> _contactStates;            // horizon x NUM_LEGS
-  DMat<double> _a_mat;                  // 13 x 13
-  DMat<double> _b_mat;                  // 13 x (NUM_LEGS * 3)
-  DMat<double> ab_concatenated_;        // 13 + NUM_LEGS * 3 x 13 + NUM_LEGS * 3
-  DMat<double> _a_exp;                  // same dimension as _a_mat
-  DMat<double> _b_exp;                  // same dimension as _b_mat
-  DMat<double> _contactPositionsBodyFrame;
+  DMat<double> _a_mat;           // 13 x 13
+  DMat<double> _b_mat;           // 13 x (NUM_LEGS * 3)
+  DMat<double> ab_concatenated_; // 13 + NUM_LEGS * 3 x 13 + NUM_LEGS * 3
+  DMat<double> _a_exp;           // same dimension as _a_mat
+  DMat<double> _b_exp;           // same dimension as _b_mat
 
   // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
   DMat<double> _a_qp;  // 13 * horizon x 13
@@ -59,15 +55,15 @@ class MPC {
   // Whether optimizing for the first step
   bool initial_run_;
 
-  void updateConstraintsMatrix();
-
-  void computeConstraintBounds();
+  void updateConstraints(DMat<bool> &contactTable);
 
   DVec<double> &solveQP();
 
-  void updateObjectiveVector();
+  void updateObjectiveVector(robots::Robot &robot, DMat<float> &bodyTrajectory);
 
-  void computeABExponentials();
+  void computeABExponentials(robots::Robot &robot,
+                             DMat<float> &contactPositionsWorldFrameRotated,
+                             DMat<float> &bodyTrajectory);
 
   void computeQpMatrices();
 
@@ -85,10 +81,10 @@ public:
 
   ~MPC();
 
-  DVec<double> &computeContactForces(robots::Robot &robot,
-                                     DMat<bool> &contactTable,
-                                     DMat<float> &contactPositionsBodyFrame,
-                                     DMat<float> &bodyTrajectory);
+  DVec<double> &
+  computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
+                       DMat<float> &contactPositionsWorldFrameRotated,
+                       DMat<float> &bodyTrajectory);
 
   void reset();
 };

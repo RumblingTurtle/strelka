@@ -5,13 +5,10 @@
 #include <robots/UnitreeA1.hpp>
 #include <state_estimation/KalmanFilterObserver.hpp>
 
-using strelka::KalmanFilterObserver;
-
-using namespace strelka::robots;
-
 int main() {
   using namespace strelka::robots;
   using namespace strelka;
+  using strelka::KalmanFilterObserver;
 
   KalmanFilterObserver::KalmanFilterObserverParams params{
       .dt = 0.001,
