@@ -18,8 +18,6 @@ LocalPlanner::LocalPlanner()
   const std::vector<double> inertia{0.15, 0, 0, 0, 0.34, 0, 0, 0, 0.36};
   const std::vector<double> weights{constants::A1::MPC_WEIGHTS,
                                     constants::A1::MPC_WEIGHTS + 13};
-  oldMpc = new Mpc(constants::A1::MPC_BODY_MASS, inertia, 4, horizonSteps,
-                   MPC_DT, weights, 1e-5);
 
   wbicCommand = new a1_lcm_msgs::WbicCommand();
 }
@@ -50,55 +48,23 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
   DMat<bool> contactTable =
       scheduler.getContactTable(MPC_DT, horizonSteps, footContacts);
 
-  DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectoryTest(
+  DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
       robot, command, MPC_DT, horizonSteps);
 
   footPlanner.calculateNextFootholdPositions(robot, command);
 
-  DMat<float> footholdTable =
-      footPlanner.calculateWorldFrameRotatedFootholdsTest(
-          robot, command, bodyTrajectory, contactTable);
+  DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
+      robot, command, bodyTrajectory, contactTable);
 
-  if (false) {
-    std::vector<double> coeffs{0.45, 0.45, 0.45, 0.45};
+  DVec<double> forces = mpc->computeContactForces(
+      robot, contactTable, footholdTable, bodyTrajectory);
 
-    DVec<double> currentState(13);
-    currentState.block(0, 0, 3, 1) = robot.currentRPY().cast<double>();
-    currentState.block(3, 0, 3, 1) = robot.positionWorldFrame().cast<double>();
+  Vec12<float> mpcForces = -forces.block(0, 0, 12, 1).cast<float>();
 
-    currentState.block(6, 0, 3, 1) =
-        robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame()).cast<double>();
-
-    currentState.block(9, 0, 3, 1) =
-        robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame())
-            .cast<double>();
-
-    currentState(12) = (double)constants::GRAVITY_CONSTANT;
-
-    DMat<double> contcts = contactTable.cast<double>();
-    DMat<double> feet = footholdTable.cast<double>();
-    DMat<double> b = bodyTrajectory.cast<double>();
-    DVec<double> body = Eigen::Map<DVec<double>>(b.data(), b.size());
-    std::vector<double> forces =
-        oldMpc->ComputeContactForces(contcts, feet, body, currentState, coeffs,
-                                     constants::A1::MPC_CONSTRAINT_MAX_SCALE,
-                                     constants::A1::MPC_CONSTRAINT_MIN_SCALE);
-    FOR_EACH_LEG {
-      wbicCommand->mpcForces[LEG_ID * 3] = -forces[LEG_ID * 3];
-      wbicCommand->mpcForces[LEG_ID * 3 + 1] = -forces[LEG_ID * 3 + 1];
-      wbicCommand->mpcForces[LEG_ID * 3 + 2] = -forces[LEG_ID * 3 + 2];
-    }
-  } else {
-    DVec<double> forces = mpc->computeContactForces(
-        robot, contactTable, footholdTable, bodyTrajectory);
-
-    Vec12<float> mpcForces = -forces.block(0, 0, 12, 1).cast<float>();
-
-    FOR_EACH_LEG {
-      wbicCommand->mpcForces[LEG_ID * 3] = mpcForces[LEG_ID * 3];
-      wbicCommand->mpcForces[LEG_ID * 3 + 1] = mpcForces[LEG_ID * 3 + 1];
-      wbicCommand->mpcForces[LEG_ID * 3 + 2] = mpcForces[LEG_ID * 3 + 2];
-    }
+  FOR_EACH_LEG {
+    wbicCommand->mpcForces[LEG_ID * 3] = mpcForces[LEG_ID * 3];
+    wbicCommand->mpcForces[LEG_ID * 3 + 1] = mpcForces[LEG_ID * 3 + 1];
+    wbicCommand->mpcForces[LEG_ID * 3 + 2] = mpcForces[LEG_ID * 3 + 2];
   }
 
   Vec12<float> footP;

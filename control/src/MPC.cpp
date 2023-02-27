@@ -172,7 +172,7 @@ void MPC::updateConstraints(DMat<bool> &contactTable) {
 
       _constraint_ub(row) = friction_ub;
       _constraint_ub(row + 1) = friction_ub;
-
+      _constraint_ub(row + 2) = friction_ub;
       _constraint_ub(row + 3) = friction_ub;
       _constraint_ub(row + 4) = fz_max * contactTable(j, i);
     }

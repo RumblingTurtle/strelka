@@ -7,7 +7,6 @@
 #include <control/BodyTrajectoryPlanner.hpp>
 #include <control/FootholdPlanner.hpp>
 #include <control/MPC.hpp>
-#include <control/OldMPC.hpp>
 #include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <messages/HighLevelCommand.hpp>
@@ -22,7 +21,6 @@ class LocalPlanner {
   BodyTrajectoryPlanner bodyPlanner;
   FootholdPlanner footPlanner;
   MPC *mpc;
-  Mpc *oldMpc;
 
   a1_lcm_msgs::HighLevelCommand *highCommand;
   a1_lcm_msgs::WbicCommand *wbicCommand;
