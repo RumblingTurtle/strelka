@@ -32,6 +32,7 @@ public:
   DMat<bool> getContactTable(float dt, int horizonSteps,
                              Vec4<bool> currentContacts);
 
+  bool isLegSwinging(int legId);
   bool isLegScheduledToSwing(int legId);
 
   float normalizedPhase(int legId);

@@ -14,9 +14,9 @@ int main() {
   using namespace strelka::messages;
 
   Gait TEST_GAIT = {.name = "test",
-                    .dutyFactor = {0.6, 0.6, 0.6, 0.6},
-                    .phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                    .phaseOffset = {0.0, 0.0, 0.0, 0.0}};
+                    ._dutyFactor = {0.6, 0.6, 0.6, 0.6},
+                    ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
+                    ._phaseOffset = {0.0, 0.0, 0.0, 0.0}};
 
   const float desiredVelocityX = 0.2;
   const float dt = 0.001;

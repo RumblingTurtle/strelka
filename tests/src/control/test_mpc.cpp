@@ -15,9 +15,9 @@ int main() {
   using namespace strelka::messages;
 
   Gait TEST_GAIT = {.name = "test",
-                    .dutyFactor = {0.6, 0.6, 0.6, 0.6},
-                    .phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                    .phaseOffset = {0.0, 0.0, 0.0, 0.0}};
+                    ._dutyFactor = {0.6, 0.6, 0.6, 0.6},
+                    ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
+                    ._phaseOffset = {0.0, 0.0, 0.0, 0.0}};
 
   const DVec<double> MPC_WEIGHTS =
       Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);

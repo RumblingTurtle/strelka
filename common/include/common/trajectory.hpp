@@ -51,7 +51,7 @@ inline Vec3<float> getSwingTrajectoryPosition(Vec3<float> pStart,
 
   if (tSpedUp < 0.5) {
     desiredPosition(2) =
-        cubicBezier(pStart(2), pEnd(2) + swingHeight, tSpedUp * 2);
+        cubicBezier(pStart(2), pStart(2) + swingHeight, tSpedUp * 2);
   } else {
     desiredPosition(2) =
         cubicBezier(pStart(2) + swingHeight, pEnd(2), tSpedUp * 2 - 1);
@@ -76,7 +76,7 @@ inline Vec3<float> getSwingTrajectoryVelocity(Vec3<float> pStart,
 
   if (tSpedUp < 0.5) {
     desiredVelocity(2) =
-        cubicBezierDerivative(pStart(2), pEnd(2) + swingHeight, tSpedUp * 2) *
+        cubicBezierDerivative(pStart(2), pStart(2) + swingHeight, tSpedUp * 2) *
         2 / swingDuration;
   } else {
     desiredVelocity(2) = cubicBezierDerivative(pStart(2) + swingHeight, pEnd(2),
@@ -104,7 +104,7 @@ inline Vec3<float> getSwingTrajectoryAcceleration(Vec3<float> pStart,
 
   if (tSpedUp < 0.5) {
     desiredAcceleration(2) =
-        cubicBezierSecondDerivative(pStart(2), pEnd(2) + swingHeight,
+        cubicBezierSecondDerivative(pStart(2), pStart(2) + swingHeight,
                                     tSpedUp * 2) *
         4 / (swingDuration * swingDuration);
   } else {

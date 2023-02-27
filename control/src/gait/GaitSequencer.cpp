@@ -7,13 +7,13 @@ void GaitSequencer::updateLegState() {
 
   for (int legId = 0; legId < 4; legId++) {
     float legTime =
-        currentGaitTime + gait.phaseOffset[legId] * gait.phaseDuration[legId];
+        currentGaitTime + gait.phaseOffset(legId) * gait.phaseDuration(legId);
 
-    float phaseTime = std::fmod(legTime, gait.phaseDuration[legId]);
+    float phaseTime = std::fmod(legTime, gait.phaseDuration(legId));
 
-    float fullPhaseNormalized = phaseTime / gait.phaseDuration[legId];
+    float fullPhaseNormalized = phaseTime / gait.phaseDuration(legId);
 
-    if (fullPhaseNormalized < gait.dutyFactor[legId]) {
+    if (fullPhaseNormalized < gait.dutyFactor(legId)) {
       legState[legId] = LegState::STANCE;
       normalizedPhase[legId] = phaseTime / gait.stanceDuration(legId);
     } else {
@@ -26,8 +26,9 @@ void GaitSequencer::updateLegState() {
 }
 
 GaitSequencer::GaitSequencer(Gait gait) {
-  sequence.push_back(
-      {gait, *std::max_element(gait.phaseDuration, gait.phaseDuration + 4)});
+  float maxDuration =
+      *std::max_element(gait._phaseDuration, gait._phaseDuration + 4);
+  sequence.push_back({gait, 2 * maxDuration});
   reset();
 }
 

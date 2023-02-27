@@ -3,7 +3,11 @@
 #include <chrono>
 #include <iostream>
 
-template <typename Callable> void executionTime(Callable functor) {
+/// @brief Returns run time of a callable
+/// @tparam Callable Callable object type
+/// @param functor Functor object to run
+template <typename Callable> float executionTime(Callable functor) {
+
   std::chrono::time_point<std::chrono::high_resolution_clock> t =
       std::chrono::high_resolution_clock::now();
   functor();

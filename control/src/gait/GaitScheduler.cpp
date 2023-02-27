@@ -74,8 +74,9 @@ void GaitScheduler::step(float dt, Vec4<bool> contacts) {
   for (int legId = 0; legId < 4; legId++) {
 
     if (scheduledState[legId] == LegState::SWING && contacts[legId] &&
-        _normalizedPhase[legId] > CONTACT_DETECTION_THRESHOLD)
+        _normalizedPhase[legId] >= CONTACT_DETECTION_THRESHOLD) {
       currentLegState[legId] = LegState::EARLY_CONTACT;
+    }
 
     if (scheduledState[legId] == LegState::STANCE && !contacts[legId]) {
       currentLegState[legId] = LegState::LOST_CONTACT;
@@ -85,6 +86,10 @@ void GaitScheduler::step(float dt, Vec4<bool> contacts) {
 
 bool GaitScheduler::isLegScheduledToSwing(int legId) {
   return scheduledState[legId] == LegState::SWING;
+}
+
+bool GaitScheduler::isLegSwinging(int legId) {
+  return currentLegState[legId] == LegState::SWING;
 }
 
 bool GaitScheduler::swingStarted(int legId) {
@@ -106,7 +111,7 @@ float GaitScheduler::GaitScheduler::normalizedPhase(int legId) {
 }
 
 float GaitScheduler::phaseDuration(int legId) {
-  return sequencer.currentGait().phaseDuration[legId];
+  return sequencer.currentGait().phaseDuration(legId);
 }
 
 float GaitScheduler::swingDuration(int legId) {

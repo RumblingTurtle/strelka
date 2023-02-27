@@ -24,9 +24,9 @@ class UnitreeA1 : public Robot {
   Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
   Quat<float> _bodyToWorldQuat;
-  Vec43<float> _footPositionsTrunkFrame;
+  Mat43<float> _footPositionsTrunkFrame;
   Vec4<bool> _footContacts;
-  Vec43<float> _footVelocitiesTrunkFrame;
+  Mat43<float> _footVelocitiesTrunkFrame;
   Vec3<float> _gyroscopeBodyFrame;
   Vec3<float> _accelerometerBodyFrame;
   Vec3<float> _accelerometerWorldFrame;

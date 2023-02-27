@@ -4,7 +4,7 @@ namespace strelka {
 namespace control {
 
 LocalPlanner::LocalPlanner()
-    : scheduler(GAITS::STAND), bodyPlanner(), footPlanner(scheduler),
+    : scheduler(GAITS::TROT), bodyPlanner(), footPlanner(scheduler),
       prevTick(-1) {
   const DVec<double> MPC_WEIGHTS =
       Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
@@ -37,11 +37,21 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
       messages::HighLevelCommand::makeDummyCommandMessage(0.0);
   robots::UnitreeA1 robot{messageIn};
 
+  float dt = messageIn->tick;
+
   if (prevTick == -1) {
-    prevTick = messageIn->tick - 0.001;
+    dt = 0.001;
+  } else {
+    dt -= prevTick;
   }
 
-  float dt = messageIn->tick - prevTick;
+  prevTick = messageIn->tick;
+  if (dt == 0) {
+    // NOTE: happens a couple times at the start for no reason. Might be a
+    // gazebo broadcaster issue
+    return;
+  }
+
   Vec4<bool> footContacts = robot.footContacts();
   scheduler.step(dt, footContacts);
 
@@ -83,8 +93,12 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
 
   float footState[4];
   FOR_EACH_LEG {
-    wbicCommand->footState[LEG_ID] =
+    bool useForceTask =
         scheduler.footInContact(LEG_ID) || scheduler.lostContact(LEG_ID);
+    wbicCommand->footState[LEG_ID] = useForceTask;
+    if (scheduler.lostContact(LEG_ID)) {
+      mpcForces(3 * LEG_ID + 2, 0) = -constants::A1::MPC_BODY_MASS * 5;
+    }
   }
 
   memcpy(wbicCommand->pFoot, footP.data(), sizeof(float) * 12);
@@ -109,9 +123,9 @@ void LocalPlanner::processLoop() {
       lcm.subscribe("high_command", &LocalPlanner::commandHandle, this);
   commandSub->setQueueCapacity(1);
   */
-  stateSub->setQueueCapacity(1);
-  while (lcm.handle() == 0) {
-  }
+  // stateSub->setQueueCapacity(1);
+  while (lcm.handle() == 0)
+    ;
 }
 } // namespace control
 } // namespace strelka

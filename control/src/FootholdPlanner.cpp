@@ -1,4 +1,5 @@
 #include <control/FootholdPlanner.hpp>
+#include <iostream>
 namespace strelka {
 namespace control {
 
@@ -97,6 +98,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
   FOR_EACH_LEG {
     bool updateAsStance = gaitScheduler.footInContact(LEG_ID) ||
                           gaitScheduler.lostContact(LEG_ID);
+
     bool swingStarted = gaitScheduler.swingStarted(LEG_ID);
 
     if (updateAsStance || firstRun) {
@@ -220,12 +222,14 @@ void FootholdPlanner::getFootDesiredPVA(
     robots::Robot &robot, Vec12<float> &desiredFootPositions,
     Vec12<float> &desiredFootVelocities,
     Vec12<float> &desiredFootAccelerations) {
+
   FOR_EACH_LEG {
     Vec3<float> desiredFootPosition;
     Vec3<float> desiredFootVelocity;
     Vec3<float> desiredFootAcceleration;
 
-    if (gaitScheduler.isLegScheduledToSwing(LEG_ID)) {
+    if (gaitScheduler.isLegSwinging(LEG_ID)) {
+
       Vec3<float> pStart = _footholds[LEG_ID][0];
       Vec3<float> pEnd =
           _footholds[LEG_ID][1] + Vec3<float>{0, 0, FOOT_CLEARANCE};
