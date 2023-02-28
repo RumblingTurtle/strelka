@@ -1,13 +1,15 @@
 #include <common/A1/constants.hpp>
 #include <common/macros.hpp>
-#include <interfaces/GazeboInterface.hpp>
+#include <interfaces/A1/A1GazeboInterface.hpp>
 #include <iostream>
 #include <robots/UnitreeA1.hpp>
 #include <state_estimation/KalmanFilterObserver.hpp>
 
 int main() {
   using namespace strelka::robots;
+  using namespace strelka::A1;
   using namespace strelka;
+
   using strelka::KalmanFilterObserver;
 
   KalmanFilterObserver::KalmanFilterObserverParams params{

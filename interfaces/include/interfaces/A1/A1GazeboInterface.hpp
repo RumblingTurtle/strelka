@@ -1,5 +1,5 @@
-#ifndef GAZEBO_INTERFACE_H
-#define GAZEBO_INTERFACE_H
+#ifndef A1_GAZEBO_INTERFACE_H
+#define A1_GAZEBO_INTERFACE_H
 
 #include <common/A1/constants.hpp>
 #include <common/typedefs.hpp>
@@ -13,7 +13,8 @@
 #define GAZEBO_BASE_RATE 1000
 
 namespace strelka {
-class GazeboInterface : public QuadrupedInterface {
+namespace A1 {
+class A1GazeboInterface : public QuadrupedInterface {
   lcm::LCM lcm;
   a1_lcm_msgs::RobotLowCommand commandMessage;
 
@@ -26,17 +27,17 @@ class GazeboInterface : public QuadrupedInterface {
 
     Eigen::VectorXf startAngles;
     const Eigen::VectorXf &desiredAngles;
-    GazeboInterface &interface;
+    A1GazeboInterface &interface;
 
     MoveToHandle(float moveTime, const Eigen::VectorXf &desiredAngles,
-                 GazeboInterface &interface);
+                 A1GazeboInterface &interface);
 
     void handle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                 const a1_lcm_msgs::RobotRawState *data);
   };
 
 public:
-  explicit GazeboInterface() {}
+  explicit A1GazeboInterface() {}
 
   virtual void sendCommandMessage(const Eigen::VectorXf &command) override;
 
@@ -53,7 +54,7 @@ public:
 
   virtual void moveToStand(float moveTime = 3.0) override;
 };
-
+} // namespace A1
 } // namespace strelka
 
 #endif // GAZEBO_INTERFACE_H

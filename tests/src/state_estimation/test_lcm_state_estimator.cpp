@@ -1,10 +1,11 @@
-#include <interfaces/GazeboInterface.hpp>
+#include <interfaces/A1/A1GazeboInterface.hpp>
 #include <state_estimation/A1/A1StateEstimator.hpp>
 
 int main() {
+  using namespace strelka::A1;
   using namespace strelka;
 
-  GazeboInterface interface;
+  A1GazeboInterface interface;
   interface.moveToInit();
   interface.moveToStand();
 

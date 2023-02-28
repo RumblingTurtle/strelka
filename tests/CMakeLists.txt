@@ -16,7 +16,7 @@ SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES
     strelka_control
 )
 
-file(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true  ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
+FILE(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true  ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
 
 foreach(file_path ${STRELKA_TESTS_SOURCES})
     string( REPLACE ".cpp" "" new_name ${file_path} )

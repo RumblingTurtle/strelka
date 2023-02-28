@@ -1,9 +1,9 @@
-#include <interfaces/GazeboInterface.hpp>
+#include <interfaces/A1/A1GazeboInterface.hpp>
 
 int main() {
-  using namespace strelka;
+  using namespace strelka::A1;
 
-  GazeboInterface interface;
+  A1GazeboInterface interface;
   interface.moveToInit();
   interface.moveToStand();
   return 0;

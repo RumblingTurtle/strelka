@@ -4,18 +4,18 @@
     Ideally a builder LocalPlanner<FootPlanner,BodyTrajectoryPlanner,Sequencer>();
     + Gait scheduler
     + Gait sequencer
-        - Common interface
+        + Common interface
     - Body trajectory planner
         + Common interface
         - Lowpass filter for pitch and height
     + Foot planner
         + Common interface
-    - MPC
+    + MPC
     - Move A1 constants into UnitreeA1
 
 - Code structure
     - Ensure lcm.good()
-    - lcm.handle() == 0
+    + lcm.handle() == 0
     - Timeouts?
     - Sim/Hardware bridge to lcm
     - Decouple strelka and ros entirely(at least for now)
@@ -33,12 +33,10 @@
 
 - Build system
     - Macros for packages
-    - Automatic source file search
+    + Automatic source file search
             FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
 
 - Elevation mapping???
 
-- Replace defines with constants?
-
-
++ Replace defines with constants
 + Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 

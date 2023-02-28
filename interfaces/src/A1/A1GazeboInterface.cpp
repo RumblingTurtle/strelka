@@ -1,10 +1,11 @@
-#include <interfaces/GazeboInterface.hpp>
+#include <interfaces/A1/A1GazeboInterface.hpp>
 
 namespace strelka {
+namespace A1 {
 
-GazeboInterface::MoveToHandle::MoveToHandle(
+A1GazeboInterface::MoveToHandle::MoveToHandle(
     float moveTime, const Eigen::VectorXf &desiredAngles,
-    GazeboInterface &interface)
+    A1GazeboInterface &interface)
     : interface(interface), desiredAngles(desiredAngles), firstHandle(true),
       prevTick(-1) {
   assert(desiredAngles.size() == 12);
@@ -14,7 +15,7 @@ GazeboInterface::MoveToHandle::MoveToHandle(
   this->timeLeft = moveTime;
 }
 
-void GazeboInterface::MoveToHandle::handle(
+void A1GazeboInterface::MoveToHandle::handle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const a1_lcm_msgs::RobotRawState *data) {
 
@@ -55,7 +56,7 @@ void GazeboInterface::MoveToHandle::handle(
   timeLeft -= dt;
 }
 
-void GazeboInterface::sendCommandMessage(const Eigen::VectorXf &command) {
+void A1GazeboInterface::sendCommandMessage(const Eigen::VectorXf &command) {
   assert(command.size() == 60);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = command[5 * motorId];
@@ -68,7 +69,7 @@ void GazeboInterface::sendCommandMessage(const Eigen::VectorXf &command) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void GazeboInterface::setTorques(const Eigen::VectorXf &torques) {
+void A1GazeboInterface::setTorques(const Eigen::VectorXf &torques) {
   assert(torques.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = 0;
@@ -81,7 +82,7 @@ void GazeboInterface::setTorques(const Eigen::VectorXf &torques) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void GazeboInterface::setAngles(const Eigen::VectorXf &q) {
+void A1GazeboInterface::setAngles(const Eigen::VectorXf &q) {
   assert(q.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
@@ -94,8 +95,8 @@ void GazeboInterface::setAngles(const Eigen::VectorXf &q) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void GazeboInterface::setAngles(const Eigen::VectorXf &q,
-                                const Eigen::VectorXf &dq) {
+void A1GazeboInterface::setAngles(const Eigen::VectorXf &q,
+                                  const Eigen::VectorXf &dq) {
   assert(q.size() == 12);
   assert(dq.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
@@ -109,7 +110,7 @@ void GazeboInterface::setAngles(const Eigen::VectorXf &q,
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void GazeboInterface::moveTo(const Eigen::VectorXf &angles, float moveTime) {
+void A1GazeboInterface::moveTo(const Eigen::VectorXf &angles, float moveTime) {
   assert(angles.size() == 12);
   assert(moveTime > 0);
 
@@ -124,7 +125,7 @@ void GazeboInterface::moveTo(const Eigen::VectorXf &angles, float moveTime) {
   lcm.unsubscribe(sub);
 }
 
-void GazeboInterface::moveToInit(float moveTime) {
+void A1GazeboInterface::moveToInit(float moveTime) {
   assert(moveTime > 0);
   Eigen::VectorXf moveAngles;
   moveAngles.resize(12);
@@ -137,7 +138,7 @@ void GazeboInterface::moveToInit(float moveTime) {
   moveTo(moveAngles, moveTime);
 }
 
-void GazeboInterface::moveToStand(float moveTime) {
+void A1GazeboInterface::moveToStand(float moveTime) {
   assert(moveTime > 0);
   Eigen::VectorXf moveAngles;
   moveAngles.resize(12);
@@ -149,5 +150,6 @@ void GazeboInterface::moveToStand(float moveTime) {
   }
   moveTo(moveAngles, moveTime);
 }
+} // namespace A1
 
 } // namespace strelka
