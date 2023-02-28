@@ -1,4 +1,4 @@
-#include <control/LocalPlanner.hpp>
+#include <control/A1/LocalPlanner.hpp>
 
 namespace strelka {
 namespace control {

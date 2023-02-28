@@ -10,7 +10,7 @@ int main() {
   using namespace strelka::robots;
 
   WholeBodyImpedanceController controller{buildA1<float>().buildModel(),
-                                          strelka::A1_DEFAULT_WBIC_PARAMS};
+                                          DEFAULT_WBIC_PARAMS};
 
   WholeBodyImpedanceController::WBICOutput outs;
 

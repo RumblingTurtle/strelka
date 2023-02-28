@@ -35,6 +35,26 @@ public:
   void update(robots::Robot &robot, messages::WBICCommand &command,
               WBICOutput &output);
 };
+
+static WholeBodyImpedanceController::WBICParams STAND_WBIC_PARAMS = {
+    .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
+    .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
+    .Kp_kin = {1, 1, 1, 1, 1, 1, 1, 1, 1},
+    .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+    .rf_W = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    .mu = 0.4,
+    .max_fz = 1500,
+};
+
+static WholeBodyImpedanceController::WBICParams DEFAULT_WBIC_PARAMS = {
+    .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
+    .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
+    .Kp_kin = {0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 1, 1, 1},
+    .floating_W = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+    .rf_W = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+    .mu = 0.4,
+    .max_fz = 1500,
+};
 } // namespace control
 } // namespace strelka
 
