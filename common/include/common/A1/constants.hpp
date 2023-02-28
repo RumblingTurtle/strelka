@@ -1,3 +1,8 @@
+/**
+ * @file constants.hpp
+ * Constants for Unitree A1 robot
+ *
+ */
 #ifndef A1_CONSTANTS_H
 #define A1_CONSTANTS_H
 

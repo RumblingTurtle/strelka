@@ -1,11 +1,20 @@
+/**
+ * @file utilities.hpp
+ * Utility functions
+ *
+ */
 #ifndef STRELKA_UTILITIES_H
 #define STRELKA_UTILITIES_H
 #include <chrono>
 #include <iostream>
 
-/// @brief Returns run time of a callable
-/// @tparam Callable Callable object type
-/// @param functor Functor object to run
+/**
+ * @brief Returns time of execution of a given callable object/lambda in
+ * milliseconds
+ *
+ * @param functor Callable to run
+ * @return float runtime of functor in milliseconds
+ */
 template <typename Callable> float executionTime(Callable functor) {
 
   std::chrono::time_point<std::chrono::high_resolution_clock> t =
@@ -15,7 +24,7 @@ template <typename Callable> float executionTime(Callable functor) {
                  std::chrono::high_resolution_clock::now() - t)
                  .count() /
              1000.0f;
-  std::cout << "Time to execute: " << ms << "ms" << std::endl;
+  return ms;
 }
 
 #endif // STRELKA_UTILITIES_H

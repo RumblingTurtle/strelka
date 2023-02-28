@@ -1,3 +1,7 @@
+/**
+ * @file kinematics.hpp
+ * Kinematics functions for Unitree A1 robot
+ */
 #ifndef A1_KINEMATICS_H
 #define A1_KINEMATICS_H
 
@@ -8,8 +12,30 @@
 namespace strelka {
 namespace kinematics {
 namespace A1 {
-inline Vec3<float> footPositionHipFrame(const Vec3<float> &angles, int legId) {
 
+/**
+ * @brief Given the angle and number of the leg in a given order:
+ *
+ * 0 Front right (FR)
+ * 1 Front left (FL)
+ * 2 Rear right (RR)
+ * 3 Rear left (RL)
+ *
+ * computes the position of the foot in the hip frame
+ *
+ * @param angles Eigen::Matrix<float,3,1> vector representing angles for a
+ * single leg
+ * @param legId number from 0 to 3 determining direction of the hip link:
+ *
+ * FR = -1
+ * FL = +1
+ * RR = -1
+ * RL = +1
+ *
+ * @return Vec3<float> Hip frame position of the foot link
+ */
+inline Vec3<float> footPositionHipFrame(const Vec3<float> &angles, int legId) {
+  assert(legId >= 0 && legId < 4);
   float hipLength = constants::A1::LEG_LENGTH[0] * std::pow(-1, legId + 1);
   float legLength =
       std::sqrt(constants::A1::LEG_LENGTH[1] * constants::A1::LEG_LENGTH[1] +
@@ -33,6 +59,27 @@ inline Vec3<float> footPositionHipFrame(const Vec3<float> &angles, int legId) {
   return Vec3<float>{xOffset, yOffset, zOffset};
 }
 
+/**
+ * @brief Computes jacobian matrix relating joint velocities to end effector
+ * velocity for a single foot from  current angle configuration and number of
+ * the leg in a given order:
+ *
+ * 0 Front right (FR)
+ * 1 Front left (FL)
+ * 2 Rear right (RR)
+ * 3 Rear left (RL)
+ *
+ * @param angles Eigen::Matrix<float,3,1> vector representing angles for a
+ * single leg
+ * @param legId number from 0 to 3 determining direction of the hip link
+ *
+ * FR = -1
+ * FL = +1
+ * RR = -1
+ * RL = +1
+ *
+ * @return Mat3<float> Jacobian matrix
+ */
 inline Mat3<float> analyticalLegJacobian(const Vec3<float> &angles, int legId) {
   float upperLegLength = constants::A1::LEG_LENGTH(1);
   float lowerLegLength = constants::A1::LEG_LENGTH(2);
