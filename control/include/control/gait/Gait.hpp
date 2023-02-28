@@ -1,3 +1,14 @@
+/**
+ * @file Gait.hpp
+ * Simple gait parameters container with definitions of common gait types and
+ * leg states.
+ * Leg IDs are specified in a given order:
+ *
+ * 0 Front right (FR)
+ * 1 Front left (FL)
+ * 2 Rear right (RR)
+ * 3 Rear left (RL)
+ */
 #ifndef GAIT_H
 #define GAIT_H
 #include <cassert>
@@ -7,9 +18,6 @@ namespace strelka {
 enum class LegState { SWING, STANCE, EARLY_CONTACT, LOST_CONTACT };
 
 struct Gait {
-  /*
-  Gait parameters container
-  */
   const char *name;
   float _dutyFactor[4];
   float _phaseDuration[4];

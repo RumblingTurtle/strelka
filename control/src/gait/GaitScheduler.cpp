@@ -14,12 +14,12 @@ void GaitScheduler::setScale(float newScale) {
 
 void GaitScheduler::reset() {
   scale = 1;
+  sequencer.reset();
   for (int legId = 0; legId < 4; legId++) {
     currentLegState[legId] = LegState::STANCE;
     prevLegState[legId] = LegState::STANCE;
     scheduledState[legId] = LegState::STANCE;
     prevScheduledState[legId] = LegState::STANCE;
-    _normalizedPhase[legId] = 0;
   }
 }
 
@@ -67,14 +67,13 @@ void GaitScheduler::step(float dt, Vec4<bool> contacts) {
 
   sequencer.step(dt * scale);
 
-  memcpy(_normalizedPhase, sequencer.normalizedPhase, sizeof(float) * 4);
   memcpy(scheduledState, sequencer.legState, sizeof(LegState) * 4);
   memcpy(currentLegState, sequencer.legState, sizeof(LegState) * 4);
 
   for (int legId = 0; legId < 4; legId++) {
 
     if (scheduledState[legId] == LegState::SWING && contacts[legId] &&
-        _normalizedPhase[legId] >= CONTACT_DETECTION_THRESHOLD) {
+        normalizedPhase(legId) >= CONTACT_DETECTION_THRESHOLD) {
       currentLegState[legId] = LegState::EARLY_CONTACT;
     }
 
@@ -107,7 +106,7 @@ bool GaitScheduler::lostContact(int legId) {
 }
 
 float GaitScheduler::GaitScheduler::normalizedPhase(int legId) {
-  return _normalizedPhase[legId];
+  return sequencer.normalizedPhase[legId];
 }
 
 float GaitScheduler::phaseDuration(int legId) {
