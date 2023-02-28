@@ -64,9 +64,8 @@ Vec3<typename T::Scalar> quat2euler(const Eigen::MatrixBase<T> &q) {
 }
 
 /**
- * @brief
+ * @brief Converts roll pitch yaw angles to rotation matrix
  *
- * @tparam T2
  * @param rpy Euler angles Eigen::Matrix<ScalarType,3,1>
  * @param output Rotation matrix Eigen::Matrix<ScalarType,3,3>
  */

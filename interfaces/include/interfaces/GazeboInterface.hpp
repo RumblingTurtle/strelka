@@ -38,23 +38,20 @@ class GazeboInterface : public QuadrupedInterface {
 public:
   explicit GazeboInterface() {}
 
-  void sendCommandMessage(const Eigen::VectorXf &command) override;
+  virtual void sendCommandMessage(const Eigen::VectorXf &command) override;
 
-  void setTorques(const Eigen::VectorXf &torques) override;
+  virtual void setTorques(const Eigen::VectorXf &torques) override;
 
-  void setAngles(const Eigen::VectorXf &q) override;
+  virtual void setAngles(const Eigen::VectorXf &q) override;
 
-  void setAngles(const Eigen::VectorXf &q, const Eigen::VectorXf &dq) override;
+  virtual void setAngles(const Eigen::VectorXf &q,
+                         const Eigen::VectorXf &dq) override;
 
-  void moveTo(const Eigen::VectorXf &angles, float moveTime) override;
+  virtual void moveTo(const Eigen::VectorXf &angles, float moveTime) override;
 
-  void moveToInit(float moveTime = 3.0) override;
+  virtual void moveToInit(float moveTime = 3.0) override;
 
-  void moveToStand(float moveTime = 3.0) override;
-
-  /*
-    TODO: void slow_down_sim(self,sim_slowdown=1,sim_slowdown_type = "rate");
-  */
+  virtual void moveToStand(float moveTime = 3.0) override;
 };
 
 } // namespace strelka

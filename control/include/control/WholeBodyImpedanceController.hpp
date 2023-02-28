@@ -3,7 +3,7 @@
 
 #include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <common/typedefs.hpp>
-#include <control/A1WbicDynamics.hpp>
+#include <control/A1/A1WbicDynamics.hpp>
 #include <messages/WBICCommand.hpp>
 #include <robots/Robot.hpp>
 

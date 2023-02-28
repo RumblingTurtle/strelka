@@ -1,5 +1,5 @@
-#ifndef WBIC_UNITREE_A1_H
-#define WBIC_UNITREE_A1_H
+#ifndef WBIC_UNITREE_A1_DYNAMICS_H
+#define WBIC_UNITREE_A1_DYNAMICS_H
 
 #include <WBIC/Dynamics/FloatingBaseModel.h>
 #include <WBIC/Dynamics/Quadruped.h>
@@ -34,8 +34,6 @@ template <typename T> Quadruped<T> buildA1() {
   a1._motorR = 0.173;
   a1._jointDamping = .01;
   a1._jointDryFriction = .2;
-  // a1._jointDamping = .0;
-  // a1._jointDryFriction = .0;
 
   // rotor inertia if the rotor is oriented so it spins around the z-axis
   Mat3<T> rotorRotationalInertiaZ;
@@ -98,4 +96,4 @@ template <typename T> Quadruped<T> buildA1() {
   return a1;
 }
 
-#endif // PROJECT_A1_H
+#endif // WBIC_UNITREE_A1_DYNAMICS_H
