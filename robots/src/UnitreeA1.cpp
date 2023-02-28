@@ -34,18 +34,18 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
     Vec3<float> trunkToHipOffset = Eigen::Map<const Vec3<float>>(
         constants::A1::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
 
-    _footJacobians.block(LEG_ID * 3, 0, 3, 3) =
-        kinematics::A1::analyticalLegJacobian(_q.block(LEG_ID * 3, 0, 3, 1),
+    _footJacobians.block<3, 3>(LEG_ID * 3, 0) =
+        kinematics::A1::analyticalLegJacobian(_q.block<3, 1>(LEG_ID * 3, 0),
                                               LEG_ID);
 
     _footPositionsTrunkFrame.row(LEG_ID) =
-        kinematics::A1::footPositionHipFrame(_q.block(LEG_ID * 3, 0, 3, 1),
+        kinematics::A1::footPositionHipFrame(_q.block<3, 1>(LEG_ID * 3, 0),
                                              LEG_ID) +
         trunkToHipOffset;
 
     _footVelocitiesTrunkFrame.row(LEG_ID) =
-        (_footJacobians.block(LEG_ID * 3, 0, 3, 3) *
-         _dq.block(LEG_ID * 3, 0, 3, 1))
+        (_footJacobians.block<3, 3>(LEG_ID * 3, 0) *
+         _dq.block<3, 1>(LEG_ID * 3, 0))
             .transpose();
 
     _footContacts(LEG_ID) =

@@ -68,7 +68,7 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
   DVec<double> forces = mpc->computeContactForces(
       robot, contactTable, footholdTable, bodyTrajectory);
 
-  Vec12<float> mpcForces = -forces.block(0, 0, 12, 1).cast<float>();
+  Vec12<float> mpcForces = -forces.block<12, 1>(0, 0).cast<float>();
 
   FOR_EACH_LEG {
     wbicCommand->mpcForces[LEG_ID * 3] = mpcForces[LEG_ID * 3];

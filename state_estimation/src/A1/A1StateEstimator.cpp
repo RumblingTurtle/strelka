@@ -48,7 +48,7 @@ void A1StateEstimator::fillStateEstimatorData(
 
   Vec12<float> footPosititons;
   FOR_EACH_LEG {
-    footPosititons.block(LEG_ID * 3, 0, 3, 1) =
+    footPosititons.block<3, 1>(LEG_ID * 3, 0) =
         robot.footPositionTrunkFrame(LEG_ID);
   }
 

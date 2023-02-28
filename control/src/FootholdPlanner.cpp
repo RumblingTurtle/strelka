@@ -29,7 +29,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholdsTest(
   footholdTable.setZero();
   for (int h = 0; h < horizonSteps; h++) {
     FOR_EACH_LEG {
-      footholdTable.block(LEG_ID, 3 * h, 1, 3) =
+      footholdTable.block<1, 3>(LEG_ID, 3 * h) =
           (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)))
               .transpose();
 
@@ -50,9 +50,9 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
 
   for (int h = 0; h < horizonSteps; h++) {
 
-    Vec3<float> bodyPosWorld = bodyTrajectory.block(h, 3, 1, 3).transpose();
+    Vec3<float> bodyPosWorld = bodyTrajectory.block<1, 3>(h, 3).transpose();
     Mat3<float> bodyToWorldRot_h;
-    rotation::rpy2rot(bodyTrajectory.block(h, 0, 1, 3).transpose(),
+    rotation::rpy2rot(bodyTrajectory.block<1, 3>(h, 0).transpose(),
                       bodyToWorldRot_h);
 
     FOR_EACH_LEG {
@@ -84,7 +84,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
           _footholds[LEG_ID][currentFootholdIdx[LEG_ID]] -
           Vec3<float>{0, 0, constants::A1::FOOT_RADIUS};
 
-      footholdTable.block(LEG_ID, 3 * h, 1, 3) =
+      footholdTable.block<1, 3>(LEG_ID, 3 * h) =
           (footholdWorld - bodyPosWorld).transpose();
     }
   }
@@ -102,14 +102,14 @@ void FootholdPlanner::calculateNextFootholdPositions(
     bool swingStarted = gaitScheduler.swingStarted(LEG_ID);
 
     if (updateAsStance || firstRun) {
-      lastContactPosWorld.block(LEG_ID, 0, 1, 3) =
+      lastContactPosWorld.block<1, 3>(LEG_ID, 0) =
           robot.footPositionWorldFrame(LEG_ID).transpose();
     }
 
     if (updateAsStance || swingStarted || updateContinuously) {
       _footholds[LEG_ID].clear();
       _footholds[LEG_ID].push_back(
-          lastContactPosWorld.block(LEG_ID, 0, 1, 3).transpose());
+          lastContactPosWorld.block<1, 3>(LEG_ID, 0).transpose());
 
       FOOTHOLD_PREDICTION_TYPE predictType;
       if (updateContinuously) {
@@ -254,9 +254,9 @@ void FootholdPlanner::getFootDesiredPVA(
       desiredFootAcceleration = {0, 0, 0};
     }
 
-    desiredFootPositions.block(LEG_ID * 3, 0, 3, 1) = desiredFootPosition;
-    desiredFootVelocities.block(LEG_ID * 3, 0, 3, 1) = desiredFootVelocity;
-    desiredFootAccelerations.block(LEG_ID * 3, 0, 3, 1) =
+    desiredFootPositions.block<3, 1>(LEG_ID * 3, 0) = desiredFootPosition;
+    desiredFootVelocities.block<3, 1>(LEG_ID * 3, 0) = desiredFootVelocity;
+    desiredFootAccelerations.block<3, 1>(LEG_ID * 3, 0) =
         desiredFootAcceleration;
   }
 }

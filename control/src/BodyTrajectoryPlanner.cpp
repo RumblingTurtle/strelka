@@ -28,8 +28,8 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectoryTest(
     trajectory(h, 5) = command.desiredBodyHeight();
 
     // Prefer to stablize roll and pitch.
-    trajectory.block(h, 6, 1, 3).setZero();
-    trajectory.block(h, 9, 1, 3).setZero();
+    trajectory.block<1, 3>(h, 6).setZero();
+    trajectory.block<1, 3>(h, 9).setZero();
     trajectory(h, 12) = constants::GRAVITY_CONSTANT;
   }
 
@@ -51,9 +51,9 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
 
   FOR_EACH_LEG {
     if (robot.footContact(LEG_ID) || firstRun) {
-      prevContactPosBody.block(LEG_ID, 0, 1, 3) =
+      prevContactPosBody.block<1, 3>(LEG_ID, 0) =
           robot.footPositionTrunkFrame(LEG_ID).transpose();
-      prevContactPosWorld.block(LEG_ID, 0, 1, 3) =
+      prevContactPosWorld.block<1, 3>(LEG_ID, 0) =
           robot.footPositionWorldFrame(LEG_ID).transpose();
     }
   }
@@ -88,7 +88,7 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
 
     // Desired rotation and linear velocity of the body at horizon step h
     Mat3<float> rotation_h;
-    Vec3<float> rpy_h = trajectory.block(h, 0, 1, 3).transpose();
+    Vec3<float> rpy_h = trajectory.block<1, 3>(h, 0).transpose();
     rotation::rpy2rot(rpy_h, rotation_h);
     Vec3<float> velocity_h = rotation_h * desiredLinearVelocity;
     velocity_h(2) = 0;
@@ -102,14 +102,14 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
       trajectory(h, 5) = command.desiredBodyHeight() + estimatedContactHeight +
                          comOffsetWorld(2);
     } else {
-      trajectory.block(h, 3, 1, 3) = trajectory.block(h - 1, 3, 1, 3);
+      trajectory.block<1, 3>(h, 3) = trajectory.block<1, 3>(h - 1, 3);
     }
 
-    trajectory.block(h, 3, 1, 3) += (dt * velocity_h).transpose();
+    trajectory.block<1, 3>(h, 3) += (dt * velocity_h).transpose();
 
     // Prefer to stablize roll and pitch.
-    trajectory.block(h, 6, 1, 3) = desiredAngularVelocity.transpose();
-    trajectory.block(h, 9, 1, 3) = velocity_h.transpose();
+    trajectory.block<1, 3>(h, 6) = desiredAngularVelocity.transpose();
+    trajectory.block<1, 3>(h, 9) = velocity_h.transpose();
     trajectory(h, 12) = constants::GRAVITY_CONSTANT;
   }
 

@@ -87,7 +87,7 @@ void MPC::computeABExponentials(robots::Robot &robot,
   // B mat and A mat exponentials calculation
   for (int h = 0; h < planning_horizon_; h++) {
     Vec3<double> current_rpy =
-        bodyTrajectory.block(h, 0, 1, 3).transpose().cast<double>();
+        bodyTrajectory.block<1, 3>(h, 0).transpose().cast<double>();
     Mat3<double> current_robot_rot;
     rotation::rpy2rot(current_rpy, current_robot_rot);
 
@@ -109,17 +109,17 @@ void MPC::computeABExponentials(robots::Robot &robot,
     }
 
     // Exponentiation
-    ab_concatenated_.block(0, STATE_DIM, STATE_DIM, ACTION_DIM) =
+    ab_concatenated_.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM) =
         _b_mat * timestep_;
 
     DMat<double> ab_exp = ab_concatenated_.exp();
     if (h == 0) {
       _a_exp = ab_exp.block<STATE_DIM, STATE_DIM>(0, 0);
-      _b_exp = ab_exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
+      _b_exp = ab_exp.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM);
     }
 
-    _b_exps.block(h * STATE_DIM, 0, STATE_DIM, ACTION_DIM) =
-        ab_exp.block(0, STATE_DIM, STATE_DIM, ACTION_DIM);
+    _b_exps.block<STATE_DIM, ACTION_DIM>(h * STATE_DIM, 0) =
+        ab_exp.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM);
   }
 }
 
@@ -135,19 +135,19 @@ void MPC::computeQpMatrices() {
 
   for (int i = 0; i < planning_horizon_; ++i) {
     // Diagonal block.
-    _b_qp.block(i * STATE_DIM, i * ACTION_DIM, STATE_DIM, ACTION_DIM) =
-        _b_exps.block(i * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
+    _b_qp.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, i * ACTION_DIM) =
+        _b_exps.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, 0);
     // Off diagonal Diagonal blocks = A^(i - j - 1) * B_exp_j.
     for (int j = 0; j < i; ++j) {
       const int power = i - j;
       if (i > 1 && j > 0) {
-        _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
-            _b_qp.block((i - 1) * STATE_DIM, (j - 1) * ACTION_DIM, STATE_DIM,
-                        ACTION_DIM);
+        _b_qp.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, j * ACTION_DIM) =
+            _b_qp.block<STATE_DIM, ACTION_DIM>((i - 1) * STATE_DIM,
+                                               (j - 1) * ACTION_DIM);
       } else {
-        _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
+        _b_qp.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, j * ACTION_DIM) =
             _a_qp.block<STATE_DIM, STATE_DIM>((power - 1) * STATE_DIM, 0) *
-            _b_exps.block(j * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
+            _b_exps.block<STATE_DIM, ACTION_DIM>(j * STATE_DIM, 0);
       }
     }
   }
@@ -155,7 +155,7 @@ void MPC::computeQpMatrices() {
   _p_mat.noalias() = (_b_qp.transpose() * qp_weights_ * _b_qp) * 2.0;
 
   for (int i = 0; i < planning_horizon_; ++i) {
-    _p_mat.block(i * ACTION_DIM, i * ACTION_DIM, ACTION_DIM, ACTION_DIM) +=
+    _p_mat.block<ACTION_DIM, ACTION_DIM>(i * ACTION_DIM, i * ACTION_DIM) +=
         alphaI;
   }
 }
@@ -190,7 +190,7 @@ void MPC::updateConstraints(DMat<bool> &contactTable) {
   }
 
   for (int i = 0; i < planning_horizon_ * MPC::NUM_LEGS; ++i) {
-    _constraint.block(i * MPC::CONSTRAINT_DIM, i * 3, MPC::CONSTRAINT_DIM, 3)
+    _constraint.block<MPC::CONSTRAINT_DIM, 3>(i * MPC::CONSTRAINT_DIM, i * 3)
         << -1,
         0, _footFrictionCoefficients[0], 1, 0, _footFrictionCoefficients[1], 0,
         -1, _footFrictionCoefficients[2], 0, 1, _footFrictionCoefficients[3], 0,
@@ -297,13 +297,13 @@ DVec<double> &MPC::solveQP() {
 void MPC::updateObjectiveVector(robots::Robot &robot,
                                 DMat<float> &bodyTrajectory) {
   DVec<double> currentState(13);
-  currentState.block(0, 0, 3, 1) = robot.currentRPY().cast<double>();
-  currentState.block(3, 0, 3, 1) = robot.positionWorldFrame().cast<double>();
+  currentState.block<3, 1>(0, 0) = robot.currentRPY().cast<double>();
+  currentState.block<3, 1>(3, 0) = robot.positionWorldFrame().cast<double>();
 
-  currentState.block(6, 0, 3, 1) =
+  currentState.block<3, 1>(6, 0) =
       robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame()).cast<double>();
 
-  currentState.block(9, 0, 3, 1) =
+  currentState.block<3, 1>(9, 0) =
       robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame())
           .cast<double>();
 

@@ -32,9 +32,9 @@ int main() {
         constants::A1::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
 
     std::cout << kinematics::A1::footPositionHipFrame(
-                     qVec.block(LEG_ID * 3, 0, 3, 1), LEG_ID) +
+                     qVec.block<3, 1>(LEG_ID * 3, 0), LEG_ID) +
                      trunkToHipOffset -
-                     innoControlPositionsVec.block(LEG_ID * 3, 0, 3, 1)
+                     innoControlPositionsVec.block<3, 1>(LEG_ID * 3, 0)
               << std::endl;
   }
 

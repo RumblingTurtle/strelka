@@ -7,9 +7,6 @@
 #include <eigen3/Eigen/LU>
 #include <robots/Robot.hpp>
 
-#define STATE_DIM 18
-#define SENSOR_DIM 31
-
 namespace strelka {
 class UninitializedKalmanFilter : std::exception {
   const char *what() {
@@ -20,6 +17,9 @@ class UninitializedKalmanFilter : std::exception {
 };
 
 class KalmanFilterObserver {
+  constexpr static int STATE_DIM = 18;
+  constexpr static int SENSOR_DIM = 31;
+
   Eigen::Matrix<float, STATE_DIM, 1> _xhat;
   Eigen::Matrix<float, 12, 1> _ps;
   Eigen::Matrix<float, 12, 1> _vs;

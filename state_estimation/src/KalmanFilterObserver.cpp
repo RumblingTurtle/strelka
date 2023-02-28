@@ -2,6 +2,9 @@
 
 namespace strelka {
 
+const int KalmanFilterObserver::STATE_DIM;
+const int KalmanFilterObserver::SENSOR_DIM;
+
 KalmanFilterObserver::KalmanFilterObserver(
     KalmanFilterObserverParams &parameters)
     : initialized(false), parameters(parameters) {
@@ -23,12 +26,12 @@ void KalmanFilterObserver::initialize() {
   _vs.setZero();
 
   _A.setZero();
-  _A.block(0, 0, 3, 3) = Eigen::Matrix<float, 3, 3>::Identity();
-  _A.block(0, 3, 3, 3) = parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
-  _A.block(3, 3, 3, 3) = Eigen::Matrix<float, 3, 3>::Identity();
-  _A.block(6, 6, 12, 12) = Eigen::Matrix<float, 12, 12>::Identity();
+  _A.block<3, 3>(0, 0) = Eigen::Matrix<float, 3, 3>::Identity();
+  _A.block<3, 3>(0, 3) = parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
+  _A.block<3, 3>(3, 3) = Eigen::Matrix<float, 3, 3>::Identity();
+  _A.block<12, 12>(6, 6) = Eigen::Matrix<float, 12, 12>::Identity();
   _B.setZero();
-  _B.block(3, 0, 3, 3) = parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
+  _B.block<3, 3>(3, 0) = parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
   Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> C1(3, 6);
   C1 << Eigen::Matrix<float, 3, 3>::Identity(),
       Eigen::Matrix<float, 3, 3>::Zero();
@@ -36,15 +39,15 @@ void KalmanFilterObserver::initialize() {
   C2 << Eigen::Matrix<float, 3, 3>::Zero(),
       Eigen::Matrix<float, 3, 3>::Identity();
   _C.setZero();
-  _C.block(0, 0, 3, 6) = C1;
-  _C.block(3, 0, 3, 6) = C1;
-  _C.block(6, 0, 3, 6) = C1;
-  _C.block(9, 0, 3, 6) = C1;
-  _C.block(0, 6, 12, 12) = float(-1) * Eigen::Matrix<float, 12, 12>::Identity();
-  _C.block(12, 0, 3, 6) = C2;
-  _C.block(15, 0, 3, 6) = C2;
-  _C.block(STATE_DIM, 0, 3, 6) = C2;
-  _C.block(21, 0, 3, 6) = C2;
+  _C.block<3, 6>(0, 0) = C1;
+  _C.block<3, 6>(3, 0) = C1;
+  _C.block<3, 6>(6, 0) = C1;
+  _C.block<3, 6>(9, 0) = C1;
+  _C.block<12, 12>(0, 6) = float(-1) * Eigen::Matrix<float, 12, 12>::Identity();
+  _C.block<3, 6>(12, 0) = C2;
+  _C.block<3, 6>(15, 0) = C2;
+  _C.block<3, 6>(STATE_DIM, 0) = C2;
+  _C.block<3, 6>(21, 0) = C2;
   _C(27, 17) = float(1);
   _C(26, 14) = float(1);
   _C(25, 11) = float(1);
@@ -53,11 +56,11 @@ void KalmanFilterObserver::initialize() {
   _P.setIdentity();
   _P = float(0.001) * _P;
   _Q0.setIdentity();
-  _Q0.block(0, 0, 3, 3) =
+  _Q0.block<3, 3>(0, 0) =
       parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
-  _Q0.block(3, 3, 3, 3) =
+  _Q0.block<3, 3>(3, 3) =
       parameters.dt * Eigen::Matrix<float, 3, 3>::Identity();
-  _Q0.block(6, 6, 12, 12) =
+  _Q0.block<12, 12>(6, 6) =
       parameters.dt * Eigen::Matrix<float, 12, 12>::Identity();
   _R0.setIdentity();
 
@@ -74,27 +77,25 @@ void KalmanFilterObserver::update(robots::Robot &robot,
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Q =
       Eigen::Matrix<float, STATE_DIM, STATE_DIM>::Identity();
 
-  Q.block(0, 0, 3, 3) =
-      _Q0.block(0, 0, 3, 3) * parameters.imuPositionProcessNoise;
-  Q.block(3, 3, 3, 3) =
-      _Q0.block(3, 3, 3, 3) * parameters.imuVelocityProcessNoise;
-  Q.block(6, 6, 12, 12) =
-      _Q0.block(6, 6, 12, 12) * parameters.footPositionProcessNoise;
+  Q.block<3, 3>(0, 0) =
+      _Q0.block<3, 3>(0, 0) * parameters.imuPositionProcessNoise;
+  Q.block<3, 3>(3, 3) =
+      _Q0.block<3, 3>(3, 3) * parameters.imuVelocityProcessNoise;
+  Q.block<12, 12>(6, 6) =
+      _Q0.block<12, 12>(6, 6) * parameters.footPositionProcessNoise;
 
   Eigen::Matrix<float, SENSOR_DIM, SENSOR_DIM> R =
       Eigen::Matrix<float, SENSOR_DIM, SENSOR_DIM>::Identity();
-  R.block(0, 0, 12, 12) =
-      _R0.block(0, 0, 12, 12) * parameters.footPositionSensorNoise;
-  R.block(12, 12, 12, 12) =
-      _R0.block(12, 12, 12, 12) * parameters.footVelocitySensorNoise;
-  R.block(24, 24, 4, 4) =
-      _R0.block(24, 24, 4, 4) * parameters.contactHeightSensorNoise;
-  R.block(28, 28, 1, 1) =
-      _R0.block(28, 28, 1, 1) * parameters.externalOdometryNoisePosition[0];
-  R.block(29, 29, 1, 1) =
-      _R0.block(29, 29, 1, 1) * parameters.externalOdometryNoisePosition[1];
-  R.block(30, 30, 1, 1) =
-      _R0.block(30, 30, 1, 1) * parameters.externalOdometryNoisePosition[2];
+  R.block<12, 12>(0, 0) =
+      _R0.block<12, 12>(0, 0) * parameters.footPositionSensorNoise;
+  R.block<12, 12>(12, 12) =
+      _R0.block<12, 12>(12, 12) * parameters.footVelocitySensorNoise;
+  R.block<4, 4>(24, 24) =
+      _R0.block<4, 4>(24, 24) * parameters.contactHeightSensorNoise;
+
+  R(28, 28) = _R0(28, 28) * parameters.externalOdometryNoisePosition[0];
+  R(29, 29) = _R0(29, 29) * parameters.externalOdometryNoisePosition[1];
+  R(30, 30) = _R0(30, 30) * parameters.externalOdometryNoisePosition[2];
 
   if (useExternalOdometry) {
     // Loam state to sensor
@@ -136,13 +137,13 @@ void KalmanFilterObserver::update(robots::Robot &robot,
 
     float high_suspect_number(100);
 
-    Q.block(qindex, qindex, 3, 3) =
+    Q.block<3, 3>(qindex, qindex) =
         (float(1) + (float(1) - trust) * high_suspect_number) *
-        Q.block(qindex, qindex, 3, 3);
-    R.block(rindex1, rindex1, 3, 3) = 1 * R.block(rindex1, rindex1, 3, 3);
-    R.block(rindex2, rindex2, 3, 3) =
+        Q.block<3, 3>(qindex, qindex);
+    R.block<3, 3>(rindex1, rindex1) = 1 * R.block<3, 3>(rindex1, rindex1);
+    R.block<3, 3>(rindex2, rindex2) =
         (float(1) + (float(1) - trust) * high_suspect_number) *
-        R.block(rindex2, rindex2, 3, 3);
+        R.block<3, 3>(rindex2, rindex2);
     R(rindex3, rindex3) =
         (float(1) + (float(1) - trust) * high_suspect_number) *
         R(rindex3, rindex3);
@@ -178,11 +179,11 @@ void KalmanFilterObserver::update(robots::Robot &robot,
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> Pt = _P.transpose();
   _P = (_P + Pt) / float(2);
 
-  _position = _xhat.block(0, 0, 3, 1);
-  _velocityWorld = _xhat.block(3, 0, 3, 1);
-  _velocityBody = robot.rotateWorldToBodyFrame(_xhat.block(3, 0, 3, 1));
-  _footPositionsWorld = _xhat.block(6, 0, 12, 1);
-  _positionCovariance = _P.block(0, 0, 3, 3);
+  _position = _xhat.block<3, 1>(0, 0);
+  _velocityWorld = _xhat.block<3, 1>(3, 0);
+  _velocityBody = robot.rotateWorldToBodyFrame(_xhat.block<3, 1>(3, 0));
+  _footPositionsWorld = _xhat.block<12, 1>(6, 0);
+  _positionCovariance = _P.block<3, 3>(0, 0);
 }
 
 Eigen::Vector3f KalmanFilterObserver::position() const { return _position; }
