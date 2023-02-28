@@ -51,7 +51,6 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
     // gazebo broadcaster issue
     return;
   }
-
   Vec4<bool> footContacts = robot.footContacts();
   scheduler.step(dt, footContacts);
 
@@ -77,12 +76,6 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
     wbicCommand->mpcForces[LEG_ID * 3 + 2] = mpcForces[LEG_ID * 3 + 2];
   }
 
-  Vec12<float> footP;
-  Vec12<float> footV;
-  Vec12<float> footA;
-
-  footPlanner.getFootDesiredPVA(robot, footP, footV, footA);
-
   for (int i = 0; i < 3; i++) {
     wbicCommand->rpy[i] = bodyTrajectory(0, 0 + i);
     wbicCommand->pBody[i] = bodyTrajectory(0, 3 + i);
@@ -97,13 +90,19 @@ void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
         scheduler.footInContact(LEG_ID) || scheduler.lostContact(LEG_ID);
     wbicCommand->footState[LEG_ID] = useForceTask;
     if (scheduler.lostContact(LEG_ID)) {
-      mpcForces(3 * LEG_ID + 2, 0) = -constants::A1::MPC_BODY_MASS * 5;
+      mpcForces(3 * LEG_ID + 2, 0) = constants::A1::MPC_BODY_MASS * 5;
     }
   }
 
+  Vec12<float> footP;
+  Vec12<float> footV;
+  Vec12<float> footA;
+
+  footPlanner.getFootDesiredPVA(robot, footP, footV, footA);
+
   memcpy(wbicCommand->pFoot, footP.data(), sizeof(float) * 12);
-  memcpy(wbicCommand->vFoot, footA.data(), sizeof(float) * 12);
-  memcpy(wbicCommand->aFoot, footV.data(), sizeof(float) * 12);
+  memcpy(wbicCommand->vFoot, footV.data(), sizeof(float) * 12);
+  memcpy(wbicCommand->aFoot, footA.data(), sizeof(float) * 12);
 
   wbicCommand->stop = 0;
 
@@ -123,7 +122,7 @@ void LocalPlanner::processLoop() {
       lcm.subscribe("high_command", &LocalPlanner::commandHandle, this);
   commandSub->setQueueCapacity(1);
   */
-  // stateSub->setQueueCapacity(1);
+  stateSub->setQueueCapacity(1);
   while (lcm.handle() == 0)
     ;
 }

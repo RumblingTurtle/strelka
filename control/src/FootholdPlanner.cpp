@@ -231,8 +231,7 @@ void FootholdPlanner::getFootDesiredPVA(
     if (gaitScheduler.isLegSwinging(LEG_ID)) {
 
       Vec3<float> pStart = _footholds[LEG_ID][0];
-      Vec3<float> pEnd =
-          _footholds[LEG_ID][1] + Vec3<float>{0, 0, FOOT_CLEARANCE};
+      Vec3<float> pEnd = _footholds[LEG_ID][1];
 
       desiredFootPosition = trajectory::getSwingTrajectoryPosition(
           pStart, pEnd, swingHeight[LEG_ID],

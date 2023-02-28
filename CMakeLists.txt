@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(strelka)
+project(strelka LANGUAGES C CXX)
 
-#set(CMAKE_CXX_FLAGS "-O3 ")
 #set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "-O3 -ggdb")
+#set(CMAKE_CXX_FLAGS "-O3 -ggdb")
+
+set(CMAKE_CXX_FLAGS "-O3 -ggdb ")#-Wall \
+#-Wextra -Wcast-align -Wdisabled-optimization -Wformat=2 \
+#-Winit-self -Wmissing-include-dirs -Woverloaded-virtual \
+#-Wshadow -Wsign-promo -Werror")
+
+set(CMAKE_C_FLAGS "-O3  -ggdb  -march=native -std=gnu99 -I.")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
