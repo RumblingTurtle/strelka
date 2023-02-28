@@ -1,4 +1,5 @@
 #include <control/A1/A1WBIC.hpp>
+#include <control/A1/A1WbicDynamics.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
 #include <messages/WBICCommand.hpp>
 #include <robots/UnitreeA1.hpp>
@@ -8,7 +9,8 @@ int main() {
   using namespace strelka::messages;
   using namespace strelka::robots;
 
-  WholeBodyImpedanceController controller{strelka::A1_DEFAULT_WBIC_PARAMS};
+  WholeBodyImpedanceController controller{buildA1<float>().buildModel(),
+                                          strelka::A1_DEFAULT_WBIC_PARAMS};
 
   WholeBodyImpedanceController::WBICOutput outs;
 

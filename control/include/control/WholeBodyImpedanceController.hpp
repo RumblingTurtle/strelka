@@ -3,7 +3,6 @@
 
 #include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <common/typedefs.hpp>
-#include <control/A1/A1WbicDynamics.hpp>
 #include <messages/WBICCommand.hpp>
 #include <robots/Robot.hpp>
 
@@ -29,7 +28,8 @@ public:
     Vec12<float> tau;
   };
 
-  WholeBodyImpedanceController(WBICParams &parameters);
+  WholeBodyImpedanceController(FloatingBaseModel<float> robotModel,
+                               WBICParams &parameters);
   ~WholeBodyImpedanceController();
 
   void update(robots::Robot &robot, messages::WBICCommand &command,

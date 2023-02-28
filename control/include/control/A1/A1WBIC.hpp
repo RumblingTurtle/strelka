@@ -4,6 +4,7 @@
 #include <common/A1/constants.hpp>
 #include <common/A1/kinematics.hpp>
 #include <common/typedefs.hpp>
+#include <control/A1/A1WbicDynamics.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>

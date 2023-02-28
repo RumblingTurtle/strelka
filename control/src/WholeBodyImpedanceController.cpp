@@ -5,11 +5,10 @@ namespace strelka {
 namespace control {
 
 WholeBodyImpedanceController::WholeBodyImpedanceController(
-    WBICParams &parameters) {
-  wbic = new LocomotionCtrl<float>(buildA1<float>().buildModel(), parameters.Kp,
-                                   parameters.Kd, parameters.Kp_kin,
-                                   parameters.floating_W, parameters.rf_W,
-                                   parameters.mu, parameters.max_fz);
+    FloatingBaseModel<float> robotModel, WBICParams &parameters) {
+  wbic = new LocomotionCtrl<float>(
+      robotModel, parameters.Kp, parameters.Kd, parameters.Kp_kin,
+      parameters.floating_W, parameters.rf_W, parameters.mu, parameters.max_fz);
 }
 
 WholeBodyImpedanceController::~WholeBodyImpedanceController() { delete wbic; }
@@ -26,6 +25,7 @@ void WholeBodyImpedanceController::update(robots::Robot &robot,
                command.desiredBodyAcceleration(), command.desiredFootPosition(),
                command.desiredFootVelocity(), command.desiredFootAcceleration(),
                command.desiredContactState(), command.desiredFootForceWorld());
+
   output.q = wbic->get_qDes();
   output.dq = wbic->get_dqDes();
   wbic->compute_tau();

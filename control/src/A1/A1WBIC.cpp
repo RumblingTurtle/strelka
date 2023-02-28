@@ -37,7 +37,7 @@ void A1WBIC::initialize() {
 }
 
 A1WBIC::A1WBIC(control::WholeBodyImpedanceController::WBICParams &parameters)
-    : controller(parameters) {
+    : controller(buildA1<float>().buildModel(), parameters) {
   initialize();
 }
 
