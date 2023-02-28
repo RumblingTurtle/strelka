@@ -58,22 +58,6 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     }
   }
 
-  // Fit least squares through last contact points
-  /*        A = np.hstack(
-      (prevContactPosBody[:, :2], np.array([[1, 1, 1, 1]]).T))
-  b = prevContactPosBody[:, 2].T
-
-  coeffs = A.solve(B)
-
-  if (firstRun) {
-      pitch_filter.filter(0);
-      height_filter.filter(estimated_height);
-  }
-
-      estimatedTerrainPitch = pitch_filter.filter(-coeffs[0])
-      estimatedHeight = height_filter.filter(estimated_height)
-  */
-
   float estimatedTerrainPitch = 0;
   float estimatedContactHeight = prevContactPosWorld.col(2).mean();
 

@@ -13,6 +13,7 @@ namespace control {
 class BodyTrajectoryPlanner {
   Mat43<float> prevContactPosWorld;
   Mat43<float> prevContactPosBody;
+
   bool firstRun;
 
 public:
@@ -21,6 +22,7 @@ public:
   DMat<float> getDesiredBodyTrajectory(robots::Robot &robot,
                                        messages::HighLevelCommand &command,
                                        float dt, int horizonSteps);
+
   DMat<float> getDesiredBodyTrajectoryTest(robots::Robot &robot,
                                            messages::HighLevelCommand &command,
                                            float dt, int horizonSteps);
