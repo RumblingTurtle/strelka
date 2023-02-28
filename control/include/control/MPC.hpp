@@ -20,7 +20,7 @@ class MPC {
   const double timestep_;
 
   // 13 * horizon diagonal matrix.
-  const DMat<double> qp_weights_;
+  SMat<double> qp_weights_;
 
   // NUM_LEGS * 3 * horizon diagonal matrix.
   const double alpha_;
@@ -74,6 +74,7 @@ public:
   static constexpr int NUM_LEGS = 4;
   static constexpr int ACTION_DIM = NUM_LEGS * 3;
 
+  void fillQPWeights(const DVec<double> &qp_weights);
   MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
       double timestep, const DVec<double> &qp_weights, double alpha,
       const Vec4<double> &_footFrictionCoefficients, double kMaxScale,

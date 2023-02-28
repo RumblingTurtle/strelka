@@ -3,6 +3,7 @@
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Sparse>
 
 // 3x1 Vector
 template <typename T> using Vec3 = typename Eigen::Matrix<T, 3, 1>;
@@ -25,6 +26,10 @@ template <typename T> using Mat43 = typename Eigen::Matrix<T, 4, 3>;
 // Dynamically sized matrix
 template <typename T>
 using DMat = typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+// Sparse matrix
+
+template <typename T> using SMat = typename Eigen::SparseMatrix<T>;
 
 template <typename T> using DVec = typename Eigen::Matrix<T, Eigen::Dynamic, 1>;
 #endif // TYPEDEFS_H

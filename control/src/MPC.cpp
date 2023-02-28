@@ -14,10 +14,9 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
          double kMinScale)
     : _bodyMass(mass), inertia_(inertia.asDiagonal()),
       inv_inertia_(inertia_.inverse()), planning_horizon_(planning_horizon),
-      timestep_(timestep),
-      qp_weights_(qp_weights.replicate(planning_horizon, 1).asDiagonal()),
-      alpha_(alpha), _a_mat(STATE_DIM, STATE_DIM),
+      timestep_(timestep), alpha_(alpha), _a_mat(STATE_DIM, STATE_DIM),
       _b_mat(STATE_DIM, ACTION_DIM),
+      qp_weights_(STATE_DIM * planning_horizon, STATE_DIM * planning_horizon),
       ab_concatenated_(STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM),
       _a_exp(STATE_DIM, STATE_DIM), _b_exp(STATE_DIM, ACTION_DIM),
       _a_qp(STATE_DIM * planning_horizon, STATE_DIM),
@@ -34,6 +33,7 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
       _footFrictionCoefficients(_footFrictionCoefficients) {
 
   assert(qp_weights.size() == STATE_DIM);
+  fillQPWeights(qp_weights);
   _a_mat.setZero();
   _b_mat.setZero();
   ab_concatenated_.setZero();
@@ -46,6 +46,12 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
   _constraint_ub.setZero();
   _b_exps.setZero();
   _p_mat.setZero();
+}
+
+void MPC::fillQPWeights(const DVec<double> &qp_weights) {
+  for (int i = 0; i < MPC::STATE_DIM * planning_horizon_; i++) {
+    qp_weights_.insert(i, i) = qp_weights(i % MPC::STATE_DIM);
+  }
 }
 
 MPC::~MPC() { osqp_cleanup(workspace_); }
@@ -74,6 +80,7 @@ void MPC::computeABExponentials(robots::Robot &robot,
   _a_mat(4, 10) = 1;
   _a_mat(5, 11) = 1;
   _a_mat(11, 12) = 1;
+
   ab_concatenated_.block<STATE_DIM, STATE_DIM>(0, 0) = _a_mat * timestep_;
 
   Mat3<double> skew_mat;
@@ -86,6 +93,7 @@ void MPC::computeABExponentials(robots::Robot &robot,
 
     const Mat3<double> inv_inertia_world =
         current_robot_rot * inv_inertia_ * current_robot_rot.transpose();
+
     for (int leg_id = 0; leg_id < NUM_LEGS; leg_id++) {
       double xPos = contactPositionsWorldFrameRotated(leg_id, h * 3);
       double yPos = contactPositionsWorldFrameRotated(leg_id, h * 3 + 1);
@@ -132,16 +140,19 @@ void MPC::computeQpMatrices() {
     // Off diagonal Diagonal blocks = A^(i - j - 1) * B_exp_j.
     for (int j = 0; j < i; ++j) {
       const int power = i - j;
-      _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
-          _a_qp.block<STATE_DIM, STATE_DIM>((power - 1) * STATE_DIM, 0) *
-          _b_exps.block(j * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
+      if (i > 1 && j > 0) {
+        _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
+            _b_qp.block((i - 1) * STATE_DIM, (j - 1) * ACTION_DIM, STATE_DIM,
+                        ACTION_DIM);
+      } else {
+        _b_qp.block(i * STATE_DIM, j * ACTION_DIM, STATE_DIM, ACTION_DIM) =
+            _a_qp.block<STATE_DIM, STATE_DIM>((power - 1) * STATE_DIM, 0) *
+            _b_exps.block(j * STATE_DIM, 0, STATE_DIM, ACTION_DIM);
+      }
     }
   }
 
-  _p_mat = _b_qp.transpose() * qp_weights_ * _b_qp;
-
-  // Multiply by 2 and add alpha.
-  _p_mat *= 2.0;
+  _p_mat.noalias() = (_b_qp.transpose() * qp_weights_ * _b_qp) * 2.0;
 
   for (int i = 0; i < planning_horizon_; ++i) {
     _p_mat.block(i * ACTION_DIM, i * ACTION_DIM, ACTION_DIM, ACTION_DIM) +=
@@ -205,7 +216,7 @@ DVec<double> &MPC::solveQP() {
   osqp_set_default_settings(&settings);
   settings.verbose = false;
   settings.warm_start = true;
-  settings.polish = true;
+  settings.polish = false;
   settings.adaptive_rho_interval = 25;
   settings.eps_abs = 1e-3;
   settings.eps_rel = 1e-3;

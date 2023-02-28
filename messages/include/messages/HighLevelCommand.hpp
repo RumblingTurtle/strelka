@@ -58,10 +58,12 @@ public:
   float desiredBodyHeight() { return _desiredBodyHeight; };
   float desiredFootHeight() { return _desiredFootHeight; };
 
-  static HighLevelCommand makeDummyCommandMessage(float desiredVelocityX) {
+  static HighLevelCommand
+  makeDummyCommandMessage(float desiredVelocityX = 0.0,
+                          float desiredVelocityYaw = 0.0) {
     a1_lcm_msgs::HighLevelCommand highCommandMsg{
         .linearSpeed = {desiredVelocityX, 0, 0},
-        .angularVelocity = {0, 0, 0},
+        .angularVelocity = {0, 0, desiredVelocityYaw},
         .footHeight = 0.08,
         .footClearance = 0.02,
         .hipOffsets = {0, 0},
