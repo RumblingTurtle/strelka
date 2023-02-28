@@ -52,8 +52,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
 
     Vec3<float> bodyPosWorld = bodyTrajectory.block<1, 3>(h, 3).transpose();
     Mat3<float> bodyToWorldRot_h;
-    rotation::rpy2rot(bodyTrajectory.block<1, 3>(h, 0).transpose(),
-                      bodyToWorldRot_h);
+    rotation::rpy2rot(bodyTrajectory.block<1, 3>(h, 0), bodyToWorldRot_h);
 
     FOR_EACH_LEG {
       bool inStance = contactTable(LEG_ID, h);
