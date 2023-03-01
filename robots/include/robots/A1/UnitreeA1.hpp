@@ -66,7 +66,6 @@ public:
   virtual Vec3<float> footPositionWorldFrame(int legId);
 
   virtual float footContactHeightWorldFrame(int legId);
-  virtual Eigen::Matrix<float, 12, 3> footJacobians();
 
   virtual Quat<float> bodyToWorldQuat();
   virtual Mat3<float> bodyToWorldMat();
@@ -81,6 +80,8 @@ public:
   virtual float footRadius();
 
   virtual Vec3<float> currentRPY();
+
+  Eigen::Matrix<float, 12, 3> footJacobians();
 };
 
 UnitreeA1 createDummyA1RobotWithStateEstimates();
