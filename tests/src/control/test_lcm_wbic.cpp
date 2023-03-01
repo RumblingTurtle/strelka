@@ -1,4 +1,4 @@
-#include <control/A1/A1WBIC.hpp>
+#include <robots/A1/control/A1WBIC.hpp>
 
 int main() {
   using namespace strelka;

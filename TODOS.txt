@@ -1,32 +1,41 @@
 <+> WBIC
     + Decouple A1WBIC from WholeBodyImpedanceController
+    - Documentation
 
 <+> MPC
+    - Documentation
 
 <+> Gait scheduler
+    + Documentation
 
 <+> Gait sequencer
     + Common interface
+    + Documentation
 
 <> Local planner
     - Redo Local planner as a builder LocalPlanner<FootPlanner,BodyTrajectoryPlanner,Sequencer>();
+    - Documentation
 
 <> Body trajectory planner
     + Common interface
     - Lowpass filter for pitch and height
+    - Documentation
 
 <> Foot planner
     + Common interface
     - Move A1 constants to Robot->UnitreeA1
-        constants::A1::FOOT_RADIUS
-        constants::A1::TRUNK_TO_THIGH_OFFSETS
+        A1::constants::FOOT_RADIUS
+        A1::constants::TRUNK_TO_THIGH_OFFSETS
+    - Documentation
 
-<> Code structure
-    + Replace defines with constants
-    + Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 
-    - Decouple strelka and ros entirely(at least for now)
-    ? Threads for multiple topics 
-
+<> State estimation
+    + Slowdown estimator for simulation 
+    - Multinomial moving window filter for outputs
+    - Resetable observer
+    ? External odometry parsing
+    ? ROS-less slowdown?
+    - Documentation
+    
 <> Messaging
     + lcm.handle() == 0
     - Custom update rate settings
@@ -35,16 +44,15 @@
     - Sim/Hardware bridge to lcm
     - Make lcm message names more comprehensive 
 
+<> Code structure
+    + Replace defines with constants
+    + Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 
+    - Decouple strelka and ros entirely(at least for now)
+    ? Threads for multiple topics 
+
 <> Testing
     - Add gtest to deps
     - Design assertable tests
-
-<> State estimation
-    + Slowdown estimator for simulation 
-    - Multinomial moving window filter for outputs
-    - Resetable observer
-    ? External odometry parsing
-    ? ROS-less slowdown?
 
 <> Build system
     - Macros for packages

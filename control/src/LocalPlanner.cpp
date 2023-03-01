@@ -1,130 +1,68 @@
-#include <control/A1/LocalPlanner.hpp>
+#include <control/LocalPlanner.hpp>
 
 namespace strelka {
 namespace control {
 
-LocalPlanner::LocalPlanner()
+LocalPlanner::LocalPlanner(double mpcBodyMass, const Vec3<double> bodyInertia,
+                           float stepDt, int horizonSteps)
     : scheduler(GAITS::TROT), bodyPlanner(), footPlanner(scheduler),
-      prevTick(-1) {
-  const DVec<double> MPC_WEIGHTS =
-      Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
+      _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
+      mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
+  FOR_EACH_LEG { _footState[LEG_ID] = 1; }
+  _mpcForces.setZero();
+  _desiredFootP.setZero();
+  _desiredFootV.setZero();
+  _desiredFootA.setZero();
 
-  mpc = new MPC(constants::A1::MPC_BODY_MASS, constants::A1::MPC_BODY_INERTIA,
-                horizonSteps, MPC_DT, MPC_WEIGHTS, constants::A1::MPC_ALPHA,
-                constants::A1::MPC_FRICTION_COEFFS,
-                constants::A1::MPC_CONSTRAINT_MAX_SCALE,
-                constants::A1::MPC_CONSTRAINT_MIN_SCALE);
-
-  const std::vector<double> inertia{0.15, 0, 0, 0, 0.34, 0, 0, 0, 0.36};
-  const std::vector<double> weights{constants::A1::MPC_WEIGHTS,
-                                    constants::A1::MPC_WEIGHTS + 13};
-
-  wbicCommand = new a1_lcm_msgs::WbicCommand();
+  _desiredRpy.setZero();
+  _desiredPositionBody.setZero();
+  _desiredAngularVelocity.setZero();
+  _desiredVelocityBody.setZero();
+  _desiredAccelerationBody.setZero();
 }
 
-LocalPlanner::~LocalPlanner() {
-  delete mpc;
-  delete wbicCommand;
-  lcm.unsubscribe(stateSub);
-  lcm.unsubscribe(commandSub);
-}
+LocalPlanner::~LocalPlanner() {}
 
-void LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
-                               const std::string &chan,
-                               const a1_lcm_msgs::RobotState *messageIn) {
+void LocalPlanner::update(robots::Robot &robot,
+                          messages::HighLevelCommand &command, float dt) {
 
-  messages::HighLevelCommand command =
-      messages::HighLevelCommand::makeDummyCommandMessage(0.1, 0.2);
-  robots::UnitreeA1 robot{messageIn};
-
-  float dt = messageIn->tick;
-
-  if (prevTick == -1) {
-    dt = 0.001;
-  } else {
-    dt -= prevTick;
-  }
-
-  prevTick = messageIn->tick;
-  if (dt == 0) {
-    // NOTE: happens a couple times at the start for no reason. Might be a
-    // gazebo broadcaster issue
-    return;
-  }
   Vec4<bool> footContacts = robot.footContacts();
   scheduler.step(dt, footContacts);
 
   DMat<bool> contactTable =
-      scheduler.getContactTable(MPC_DT, horizonSteps, footContacts);
+      scheduler.getContactTable(_stepDt, _horizonSteps, footContacts);
 
   DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
-      robot, command, MPC_DT, horizonSteps);
+      robot, command, _stepDt, _horizonSteps);
 
   footPlanner.calculateNextFootholdPositions(robot, command);
 
   DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
-  DVec<double> forces = mpc->computeContactForces(
-      robot, contactTable, footholdTable, bodyTrajectory);
+  DVec<double> forces = mpc.computeContactForces(robot, contactTable,
+                                                 footholdTable, bodyTrajectory);
 
-  Vec12<float> mpcForces = -forces.block<12, 1>(0, 0).cast<float>();
+  _mpcForces = -forces.block<12, 1>(0, 0).cast<float>();
 
-  FOR_EACH_LEG {
-    wbicCommand->mpcForces[LEG_ID * 3] = mpcForces[LEG_ID * 3];
-    wbicCommand->mpcForces[LEG_ID * 3 + 1] = mpcForces[LEG_ID * 3 + 1];
-    wbicCommand->mpcForces[LEG_ID * 3 + 2] = mpcForces[LEG_ID * 3 + 2];
-  }
+  _desiredRpy = bodyTrajectory.block<1, 3>(0, 0);
+  _desiredPositionBody = bodyTrajectory.block<1, 3>(0, 3);
+  _desiredAngularVelocity = bodyTrajectory.block<1, 3>(0, 6);
+  _desiredVelocityBody = bodyTrajectory.block<1, 3>(0, 9);
+  _desiredAccelerationBody.setZero();
 
-  for (int i = 0; i < 3; i++) {
-    wbicCommand->rpy[i] = bodyTrajectory(0, 0 + i);
-    wbicCommand->pBody[i] = bodyTrajectory(0, 3 + i);
-    wbicCommand->angularVelocity[i] = bodyTrajectory(0, 6 + i);
-    wbicCommand->vBody[i] = bodyTrajectory(0, 9 + i);
-    wbicCommand->aBody[i] = 0;
-  }
-
-  float footState[4];
   FOR_EACH_LEG {
     bool useForceTask =
         scheduler.footInContact(LEG_ID) || scheduler.lostContact(LEG_ID);
-    wbicCommand->footState[LEG_ID] = useForceTask;
+    _footState[LEG_ID] = useForceTask;
     if (scheduler.lostContact(LEG_ID)) {
-      mpcForces(3 * LEG_ID + 2, 0) = constants::A1::MPC_BODY_MASS * 5;
+      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 5;
     }
   }
 
-  Vec12<float> footP;
-  Vec12<float> footV;
-  Vec12<float> footA;
-
-  footPlanner.getFootDesiredPVA(robot, footP, footV, footA);
-
-  memcpy(wbicCommand->pFoot, footP.data(), sizeof(float) * 12);
-  memcpy(wbicCommand->vFoot, footV.data(), sizeof(float) * 12);
-  memcpy(wbicCommand->aFoot, footA.data(), sizeof(float) * 12);
-
-  wbicCommand->stop = 0;
-
-  lcm.publish("wbic_command", wbicCommand);
+  footPlanner.getFootDesiredPVA(robot, _desiredFootP, _desiredFootV,
+                                _desiredFootA);
 }
 
-void LocalPlanner::commandHandle(
-    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-    const a1_lcm_msgs::HighLevelCommand *commandMsg) {
-  memcpy(highCommand, commandMsg, sizeof(a1_lcm_msgs::HighLevelCommand));
-}
-
-void LocalPlanner::processLoop() {
-  stateSub = lcm.subscribe("robot_state", &LocalPlanner::stateHandle, this);
-  /*
-  commandSub =
-      lcm.subscribe("high_command", &LocalPlanner::commandHandle, this);
-  commandSub->setQueueCapacity(1);
-  */
-  stateSub->setQueueCapacity(1);
-  while (lcm.handle() == 0)
-    ;
-}
 } // namespace control
 } // namespace strelka

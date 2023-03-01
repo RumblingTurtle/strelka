@@ -1,11 +1,11 @@
-#include <common/A1/constants.hpp>
 #include <common/macros.hpp>
 #include <control/BodyTrajectoryPlanner.hpp>
 #include <control/FootholdPlanner.hpp>
 #include <control/MPC.hpp>
 #include <iostream>
 #include <messages/HighLevelCommand.hpp>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
 
 int main() {
 
@@ -19,9 +19,6 @@ int main() {
                     ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
                     ._phaseOffset = {0.0, 0.0, 0.0, 0.0}};
 
-  const DVec<double> MPC_WEIGHTS =
-      Eigen::Map<const DVec<double>>(constants::A1::MPC_WEIGHTS, 13);
-
   const float desiredVelocityX = 0.0;
   const float dt = 0.001;
   const int horizonSteps = 10;
@@ -34,11 +31,8 @@ int main() {
   BodyTrajectoryPlanner bodyPlanner{};
   FootholdPlanner footPlanner{scheduler};
 
-  MPC mpc(constants::A1::MPC_BODY_MASS, constants::A1::MPC_BODY_INERTIA,
-          horizonSteps, dt, MPC_WEIGHTS, constants::A1::MPC_ALPHA,
-          constants::A1::MPC_FRICTION_COEFFS,
-          constants::A1::MPC_CONSTRAINT_MAX_SCALE,
-          constants::A1::MPC_CONSTRAINT_MIN_SCALE);
+  MPC mpc(A1::constants::MPC_BODY_MASS, A1::constants::MPC_BODY_INERTIA,
+          horizonSteps, dt);
 
   DMat<float> bodyTrajectory =
       bodyPlanner.getDesiredBodyTrajectory(robot, command, dt, horizonSteps);
@@ -50,7 +44,6 @@ int main() {
       robot, command, bodyTrajectory, contactTable);
 
   mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);
-
   mpc.computeContactForces(robot, contactTable, footholdTable, bodyTrajectory);
 
   return 0;

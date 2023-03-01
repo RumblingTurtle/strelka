@@ -1,8 +1,8 @@
-#include <control/A1/A1WBIC.hpp>
-#include <control/A1/A1WbicDynamics.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
 #include <messages/WBICCommand.hpp>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/control/A1WBIC.hpp>
+#include <robots/A1/control/A1WbicDynamics.hpp>
 
 int main() {
   using namespace strelka::control;

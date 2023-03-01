@@ -2,9 +2,9 @@
 #define WHOLEBODYIMPEDANCE_CTRL_H
 
 #include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
+#include <common/Robot.hpp>
 #include <common/typedefs.hpp>
 #include <messages/WBICCommand.hpp>
-#include <robots/Robot.hpp>
 
 namespace strelka {
 namespace control {

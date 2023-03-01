@@ -1,4 +1,5 @@
-#include <control/A1/A1WBIC.hpp>
+#include <robots/A1/control/A1WBIC.hpp>
+
 namespace strelka {
 
 void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
@@ -22,8 +23,8 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
     for (int motorId = 0; motorId < 12; motorId++) {
       commandMessage->q[motorId] = outs.q[motorId];
       commandMessage->dq[motorId] = outs.dq[motorId];
-      commandMessage->kp[motorId] = constants::A1::POSITION_GAINS[motorId % 3];
-      commandMessage->kd[motorId] = constants::A1::DAMPING_GAINS[motorId % 3];
+      commandMessage->kp[motorId] = A1::constants::POSITION_GAINS[motorId % 3];
+      commandMessage->kd[motorId] = A1::constants::DAMPING_GAINS[motorId % 3];
       commandMessage->tau[motorId] = outs.tau[motorId];
     }
 

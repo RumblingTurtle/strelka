@@ -1,8 +1,8 @@
-#include <control/A1/LocalPlanner.hpp>
+#include <robots/A1/control/A1LocalPlanner.hpp>
 
 int main() {
   using namespace strelka::control;
-  LocalPlanner planner{};
+  A1LocalPlanner planner{};
   planner.processLoop();
   return 0;
 }

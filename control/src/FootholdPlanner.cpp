@@ -1,5 +1,4 @@
 #include <control/FootholdPlanner.hpp>
-#include <iostream>
 namespace strelka {
 namespace control {
 
@@ -33,7 +32,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholdsTest(
           (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)))
               .transpose();
 
-      footholdTable(LEG_ID, 3 * h + 2) -= constants::A1::FOOT_RADIUS;
+      footholdTable(LEG_ID, 3 * h + 2) -= robot.footRadius();
     }
   }
   return footholdTable;
@@ -42,7 +41,6 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholdsTest(
 DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
     robots::Robot &robot, messages::HighLevelCommand &command,
     DMat<float> &bodyTrajectory, DMat<bool> &contactTable) {
-
   const int horizonSteps = bodyTrajectory.rows();
   DMat<float> footholdTable(4, 3 * horizonSteps);
   footholdTable.setZero();
@@ -68,11 +66,8 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
             // as a hackish way to remove feedback term
             Vec3<float> newFoothold = predictNextFootPos(
                 bodyPosWorld, bodyToWorldRot_h,
-                _footholds[LEG_ID][footholdCount(LEG_ID) - 1],
-                command.desiredLinearVelocityBodyFrame(),
-                command.desiredAngularVelocityBodyFrame(),
-                command.desiredLinearVelocityBodyFrame(), 0.0, LEG_ID,
-                FOOTHOLD_PREDICTION_TYPE::SIMPLE);
+                _footholds[LEG_ID][footholdCount(LEG_ID) - 1], robot, command,
+                0.0, LEG_ID, FOOTHOLD_PREDICTION_TYPE::SIMPLE);
 
             _footholds[LEG_ID].push_back(newFoothold);
           }
@@ -81,7 +76,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
 
       Vec3<float> footholdWorld =
           _footholds[LEG_ID][currentFootholdIdx[LEG_ID]] -
-          Vec3<float>{0, 0, constants::A1::FOOT_RADIUS};
+          Vec3<float>{0, 0, robot.footRadius()};
 
       footholdTable.block<1, 3>(LEG_ID, 3 * h) =
           (footholdWorld - bodyPosWorld).transpose();
@@ -127,9 +122,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
       Vec3<float> predictedFootPosition = predictNextFootPos(
           robot.positionWorldFrame(), bodyToWorldRot, _footholds[LEG_ID][0],
-          command.desiredLinearVelocityBodyFrame(),
-          command.desiredAngularVelocityBodyFrame(),
-          robot.linearVelocityBodyFrame(), FEEDBACK_GAIN, LEG_ID, predictType);
+          robot, command, FEEDBACK_GAIN, LEG_ID, predictType);
 
       // Skip adjustment for now (no elevation map)
       // Vec3<float> adjustedFootPosition;
@@ -168,25 +161,24 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
 Vec3<float> FootholdPlanner::predictNextFootPos(
     Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
-    Vec3<float> prevFootPosition, Vec3<float> desiredLinearVelocity,
-    Vec3<float> desiredAngularVelocity, Vec3<float> bodyLinearVelocity,
-    float feedbackGain, int legId, FOOTHOLD_PREDICTION_TYPE predictType) {
-
-  Vec3<float> predictedFootWorld;
-
-  Vec3<float> trunkToThighOffset = Eigen::Map<const Vec3<float>>(
-      constants::A1::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
+    Vec3<float> prevFootPosition, robots::Robot &robot,
+    messages::HighLevelCommand &command, float feedbackGain, int legId,
+    FOOTHOLD_PREDICTION_TYPE predictType) {
+  Vec3<float> trunkToThighOffset = robot.trunkToThighOffset(legId);
 
   Vec3<float> linearizedAngularVelocityWorld =
-      bodyToWorldRot * desiredAngularVelocity.cross(trunkToThighOffset);
+      bodyToWorldRot *
+      command.desiredAngularVelocityBodyFrame().cross(trunkToThighOffset);
 
   Vec3<float> desiredVelocityWorld =
-      linearizedAngularVelocityWorld + bodyToWorldRot * desiredLinearVelocity;
+      linearizedAngularVelocityWorld +
+      bodyToWorldRot * command.desiredLinearVelocityBodyFrame();
 
   // TODO implement hip offset
   Vec3<float> hipPosWorld =
       bodyToWorldRot * trunkToThighOffset + currentPosition;
 
+  Vec3<float> predictedFootWorld;
   switch (predictType) {
   case FOOTHOLD_PREDICTION_TYPE::CONTINUOUS:
     predictedFootWorld =
@@ -209,11 +201,12 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
   }
 
   if (predictType != FOOTHOLD_PREDICTION_TYPE::SIMPLE) {
-    predictedFootWorld += feedbackGain * (bodyToWorldRot * bodyLinearVelocity -
-                                          desiredVelocityWorld);
+    predictedFootWorld +=
+        feedbackGain * (bodyToWorldRot * robot.linearVelocityBodyFrame() -
+                        desiredVelocityWorld);
   }
 
-  predictedFootWorld(2) = constants::A1::FOOT_RADIUS;
+  predictedFootWorld(2) = robot.footRadius();
   return predictedFootWorld;
 }
 

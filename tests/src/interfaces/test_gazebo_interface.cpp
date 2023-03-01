@@ -1,4 +1,4 @@
-#include <interfaces/A1/A1GazeboInterface.hpp>
+#include <robots/A1/interfaces/A1GazeboInterface.hpp>
 
 int main() {
   using namespace strelka::A1;

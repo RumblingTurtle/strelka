@@ -1,4 +1,4 @@
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
 
 namespace strelka {
 
@@ -32,14 +32,14 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
 
   FOR_EACH_LEG {
     Vec3<float> trunkToHipOffset = Eigen::Map<const Vec3<float>>(
-        constants::A1::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
+        A1::constants::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
 
     _footJacobians.block<3, 3>(LEG_ID * 3, 0) =
-        kinematics::A1::analyticalLegJacobian(_q.block<3, 1>(LEG_ID * 3, 0),
+        A1::kinematics::analyticalLegJacobian(_q.block<3, 1>(LEG_ID * 3, 0),
                                               LEG_ID);
 
     _footPositionsTrunkFrame.row(LEG_ID) =
-        kinematics::A1::footPositionHipFrame(_q.block<3, 1>(LEG_ID * 3, 0),
+        A1::kinematics::footPositionHipFrame(_q.block<3, 1>(LEG_ID * 3, 0),
                                              LEG_ID) +
         trunkToHipOffset;
 
@@ -49,9 +49,9 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
             .transpose();
 
     _footContacts(LEG_ID) =
-        message->footForces[LEG_ID] > constants::A1::FOOT_FORCE_THRESHOLD;
+        message->footForces[LEG_ID] > A1::constants::FOOT_FORCE_THRESHOLD;
 
-    _footContactHeights(LEG_ID) = constants::A1::FOOT_RADIUS;
+    _footContactHeights(LEG_ID) = A1::constants::FOOT_RADIUS;
   }
 
   _accelerometerWorldFrame =
@@ -140,6 +140,13 @@ Vec3<float> UnitreeA1::currentRPY() {
   return rotation::quat2euler(bodyToWorldQuat());
 }
 
+Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
+  return Eigen::Map<const Vec3<float>>(
+      A1::constants::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
+}
+
+float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
+
 UnitreeA1 createDummyA1RobotWithRawState() {
   a1_lcm_msgs::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
@@ -153,7 +160,7 @@ UnitreeA1 createDummyA1RobotWithRawState() {
       .tick = 0.0,
   };
 
-  memcpy(dummyState.q, constants::A1::INIT_ANGLES.data(), sizeof(float) * 12);
+  memcpy(dummyState.q, A1::constants::INIT_ANGLES.data(), sizeof(float) * 12);
   return UnitreeA1(&dummyState);
 }
 
@@ -167,7 +174,7 @@ UnitreeA1 createDummyA1RobotWithStateEstimates() {
                                      .position = {0, 0, 0.25},
                                      .velocityBody = {0, 0, 0}};
 
-  memcpy(dummyState.q, constants::A1::STAND_ANGLES.data(), sizeof(float) * 12);
+  memcpy(dummyState.q, A1::constants::STAND_ANGLES.data(), sizeof(float) * 12);
   return UnitreeA1(&dummyState);
 }
 

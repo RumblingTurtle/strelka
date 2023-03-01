@@ -1,13 +1,13 @@
 #ifndef A1_GAZEBO_INTERFACE_H
 #define A1_GAZEBO_INTERFACE_H
 
-#include <common/A1/constants.hpp>
 #include <common/typedefs.hpp>
 #include <interfaces/QuadrupedInterface.hpp>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
+#include <robots/A1/constants.hpp>
 
 #define GAZEBO_BASE_TIME_STEP 0.001
 #define GAZEBO_BASE_RATE 1000

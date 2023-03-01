@@ -1,6 +1,7 @@
 
 #ifndef STRELKA_MPC_H
 #define STRELKA_MPC_H
+#include <common/Robot.hpp>
 #include <common/constants.hpp>
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
@@ -9,7 +10,6 @@
 #include <eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixExponential.h>
 #include <osqp/ctrlc.h>
 #include <osqp/osqp.h>
-#include <robots/Robot.hpp>
 
 namespace strelka {
 class MPC {
@@ -74,11 +74,16 @@ public:
   static constexpr int NUM_LEGS = 4;
   static constexpr int ACTION_DIM = NUM_LEGS * 3;
 
-  void fillQPWeights(const DVec<double> &qp_weights);
+  static constexpr double CONSTRAINT_MAX_SCALE = 10;
+  static constexpr double CONSTRAINT_MIN_SCALE = 0.1;
+  static constexpr double MPC_ALPHA = 1e-5;
+  static constexpr double FRICTION_COEFFS[4] = {0.45, 0.45, 0.45, 0.45};
+  static constexpr double MPC_WEIGHTS[13] = {
+      1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
+
+  void fillQPWeights(const double *qp_weights);
   MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
-      double timestep, const DVec<double> &qp_weights, double alpha,
-      const Vec4<double> &_footFrictionCoefficients, double kMaxScale,
-      double kMinScale);
+      double timestep);
 
   ~MPC();
 

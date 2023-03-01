@@ -1,40 +1,36 @@
-#ifndef STRELKA_LOCAL_PLANNER_H
-#define STRELKA_LOCAL_PLANNER_H
+#ifndef A1_LOCAL_PLANNER_H
+#define A1_LOCAL_PLANNER_H
 
 #include <chrono>
-#include <common/A1/constants.hpp>
 #include <common/macros.hpp>
-#include <control/BodyTrajectoryPlanner.hpp>
-#include <control/FootholdPlanner.hpp>
-#include <control/MPC.hpp>
-#include <iostream>
+#include <common/typedefs.hpp>
+#include <control/LocalPlanner.hpp>
+
 #include <lcm/lcm-cpp.hpp>
+
 #include <messages/HighLevelCommand.hpp>
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
-#include <robots/UnitreeA1.hpp>
+
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
 
 namespace strelka {
 namespace control {
-class LocalPlanner {
+
+class A1LocalPlanner {
   lcm::LCM lcm;
-  GaitScheduler scheduler;
-  BodyTrajectoryPlanner bodyPlanner;
-  FootholdPlanner footPlanner;
-  MPC *mpc;
 
   a1_lcm_msgs::HighLevelCommand *highCommand;
   a1_lcm_msgs::WbicCommand *wbicCommand;
   lcm::Subscription *stateSub;
   lcm::Subscription *commandSub;
-
-  const float MPC_DT = 0.02;
-  const int horizonSteps = 15;
+  LocalPlanner localPlanner;
   float prevTick;
 
 public:
-  LocalPlanner();
+  A1LocalPlanner();
 
-  ~LocalPlanner();
+  ~A1LocalPlanner();
 
   void stateHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                    const a1_lcm_msgs::RobotState *messageIn);
@@ -47,4 +43,4 @@ public:
 } // namespace control
 } // namespace strelka
 
-#endif // STRELKA_LOCAL_PLANNER_H
+#endif // A1_LOCAL_PLANNER_H

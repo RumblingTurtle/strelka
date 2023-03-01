@@ -1,8 +1,8 @@
-#include <common/A1/constants.hpp>
 #include <common/macros.hpp>
-#include <interfaces/A1/A1GazeboInterface.hpp>
 #include <iostream>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
+#include <robots/A1/interfaces/A1GazeboInterface.hpp>
 #include <state_estimation/KalmanFilterObserver.hpp>
 
 int main() {

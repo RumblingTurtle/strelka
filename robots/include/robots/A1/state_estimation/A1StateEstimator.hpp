@@ -1,14 +1,14 @@
 #ifndef A1_STATE_ESITMATOR_H
 #define A1_STATE_ESITMATOR_H
 
-#include <common/A1/constants.hpp>
-#include <common/A1/kinematics.hpp>
 #include <common/constants.hpp>
 #include <common/rotation.hpp>
 #include <lcm/lcm-cpp.hpp>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
+#include <robots/A1/kinematics.hpp>
 #include <state_estimation/KalmanFilterObserver.hpp>
 #include <state_estimation/SlowdownEstimator.hpp>
 

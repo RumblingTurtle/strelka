@@ -1,8 +1,8 @@
-#include <common/A1/constants.hpp>
 #include <control/BodyTrajectoryPlanner.hpp>
 #include <iostream>
 #include <messages/HighLevelCommand.hpp>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
 
 int main() {
   using namespace strelka::control;

@@ -1,15 +1,14 @@
 #ifndef A1WBIC_H
 #define A1WBIC_H
 
-#include <common/A1/constants.hpp>
-#include <common/A1/kinematics.hpp>
 #include <common/typedefs.hpp>
-#include <control/A1/A1WbicDynamics.hpp>
 #include <control/WholeBodyImpedanceController.hpp>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/control/A1WbicDynamics.hpp>
+#include <robots/A1/kinematics.hpp>
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {

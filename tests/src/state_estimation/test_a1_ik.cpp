@@ -1,10 +1,10 @@
 
 
-#include <common/A1/constants.hpp>
-#include <common/A1/kinematics.hpp>
 #include <common/macros.hpp>
 #include <iostream>
-#include <robots/UnitreeA1.hpp>
+#include <robots/A1/UnitreeA1.hpp>
+#include <robots/A1/constants.hpp>
+#include <robots/A1/kinematics.hpp>
 
 int main() {
   using namespace strelka::robots;
@@ -29,9 +29,9 @@ int main() {
   FOR_EACH_LEG {
 
     Vec3<float> trunkToHipOffset = Eigen::Map<const Vec3<float>>(
-        constants::A1::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
+        A1::constants::TRUNK_TO_HIP_OFFSETS + 3 * LEG_ID, 3);
 
-    std::cout << kinematics::A1::footPositionHipFrame(
+    std::cout << A1::kinematics::footPositionHipFrame(
                      qVec.block<3, 1>(LEG_ID * 3, 0), LEG_ID) +
                      trunkToHipOffset -
                      innoControlPositionsVec.block<3, 1>(LEG_ID * 3, 0)

@@ -1,8 +1,9 @@
 #ifndef UNITREE_A1_H
 #define UNITREE_A1_H
 
-#include <common/A1/constants.hpp>
-#include <common/A1/kinematics.hpp>
+#include <robots/A1/kinematics.hpp>
+
+#include <common/Robot.hpp>
 #include <common/constants.hpp>
 #include <common/macros.hpp>
 #include <common/rotation.hpp>
@@ -10,7 +11,6 @@
 #include <exception>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
-#include <robots/Robot.hpp>
 
 namespace strelka {
 namespace robots {
@@ -76,6 +76,9 @@ public:
 
   virtual Vec3<float> transformBodyToWorldFrame(Vec3<float> vector);
   virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector);
+
+  virtual Vec3<float> trunkToThighOffset(int legId);
+  virtual float footRadius();
 
   virtual Vec3<float> currentRPY();
 };

@@ -1,7 +1,7 @@
 #ifndef FOOTHOLD_PLANNER_H
 #define FOOTHOLD_PLANNER_H
 
-#include <common/A1/constants.hpp>
+#include <common/Robot.hpp>
 #include <common/constants.hpp>
 #include <common/macros.hpp>
 #include <common/rotation.hpp>
@@ -10,7 +10,6 @@
 #include <control/gait/GaitScheduler.hpp>
 #include <exception>
 #include <messages/HighLevelCommand.hpp>
-#include <robots/Robot.hpp>
 #include <vector>
 
 #define FOOT_CLEARANCE 0.02
@@ -56,11 +55,11 @@ public:
       DMat<float> &bodyTrajectory, DMat<bool> &contactTable);
   void calculateNextFootholdPositions(robots::Robot &robot,
                                       messages::HighLevelCommand &command);
-  Vec3<float> predictNextFootPos(
-      Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
-      Vec3<float> prevFootPosition, Vec3<float> desiredLinearVelocity,
-      Vec3<float> desiredAngularVelocity, Vec3<float> bodyLinearVelocity,
-      float feedbackGain, int legId, FOOTHOLD_PREDICTION_TYPE predictType);
+  Vec3<float>
+  predictNextFootPos(Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
+                     Vec3<float> prevFootPosition, robots::Robot &robot,
+                     messages::HighLevelCommand &command, float feedbackGain,
+                     int legId, FOOTHOLD_PREDICTION_TYPE predictType);
 
   void getFootDesiredPVA(robots::Robot &robot,
                          Vec12<float> &desiredFootPositions,

@@ -1,6 +1,5 @@
 
 #include <control/MPC.hpp>
-#include <iostream>
 namespace strelka {
 
 constexpr int MPC::STATE_DIM;
@@ -8,13 +7,17 @@ constexpr int MPC::CONSTRAINT_DIM;
 constexpr int MPC::NUM_LEGS;
 constexpr int MPC::ACTION_DIM;
 
+constexpr double MPC::CONSTRAINT_MAX_SCALE;
+constexpr double MPC::CONSTRAINT_MIN_SCALE;
+constexpr double MPC::MPC_ALPHA;
+constexpr double MPC::FRICTION_COEFFS[4];
+constexpr double MPC::MPC_WEIGHTS[13];
+
 MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
-         double timestep, const DVec<double> &qp_weights, double alpha,
-         const Vec4<double> &_footFrictionCoefficients, double kMaxScale,
-         double kMinScale)
+         double timestep)
     : _bodyMass(mass), inertia_(inertia.asDiagonal()),
       inv_inertia_(inertia_.inverse()), planning_horizon_(planning_horizon),
-      timestep_(timestep), alpha_(alpha), _a_mat(STATE_DIM, STATE_DIM),
+      timestep_(timestep), alpha_(MPC_ALPHA), _a_mat(STATE_DIM, STATE_DIM),
       _b_mat(STATE_DIM, ACTION_DIM),
       qp_weights_(STATE_DIM * planning_horizon, STATE_DIM * planning_horizon),
       ab_concatenated_(STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM),
@@ -29,11 +32,10 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
       _constraint_ub(CONSTRAINT_DIM * NUM_LEGS * planning_horizon),
       qp_solution_(3 * NUM_LEGS * planning_horizon), workspace_(0),
       initial_run_(true), _b_exps(planning_horizon * STATE_DIM, ACTION_DIM),
-      kMaxScale(kMaxScale), kMinScale(kMinScale),
-      _footFrictionCoefficients(_footFrictionCoefficients) {
+      kMaxScale(CONSTRAINT_MAX_SCALE), kMinScale(CONSTRAINT_MIN_SCALE),
+      _footFrictionCoefficients(FRICTION_COEFFS) {
 
-  assert(qp_weights.size() == STATE_DIM);
-  fillQPWeights(qp_weights);
+  fillQPWeights(MPC_WEIGHTS);
   _a_mat.setZero();
   _b_mat.setZero();
   ab_concatenated_.setZero();
@@ -48,9 +50,9 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
   _p_mat.setZero();
 }
 
-void MPC::fillQPWeights(const DVec<double> &qp_weights) {
+void MPC::fillQPWeights(const double *qp_weights) {
   for (int i = 0; i < MPC::STATE_DIM * planning_horizon_; i++) {
-    qp_weights_.insert(i, i) = qp_weights(i % MPC::STATE_DIM);
+    qp_weights_.insert(i, i) = qp_weights[i % MPC::STATE_DIM];
   }
 }
 
