@@ -17,9 +17,14 @@ class InvalidSlowdownEstimate : std::exception {
   }
 };
 
+/**
+ * @brief Compares wall time with RobotRawState messages' tick
+ * parameter to estimate the amount of simulation slowdown
+ *
+ */
 class SlowdownEstimator {
   typedef std::chrono::time_point<std::chrono::high_resolution_clock>
-      chrono_time_point;
+      ChronoTimePoint;
 
   static const int MAX_MEASUREMENT_COUNT = 1000;
   int measurementCount;
@@ -28,7 +33,7 @@ class SlowdownEstimator {
   float prevTickSim;
 
   float dtEstimateReal;
-  chrono_time_point prevTickReal;
+  ChronoTimePoint prevTickReal;
   lcm::LCM &lcm;
 
   void updateDt(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
@@ -39,13 +44,32 @@ class SlowdownEstimator {
 public:
   SlowdownEstimator(lcm::LCM &lcm);
 
+  /**
+   * @return false if o measurements are made
+   */
   bool estimateIsValid();
 
+  /**
+   * @brief Get the dt between the RobotRawState messages based on wall time
+   *
+   * @return float delta time estimate
+   */
   float getRealtimeDt();
 
+  /**
+   * @brief Get the dt between the RobotRawState messages based on
+   * RobotRawState's tick
+   *
+   * @return float delta time estimate
+   */
   float getSimDt();
 
-  void estimateDt();
+  /**
+   * @brief Starts taking measurements of wall and sim time. Results are
+   * accessible through getRealtimeDt and getSimDt
+   *
+   */
+  void estimateDts();
 };
 } // namespace state_estimation
 } // namespace strelka

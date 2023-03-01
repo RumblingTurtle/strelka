@@ -1,9 +1,9 @@
 <+> WBIC
-    + Decouple A1WBIC from WholeBodyImpedanceController
-    - Documentation
+    + Decouple A1WBIC from WholeBodyImpulseController
+    + Documentation
 
 <+> MPC
-    - Documentation
+    + Documentation
 
 <+> Gait scheduler
     + Documentation
@@ -13,6 +13,7 @@
     + Documentation
 
 <> Local planner
+    + Decouple LocalPlanner from A1
     - Redo Local planner as a builder LocalPlanner<FootPlanner,BodyTrajectoryPlanner,Sequencer>();
     - Documentation
 
@@ -23,7 +24,7 @@
 
 <> Foot planner
     + Common interface
-    - Move A1 constants to Robot->UnitreeA1
+    + Move A1 constants to Robot->UnitreeA1
         A1::constants::FOOT_RADIUS
         A1::constants::TRUNK_TO_THIGH_OFFSETS
     - Documentation
@@ -46,7 +47,8 @@
 
 <> Code structure
     + Replace defines with constants
-    + Write high level abstraction Robot() -> A1Robot(RobotState.lcm) 
+    + Write high level abstraction Robot() -> A1Robot(RobotState.lcm)
+    + Separate local planner elements from A1 specifics
     - Decouple strelka and ros entirely(at least for now)
     ? Threads for multiple topics 
 

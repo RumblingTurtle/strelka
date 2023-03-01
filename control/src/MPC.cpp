@@ -1,6 +1,7 @@
 
 #include <control/MPC.hpp>
 namespace strelka {
+namespace control {
 
 constexpr int MPC::STATE_DIM;
 constexpr int MPC::CONSTRAINT_DIM;
@@ -324,10 +325,6 @@ DVec<double> &
 MPC::computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
                           DMat<float> &contactPositionsWorldFrameRotated,
                           DMat<float> &bodyTrajectory) {
-  // std::cout << contactTable << std::endl << std::endl;
-  // std::cout << contactPositionsWorldFrameRotated << std::endl << std::endl;
-  // std::cout << bodyTrajectory << std::endl << std::endl;
-
   computeABExponentials(robot, contactPositionsWorldFrameRotated,
                         bodyTrajectory);
 
@@ -339,4 +336,5 @@ MPC::computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
 
   return solveQP();
 }
+} // namespace control
 } // namespace strelka

@@ -1,21 +1,21 @@
-#include <control/WholeBodyImpedanceController.hpp>
+#include <control/WholeBodyImpulseController.hpp>
 
 namespace strelka {
 
 namespace control {
 
-WholeBodyImpedanceController::WholeBodyImpedanceController(
+WholeBodyImpulseController::WholeBodyImpulseController(
     FloatingBaseModel<float> robotModel, WBICParams &parameters) {
   wbic = new LocomotionCtrl<float>(
       robotModel, parameters.Kp, parameters.Kd, parameters.Kp_kin,
       parameters.floating_W, parameters.rf_W, parameters.mu, parameters.max_fz);
 }
 
-WholeBodyImpedanceController::~WholeBodyImpedanceController() { delete wbic; }
+WholeBodyImpulseController::~WholeBodyImpulseController() { delete wbic; }
 
-void WholeBodyImpedanceController::update(robots::Robot &robot,
-                                          messages::WBICCommand &command,
-                                          WBICOutput &output) {
+void WholeBodyImpulseController::update(robots::Robot &robot,
+                                        messages::WBICCommand &command,
+                                        WBICOutput &output) {
 
   wbic->update(robot.bodyToWorldQuat(), robot.positionWorldFrame(),
                robot.gyroscopeBodyFrame(), robot.linearVelocityBodyFrame(),

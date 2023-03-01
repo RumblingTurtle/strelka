@@ -39,8 +39,7 @@ public:
 
   /**
    * @brief Return boolean 4xhorizonSteps matrix representing expected contact
-   * schedule of the legs by stepping forward horizonSteps*dt seconds further in
-   * time
+   * schedule of the legs by making horizonSteps steps dt seconds each
    *
    * If an entry in currentContacts is set as true then the boolean values for a
    * leg would remain true until the next swing phase occurs.

@@ -48,7 +48,7 @@ float SlowdownEstimator::getSimDt() {
   throw InvalidSlowdownEstimate();
 }
 
-void SlowdownEstimator::estimateDt() {
+void SlowdownEstimator::estimateDts() {
   reset();
   lcm::Subscription *estimateSub =
       lcm.subscribe("raw_state", &SlowdownEstimator::updateDt, this);

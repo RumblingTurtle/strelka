@@ -16,7 +16,7 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
   if (currentState) {
     strelka::robots::UnitreeA1 robot(currentState);
 
-    strelka::control::WholeBodyImpedanceController::WBICOutput outs;
+    strelka::control::WholeBodyImpulseController::WBICOutput outs;
 
     controller.update(robot, command, outs);
 
@@ -37,7 +37,7 @@ void A1WBIC::initialize() {
   currentState = new a1_lcm_msgs::RobotState();
 }
 
-A1WBIC::A1WBIC(control::WholeBodyImpedanceController::WBICParams &parameters)
+A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
     : controller(buildA1<float>().buildModel(), parameters) {
   initialize();
 }

@@ -5,9 +5,13 @@
 namespace strelka {
 namespace messages {
 
+/**
+ * @brief Command object passed to the Whole-body impulse controller
+ *  Every messsage entry should be in world frame
+ */
 class WBICCommand {
   /*
-    Everything is in world frame
+
   */
   Vec4<float> _desiredContactState;
   Vec3<float> _desiredBodyRPY;

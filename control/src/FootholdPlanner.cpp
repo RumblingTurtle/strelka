@@ -4,7 +4,6 @@ namespace control {
 
 FootholdPlanner::FootholdPlanner(GaitScheduler &gaitScheduler)
     : gaitScheduler(gaitScheduler), updateContinuously(false) {
-  _footholds.resize(4);
   FOR_EACH_LEG { _footholds[LEG_ID].reserve(5); }
 }
 

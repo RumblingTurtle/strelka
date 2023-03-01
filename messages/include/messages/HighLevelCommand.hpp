@@ -5,6 +5,17 @@
 namespace strelka {
 namespace messages {
 
+/**
+ * @brief Class representing a High level command to a Quadruped robot. Possible
+ * command parameters are as follows:
+ *
+ *  - Desired angular/linear velocites in body frame
+ *  - Desired roll pitch yaw
+ *  - Desired offset of the trunk from the initial position. Usually used while
+ * standing to move the trunk around the inital position
+ *  - Desired body height
+ *  - Desired foot height while swinging
+ */
 class HighLevelCommand {
   Vec3<float> _desiredAngularVelocityBodyFrame;
   Vec3<float> _desiredLinearVelocityBodyFrame;
@@ -13,24 +24,14 @@ class HighLevelCommand {
   float _desiredFootHeight;
   float _desiredBodyHeight;
   /*
-    float linearSpeed[3];
-
-    float angularVelocity[3];
-
-    float footHeight;
-
     float footClearance;
 
     float hipOffsets[2];
 
-    float rpy[3];
-
-    float comOffset[2];
-
-    float bodyHeight;
-
     int8_t stop;
-    */
+
+    TODO:... what else? Gait type?
+  */
 
 public:
   HighLevelCommand(const a1_lcm_msgs::HighLevelCommand *commandMsg) {

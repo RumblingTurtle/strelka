@@ -25,11 +25,11 @@ class A1GazeboInterface : public QuadrupedInterface {
     float prevTick;
     bool firstHandle;
 
-    Eigen::VectorXf startAngles;
-    const Eigen::VectorXf &desiredAngles;
+    Vec12<float> startAngles;
+    const Vec12<float> &desiredAngles;
     A1GazeboInterface &interface;
 
-    MoveToHandle(float moveTime, const Eigen::VectorXf &desiredAngles,
+    MoveToHandle(float moveTime, const Vec12<float> &desiredAngles,
                  A1GazeboInterface &interface);
 
     void handle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
@@ -39,16 +39,16 @@ class A1GazeboInterface : public QuadrupedInterface {
 public:
   explicit A1GazeboInterface() {}
 
-  virtual void sendCommandMessage(const Eigen::VectorXf &command) override;
+  virtual void sendCommandMessage(const Vec12<float> &command) override;
 
-  virtual void setTorques(const Eigen::VectorXf &torques) override;
+  virtual void setTorques(const Vec12<float> &torques) override;
 
-  virtual void setAngles(const Eigen::VectorXf &q) override;
+  virtual void setAngles(const Vec12<float> &q) override;
 
-  virtual void setAngles(const Eigen::VectorXf &q,
-                         const Eigen::VectorXf &dq) override;
+  virtual void setAngles(const Vec12<float> &q,
+                         const Vec12<float> &dq) override;
 
-  virtual void moveTo(const Eigen::VectorXf &angles, float moveTime) override;
+  virtual void moveTo(const Vec12<float> &angles, float moveTime) override;
 
   virtual void moveToInit(float moveTime = 3.0) override;
 

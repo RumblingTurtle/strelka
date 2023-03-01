@@ -12,6 +12,12 @@
 #include <osqp/osqp.h>
 
 namespace strelka {
+namespace control {
+/**
+ * @brief Model predictive stance controller
+ * https://ieeexplore.ieee.org/document/8594448/
+ *
+ */
 class MPC {
   const double _bodyMass;
   const Mat3<double> inertia_;
@@ -86,7 +92,22 @@ public:
       double timestep);
 
   ~MPC();
-
+  /**
+   * @brief Compute reaction forces to
+   *
+   * @param robot Object which implements Robot interface
+   *
+   * @param contactTable Table of size 4xN with contact/no contact pattern per
+   * each leg. See GaitScheduler's getContactTable for details
+   *
+   * @param contactPositionsWorldFrameRotated Table of size 4x3*N with each
+   * triplet in a row representing foothold position in world frame at step n
+   * minus body position at that step
+   *
+   * @param bodyTrajectory Table of size Nx13 which contains body trajectory.
+   * See BodyTrajectoryPlanner for an example
+   *
+   */
   DVec<double> &
   computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
                        DMat<float> &contactPositionsWorldFrameRotated,
@@ -94,7 +115,7 @@ public:
 
   void reset();
 };
-
+} // namespace control
 } // namespace strelka
 
 #endif // STRELKA_MPC_H

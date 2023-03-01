@@ -8,7 +8,11 @@
 
 namespace strelka {
 namespace control {
-class WholeBodyImpedanceController {
+/**
+ * @brief Adapter class for WBIC implementation by MIT
+ * https://arxiv.org/abs/1909.06586
+ */
+class WholeBodyImpulseController {
   LocomotionCtrl<float> *wbic;
 
 public:
@@ -23,20 +27,26 @@ public:
   };
 
   struct WBICOutput {
+    /**
+     * @brief Outputs representing desired angles, joint velocities and torques
+     * for provided WBICCommand and robot state
+     *
+     */
     Vec12<float> q;
     Vec12<float> dq;
     Vec12<float> tau;
   };
 
-  WholeBodyImpedanceController(FloatingBaseModel<float> robotModel,
-                               WBICParams &parameters);
-  ~WholeBodyImpedanceController();
+  WholeBodyImpulseController(FloatingBaseModel<float> robotModel,
+                             WBICParams &parameters);
+
+  ~WholeBodyImpulseController();
 
   void update(robots::Robot &robot, messages::WBICCommand &command,
               WBICOutput &output);
 };
 
-static WholeBodyImpedanceController::WBICParams STAND_WBIC_PARAMS = {
+static WholeBodyImpulseController::WBICParams STAND_WBIC_PARAMS = {
     .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
     .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
     .Kp_kin = {1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -46,7 +56,7 @@ static WholeBodyImpedanceController::WBICParams STAND_WBIC_PARAMS = {
     .max_fz = 1500,
 };
 
-static WholeBodyImpedanceController::WBICParams DEFAULT_WBIC_PARAMS = {
+static WholeBodyImpulseController::WBICParams DEFAULT_WBIC_PARAMS = {
     .Kp = {10.0, 10.0, 100.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0},
     .Kd = {1.0, 1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0},
     .Kp_kin = {0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 1, 1, 1},

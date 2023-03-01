@@ -3,9 +3,9 @@
 namespace strelka {
 namespace interfaces {
 
-A1GazeboInterface::MoveToHandle::MoveToHandle(
-    float moveTime, const Eigen::VectorXf &desiredAngles,
-    A1GazeboInterface &interface)
+A1GazeboInterface::MoveToHandle::MoveToHandle(float moveTime,
+                                              const Vec12<float> &desiredAngles,
+                                              A1GazeboInterface &interface)
     : interface(interface), desiredAngles(desiredAngles), firstHandle(true),
       prevTick(-1) {
   assert(desiredAngles.size() == 12);
@@ -20,7 +20,7 @@ void A1GazeboInterface::MoveToHandle::handle(
     const a1_lcm_msgs::RobotRawState *data) {
 
   if (firstHandle) {
-    startAngles = Eigen::Map<const Eigen::VectorXf>(data->q, 12);
+    startAngles = Eigen::Map<const Vec12<float>>(data->q, 12);
     firstHandle = false;
   }
 
@@ -31,7 +31,7 @@ void A1GazeboInterface::MoveToHandle::handle(
     return;
   }
 
-  Eigen::VectorXf q, dq;
+  Vec12<float> q, dq;
   q.resize(12);
   dq.resize(12);
 
@@ -56,7 +56,7 @@ void A1GazeboInterface::MoveToHandle::handle(
   timeLeft -= dt;
 }
 
-void A1GazeboInterface::sendCommandMessage(const Eigen::VectorXf &command) {
+void A1GazeboInterface::sendCommandMessage(const Vec12<float> &command) {
   assert(command.size() == 60);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = command[5 * motorId];
@@ -69,7 +69,7 @@ void A1GazeboInterface::sendCommandMessage(const Eigen::VectorXf &command) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setTorques(const Eigen::VectorXf &torques) {
+void A1GazeboInterface::setTorques(const Vec12<float> &torques) {
   assert(torques.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = 0;
@@ -82,7 +82,7 @@ void A1GazeboInterface::setTorques(const Eigen::VectorXf &torques) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setAngles(const Eigen::VectorXf &q) {
+void A1GazeboInterface::setAngles(const Vec12<float> &q) {
   assert(q.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
@@ -95,8 +95,8 @@ void A1GazeboInterface::setAngles(const Eigen::VectorXf &q) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setAngles(const Eigen::VectorXf &q,
-                                  const Eigen::VectorXf &dq) {
+void A1GazeboInterface::setAngles(const Vec12<float> &q,
+                                  const Vec12<float> &dq) {
   assert(q.size() == 12);
   assert(dq.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
@@ -110,7 +110,7 @@ void A1GazeboInterface::setAngles(const Eigen::VectorXf &q,
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::moveTo(const Eigen::VectorXf &angles, float moveTime) {
+void A1GazeboInterface::moveTo(const Vec12<float> &angles, float moveTime) {
   assert(angles.size() == 12);
   assert(moveTime > 0);
 
@@ -127,7 +127,7 @@ void A1GazeboInterface::moveTo(const Eigen::VectorXf &angles, float moveTime) {
 
 void A1GazeboInterface::moveToInit(float moveTime) {
   assert(moveTime > 0);
-  Eigen::VectorXf moveAngles;
+  Vec12<float> moveAngles;
   moveAngles.resize(12);
   for (int motorId = 0; motorId < 12; motorId++) {
     bool rightLeg = motorId % 6 == 0;
@@ -140,7 +140,7 @@ void A1GazeboInterface::moveToInit(float moveTime) {
 
 void A1GazeboInterface::moveToStand(float moveTime) {
   assert(moveTime > 0);
-  Eigen::VectorXf moveAngles;
+  Vec12<float> moveAngles;
   moveAngles.resize(12);
   for (int motorId = 0; motorId < 12; motorId++) {
     bool rightLeg = motorId % 6 == 0;

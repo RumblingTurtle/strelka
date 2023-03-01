@@ -2,7 +2,7 @@
 #define A1WBIC_H
 
 #include <common/typedefs.hpp>
-#include <control/WholeBodyImpedanceController.hpp>
+#include <control/WholeBodyImpulseController.hpp>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
@@ -15,7 +15,7 @@ namespace strelka {
 namespace control {
 class A1WBIC {
   lcm::LCM lcm;
-  control::WholeBodyImpedanceController controller;
+  control::WholeBodyImpulseController controller;
 
   a1_lcm_msgs::RobotLowCommand *commandMessage;
   a1_lcm_msgs::RobotState *currentState;
@@ -32,7 +32,7 @@ class A1WBIC {
   void initialize();
 
 public:
-  A1WBIC(control::WholeBodyImpedanceController::WBICParams &parameters);
+  A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters);
   ~A1WBIC();
   void processLoop();
 };

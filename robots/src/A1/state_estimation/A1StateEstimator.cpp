@@ -10,7 +10,7 @@ A1StateEstimator::A1StateEstimator() {
 
 void A1StateEstimator::processLoop() {
   SlowdownEstimator slowdownEstimator(lcm);
-  slowdownEstimator.estimateDt();
+  slowdownEstimator.estimateDts();
 
   DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
   observer->setParameters(DEFAULT_KALMAN_FILTER_PARAMS);

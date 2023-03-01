@@ -64,5 +64,30 @@ void LocalPlanner::update(robots::Robot &robot,
                                 _desiredFootA);
 }
 
+float LocalPlanner::footState(int legId) { return _footState[legId]; }
+
+Vec12<float> &LocalPlanner::mpcForces() { return _mpcForces; }
+
+Vec12<float> &LocalPlanner::desiredFootP() { return _desiredFootP; }
+
+Vec12<float> &LocalPlanner::desiredFootV() { return _desiredFootV; }
+
+Vec12<float> &LocalPlanner::desiredFootA() { return _desiredFootA; }
+
+Vec3<float> &LocalPlanner::desiredRpy() { return _desiredRpy; }
+
+Vec3<float> &LocalPlanner::desiredPositionBody() {
+  return _desiredPositionBody;
+}
+Vec3<float> &LocalPlanner::desiredAngularVelocity() {
+  return _desiredAngularVelocity;
+}
+Vec3<float> &LocalPlanner::desiredVelocityBody() {
+  return _desiredVelocityBody;
+}
+Vec3<float> &LocalPlanner::desiredAccelerationBody() {
+  return _desiredAccelerationBody;
+}
+
 } // namespace control
 } // namespace strelka

@@ -1,4 +1,4 @@
-#include <control/WholeBodyImpedanceController.hpp>
+#include <control/WholeBodyImpulseController.hpp>
 #include <messages/WBICCommand.hpp>
 #include <robots/A1/UnitreeA1.hpp>
 #include <robots/A1/control/A1WBIC.hpp>
@@ -9,10 +9,10 @@ int main() {
   using namespace strelka::messages;
   using namespace strelka::robots;
 
-  WholeBodyImpedanceController controller{buildA1<float>().buildModel(),
-                                          DEFAULT_WBIC_PARAMS};
+  WholeBodyImpulseController controller{buildA1<float>().buildModel(),
+                                        DEFAULT_WBIC_PARAMS};
 
-  WholeBodyImpedanceController::WBICOutput outs;
+  WholeBodyImpulseController::WBICOutput outs;
 
   UnitreeA1 robot = createDummyA1RobotWithRawState();
 
