@@ -8,6 +8,7 @@
 
 namespace strelka {
 
+namespace state_estimation {
 class InvalidSlowdownEstimate : std::exception {
   const char *what() {
     return "Slownown estimator haven't made any measurements "
@@ -46,6 +47,7 @@ public:
 
   void estimateDt();
 };
+} // namespace state_estimation
 } // namespace strelka
 
 #endif

@@ -1,7 +1,7 @@
 #include <robots/A1/interfaces/A1GazeboInterface.hpp>
 
 int main() {
-  using namespace strelka::A1;
+  using namespace strelka::interfaces;
 
   A1GazeboInterface interface;
   interface.moveToInit();

@@ -8,9 +8,7 @@
 int main() {
   using namespace strelka::robots;
   using namespace strelka::A1;
-  using namespace strelka;
-
-  using strelka::KalmanFilterObserver;
+  using namespace strelka::state_estimation;
 
   KalmanFilterObserver::KalmanFilterObserverParams params{
       .dt = 0.001,

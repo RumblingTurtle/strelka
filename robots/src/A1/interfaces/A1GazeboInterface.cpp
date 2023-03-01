@@ -1,7 +1,7 @@
 #include <robots/A1/interfaces/A1GazeboInterface.hpp>
 
 namespace strelka {
-namespace A1 {
+namespace interfaces {
 
 A1GazeboInterface::MoveToHandle::MoveToHandle(
     float moveTime, const Eigen::VectorXf &desiredAngles,
@@ -150,6 +150,6 @@ void A1GazeboInterface::moveToStand(float moveTime) {
   }
   moveTo(moveAngles, moveTime);
 }
-} // namespace A1
+} // namespace interfaces
 
 } // namespace strelka

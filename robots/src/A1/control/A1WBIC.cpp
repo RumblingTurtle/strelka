@@ -1,7 +1,7 @@
 #include <robots/A1/control/A1WBIC.hpp>
 
 namespace strelka {
-
+namespace control {
 void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
                          const std::string &chan,
                          const a1_lcm_msgs::RobotState *messageIn) {
@@ -65,4 +65,5 @@ A1WBIC::~A1WBIC() {
   if (commandSub)
     lcm.unsubscribe(commandSub);
 }
+} // namespace control
 } // namespace strelka

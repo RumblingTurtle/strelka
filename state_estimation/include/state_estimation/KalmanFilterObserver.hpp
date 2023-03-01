@@ -8,6 +8,7 @@
 #include <eigen3/Eigen/LU>
 
 namespace strelka {
+namespace state_estimation {
 class UninitializedKalmanFilter : std::exception {
   const char *what() {
     return "KalmanFilterObserver haven't been provided with initial "
@@ -76,6 +77,18 @@ public:
   void reset();
 };
 
+static KalmanFilterObserver::KalmanFilterObserverParams
+    DEFAULT_KALMAN_FILTER_PARAMS = {
+        .dt = 0.001,
+        .imuPositionProcessNoise = 0.02,
+        .imuVelocityProcessNoise = 0.02,
+        .footPositionProcessNoise = 0.002,
+        .footPositionSensorNoise = 0.001,
+        .footVelocitySensorNoise = 0.1,
+        .contactHeightSensorNoise = 0.001,
+        .externalOdometryNoisePosition = {0.02, 0.02, 0.09},
+};
+} // namespace state_estimation
 }; // namespace strelka
 
 #endif // KALMAN_FILTER_OBSERVER_H

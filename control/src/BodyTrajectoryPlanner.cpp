@@ -59,6 +59,7 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   }
 
   float estimatedTerrainPitch = 0;
+
   float estimatedContactHeight = prevContactPosWorld.col(2).mean();
 
   Vec3<float> desiredAngularVelocity =
@@ -70,7 +71,6 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     trajectory(h, 1) = estimatedTerrainPitch;
     trajectory(h, 2) = currentRPY(2) + dt * (h + 1) * desiredAngularVelocity(2);
 
-    // Desired rotation and linear velocity of the body at horizon step h
     Mat3<float> rotation_h;
     Vec3<float> rpy_h = trajectory.block<1, 3>(h, 0).transpose();
     rotation::rpy2rot(rpy_h, rotation_h);

@@ -9,8 +9,12 @@
 
 namespace strelka {
 namespace control {
-
+/**
+ * @brief Desired trajectory generator for robot body.
+ *
+ */
 class BodyTrajectoryPlanner {
+
   Mat43<float> prevContactPosWorld;
   Mat43<float> prevContactPosBody;
 
@@ -19,6 +23,23 @@ class BodyTrajectoryPlanner {
 public:
   BodyTrajectoryPlanner();
 
+  /**
+   * @brief Generate desired body trajectory on the given horizon and step
+   * length in seconds
+   *
+   * State values per each row are as follows:
+   * 0-2 Roll pitch yaw
+   * 3-5 Body position in odometry frame
+   * 6-8 Angular velocity
+   * 9-11 Linear velocity
+   * 12 Gravity constant
+   *
+   * @param robot Robot object implementing Robot interface
+   * @param command High level command object
+   * @param dt Time difference between the steps
+   * @param horizonSteps The amount of steps to generate
+   * @return DMat<float> horizonStepsx13 matrix of the states
+   */
   DMat<float> getDesiredBodyTrajectory(robots::Robot &robot,
                                        messages::HighLevelCommand &command,
                                        float dt, int horizonSteps);

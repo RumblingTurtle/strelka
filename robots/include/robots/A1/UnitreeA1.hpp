@@ -20,7 +20,12 @@ class NoStateEstimateException : std::exception {
            "using a1_lcm_msgs::RobotState";
   }
 };
+/**
+ * @brief Example of Robot interface implementation using Unitree A1 robot
+ *
+ */
 class UnitreeA1 : public Robot {
+
   Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
   Quat<float> _bodyToWorldQuat;

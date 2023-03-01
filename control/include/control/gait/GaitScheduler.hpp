@@ -9,12 +9,13 @@
 #define CONTACT_DETECTION_THRESHOLD 0.25
 
 namespace strelka {
+/**
+ * @brief Contact aware gait sequencer with more complex queries regarding
+ * current leg state. Gaits can also be sped up and slowed down.
+ *
+ */
 class GaitScheduler {
-  /**
-   * @brief Contact aware gait sequencer with more complex queries regarding
-   * current leg state. Gaits can also be sped up and slowed down.
-   *
-   */
+
   float scale;
   GaitSequencer sequencer;
 

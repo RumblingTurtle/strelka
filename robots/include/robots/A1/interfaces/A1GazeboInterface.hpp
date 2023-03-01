@@ -13,7 +13,7 @@
 #define GAZEBO_BASE_RATE 1000
 
 namespace strelka {
-namespace A1 {
+namespace interfaces {
 class A1GazeboInterface : public QuadrupedInterface {
   lcm::LCM lcm;
   a1_lcm_msgs::RobotLowCommand commandMessage;
@@ -54,7 +54,7 @@ public:
 
   virtual void moveToStand(float moveTime = 3.0) override;
 };
-} // namespace A1
+} // namespace interfaces
 } // namespace strelka
 
 #endif // GAZEBO_INTERFACE_H

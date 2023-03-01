@@ -2,6 +2,7 @@
 
 namespace strelka {
 
+namespace state_estimation {
 const int KalmanFilterObserver::STATE_DIM;
 const int KalmanFilterObserver::SENSOR_DIM;
 
@@ -205,5 +206,5 @@ Eigen::Matrix3f KalmanFilterObserver::positionCovariance() const {
 };
 
 void KalmanFilterObserver::reset() { _xhat.setZero(); }
-
+} // namespace state_estimation
 } // namespace strelka

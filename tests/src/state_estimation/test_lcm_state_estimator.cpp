@@ -2,8 +2,8 @@
 #include <robots/A1/state_estimation/A1StateEstimator.hpp>
 
 int main() {
-  using namespace strelka::A1;
-  using namespace strelka;
+  using namespace strelka::interfaces;
+  using namespace strelka::state_estimation;
 
   A1GazeboInterface interface;
   interface.moveToInit();

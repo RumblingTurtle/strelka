@@ -12,6 +12,7 @@
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
+namespace control {
 class A1WBIC {
   lcm::LCM lcm;
   control::WholeBodyImpedanceController controller;
@@ -35,6 +36,6 @@ public:
   ~A1WBIC();
   void processLoop();
 };
-
+} // namespace control
 } // namespace strelka
 #endif

@@ -13,18 +13,7 @@
 #include <state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
-static KalmanFilterObserver::KalmanFilterObserverParams
-    A1_DEFAULT_KALMAN_FILTER_PARAMS = {
-        .dt = 0.001,
-        .imuPositionProcessNoise = 0.02,
-        .imuVelocityProcessNoise = 0.02,
-        .footPositionProcessNoise = 0.002,
-        .footPositionSensorNoise = 0.001,
-        .footVelocitySensorNoise = 0.1,
-        .contactHeightSensorNoise = 0.001,
-        .externalOdometryNoisePosition = {0.02, 0.02, 0.09},
-};
-
+namespace state_estimation {
 class A1StateEstimator {
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
@@ -47,7 +36,7 @@ public:
 
   ~A1StateEstimator();
 };
-
+} // namespace state_estimation
 } // namespace strelka
 
 #endif // A1_STATE_ESITMATOR_H

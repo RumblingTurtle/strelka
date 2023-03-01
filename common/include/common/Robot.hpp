@@ -8,23 +8,24 @@
 
 namespace strelka {
 namespace robots {
+/**
+ * @brief Common robot interface used for state estimation and control
+ *
+ * In order to use state_estimation and control packages you have to provide
+ * implementations of this common interface.
+ *
+ * Leg notations
+ * legId - name      - abb.
+ *   0   Front right   (FR)
+ *   1   Front left    (FL)
+ *   2   Rear right    (RR)
+ *   3   Rear left     (RL)
+ *
+ * World frame actually means odometry frame.
+ * All coordinate frames are right handed.
+ */
 class Robot {
-  /**
-   * @brief Common robot interface used for state estimation and control
-   *
-   * In order to use state_estimation and control packages you have to provide
-   * implementations of this common interface.
-   *
-   * Leg notations
-   * legId - name      - abb.
-   *   0   Front right   (FR)
-   *   1   Front left    (FL)
-   *   2   Rear right    (RR)
-   *   3   Rear left     (RL)
-   *
-   * World frame actually means odometry frame.
-   * All coordinate frames are right handed.
-   */
+
 public:
   Robot(){};
   virtual ~Robot(){};
