@@ -1,6 +1,9 @@
 <+> WBIC
     + Decouple A1WBIC from WholeBodyImpulseController
     + Documentation
+    + Nan safety
+    + Rollover protection
+    + High level command timeout
 
 <+> MPC
     + Documentation

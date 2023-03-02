@@ -43,9 +43,12 @@ void A1StateEstimator::fillStateEstimatorData(
     robots::UnitreeA1 &robot, const KalmanFilterObserver *observer,
     a1_lcm_msgs::RobotState *messageOut) {
 
+  Vec3<float> filteredVelocity =
+      velocityFilter.getAverage(observer->velocityBody());
+
   memcpy(messageOut->position, observer->position().data(), sizeof(float) * 3);
-  memcpy(messageOut->velocityBody, observer->velocityBody().data(),
-         sizeof(float) * 3);
+
+  memcpy(messageOut->velocityBody, filteredVelocity.data(), sizeof(float) * 3);
 
   Vec12<float> footPosititons;
   FOR_EACH_LEG {

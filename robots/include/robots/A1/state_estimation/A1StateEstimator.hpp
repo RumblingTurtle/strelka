@@ -3,6 +3,7 @@
 
 #include <common/constants.hpp>
 #include <common/rotation.hpp>
+#include <filters/MovingWindowFilter3D.hpp>
 #include <lcm/lcm-cpp.hpp>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
@@ -11,7 +12,6 @@
 #include <robots/A1/kinematics.hpp>
 #include <state_estimation/KalmanFilterObserver.hpp>
 #include <state_estimation/SlowdownEstimator.hpp>
-
 namespace strelka {
 namespace state_estimation {
 class A1StateEstimator {
@@ -19,6 +19,8 @@ class A1StateEstimator {
   KalmanFilterObserver *observer;
   a1_lcm_msgs::RobotState *robotStateMsg;
   lcm::Subscription *sub;
+
+  filters::MovingWindowFilter3D<float> velocityFilter{};
 
   void update(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
               const a1_lcm_msgs::RobotRawState *messageIn);
