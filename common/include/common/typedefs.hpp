@@ -6,9 +6,13 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <chrono>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Sparse>
+
+typedef std::chrono::time_point<std::chrono::high_resolution_clock>
+    ChronoTimePoint;
 
 template <typename T> using Vec3 = typename Eigen::Matrix<T, 3, 1>;
 

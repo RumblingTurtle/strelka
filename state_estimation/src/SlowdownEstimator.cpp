@@ -8,19 +8,16 @@ void SlowdownEstimator::updateDt(const lcm::ReceiveBuffer *rbuf,
                                  const a1_lcm_msgs::RobotRawState *messageIn) {
   if (prevTickSim == -1) {
     prevTickSim = messageIn->tick;
-    prevTickReal = std::chrono::high_resolution_clock::now();
+    prevTickReal = getWallTime();
     return;
   }
 
   dtEstimateSim += (messageIn->tick - prevTickSim);
-  dtEstimateReal +=
-      std::chrono::duration_cast<std::chrono::duration<float>>(
-          std::chrono::high_resolution_clock::now() - prevTickReal)
-          .count();
+  dtEstimateReal += timePointDiffInSeconds(getWallTime(), prevTickReal);
 
   measurementCount++;
   prevTickSim = messageIn->tick;
-  prevTickReal = std::chrono::high_resolution_clock::now();
+  prevTickReal = getWallTime();
 }
 
 void SlowdownEstimator::reset() {

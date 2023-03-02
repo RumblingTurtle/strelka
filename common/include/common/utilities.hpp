@@ -5,26 +5,51 @@
  */
 #ifndef STRELKA_UTILITIES_H
 #define STRELKA_UTILITIES_H
-#include <chrono>
+#include <common/typedefs.hpp>
 #include <iostream>
+
+/**
+ * @brief Returns time difference between to
+ * std::chrono::time_point<std::chrono::high_resolution_clock> instances in
+ * milliseconds
+ */
+inline double timePointDiffInMilliseconds(ChronoTimePoint a,
+                                          ChronoTimePoint b) {
+  return std::chrono::duration_cast<std::chrono::microseconds>(a - b).count() /
+         1000.0;
+}
+
+/**
+ * @brief Returns time difference between to
+ * std::chrono::time_point<std::chrono::high_resolution_clock> instances in
+ * seconds
+ */
+inline double timePointDiffInSeconds(ChronoTimePoint a, ChronoTimePoint b) {
+  return std::chrono::duration_cast<std::chrono::duration<double>>(a - b)
+      .count();
+}
+
+/**
+ * @brief Get current wall time using high_resolution_clock
+ *
+ * @return ChronoTimePoint
+ */
+inline ChronoTimePoint getWallTime() {
+  return std::chrono::high_resolution_clock::now();
+}
 
 /**
  * @brief Returns time of execution of a given callable object/lambda in
  * milliseconds
  *
  * @param functor Callable to run
- * @return float runtime of functor in milliseconds
+ * @return double runtime of functor in milliseconds
  */
-template <typename Callable> float executionTime(Callable functor) {
+template <typename Callable> inline double executionTime(Callable functor) {
 
-  std::chrono::time_point<std::chrono::high_resolution_clock> t =
-      std::chrono::high_resolution_clock::now();
+  ChronoTimePoint t = getWallTime();
   functor();
-  float ms = std::chrono::duration_cast<std::chrono::microseconds>(
-                 std::chrono::high_resolution_clock::now() - t)
-                 .count() /
-             1000.0f;
-  return ms;
+  return timePointDiffInMilliseconds(getWallTime(), t);
 }
 
 #endif // STRELKA_UTILITIES_H

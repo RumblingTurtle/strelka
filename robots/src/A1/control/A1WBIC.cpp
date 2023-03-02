@@ -5,40 +5,43 @@ namespace control {
 void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
                          const std::string &chan,
                          const a1_lcm_msgs::RobotState *messageIn) {
-  memcpy(currentState, messageIn, sizeof(a1_lcm_msgs::RobotState));
+  static strelka::control::WholeBodyImpulseController::WBICOutput outs;
+  strelka::robots::UnitreeA1 robot(messageIn);
+
+  if (firstCommandRecieved) {
+    messages::WBICCommand currentCommand{currentCommandMessage};
+    controller.update(robot, currentCommand, outs);
+
+    for (int motorId = 0; motorId < 12; motorId++) {
+      lowCommandMessage->q[motorId] = outs.q[motorId];
+      lowCommandMessage->dq[motorId] = outs.dq[motorId];
+      lowCommandMessage->kp[motorId] =
+          A1::constants::POSITION_GAINS[motorId % 3];
+      lowCommandMessage->kd[motorId] =
+          A1::constants::DAMPING_GAINS[motorId % 3];
+      lowCommandMessage->tau[motorId] = outs.tau[motorId];
+    }
+
+    lcm.publish("robot_low_command", lowCommandMessage);
+  }
 }
 
 void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
                            const std::string &chan,
                            const a1_lcm_msgs::WbicCommand *commandMsg) {
-
-  messages::WBICCommand command(commandMsg);
-  if (currentState) {
-    strelka::robots::UnitreeA1 robot(currentState);
-
-    strelka::control::WholeBodyImpulseController::WBICOutput outs;
-
-    controller.update(robot, command, outs);
-
-    for (int motorId = 0; motorId < 12; motorId++) {
-      commandMessage->q[motorId] = outs.q[motorId];
-      commandMessage->dq[motorId] = outs.dq[motorId];
-      commandMessage->kp[motorId] = A1::constants::POSITION_GAINS[motorId % 3];
-      commandMessage->kd[motorId] = A1::constants::DAMPING_GAINS[motorId % 3];
-      commandMessage->tau[motorId] = outs.tau[motorId];
-    }
-
-    lcm.publish("robot_low_command", commandMessage);
-  }
+  memcpy(currentCommandMessage, commandMsg, sizeof(a1_lcm_msgs::WbicCommand));
+  firstCommandRecieved = true;
+  lastCommandTimestamp = getWallTime();
 }
 
 void A1WBIC::initialize() {
-  commandMessage = new a1_lcm_msgs::RobotLowCommand();
-  currentState = new a1_lcm_msgs::RobotState();
+  lowCommandMessage = new a1_lcm_msgs::RobotLowCommand();
+  currentCommandMessage = new a1_lcm_msgs::WbicCommand();
 }
 
 A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
-    : controller(buildA1<float>().buildModel(), parameters) {
+    : controller(buildA1<float>().buildModel(), parameters),
+      firstCommandRecieved(false), lastCommandTimestamp(getWallTime()) {
   initialize();
 }
 
@@ -48,22 +51,34 @@ void A1WBIC::processLoop() {
   commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
   stateSub->setQueueCapacity(1);
   commandSub->setQueueCapacity(1);
-  while (lcm.handle() == 0) {
+  while (true) {
+    if (0 != lcm.handle()) {
+      break;
+    }
+
+    bool commandTimeout =
+        timePointDiffInSeconds(getWallTime(), lastCommandTimestamp) > 0.5;
+
+    if (firstCommandRecieved && commandTimeout) {
+      break;
+    }
   }
 }
 
 A1WBIC::~A1WBIC() {
-  if (commandMessage)
-    delete commandMessage;
-
-  if (currentState)
-    delete currentState;
-
-  if (stateSub)
+  if (lowCommandMessage) {
+    delete lowCommandMessage;
+  }
+  if (currentCommandMessage) {
+    delete currentCommandMessage;
+  }
+  if (stateSub) {
     lcm.unsubscribe(stateSub);
+  }
 
-  if (commandSub)
+  if (commandSub) {
     lcm.unsubscribe(commandSub);
+  }
 }
 } // namespace control
 } // namespace strelka

@@ -2,6 +2,7 @@
 #define A1WBIC_H
 
 #include <common/typedefs.hpp>
+#include <common/utilities.hpp>
 #include <control/WholeBodyImpulseController.hpp>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
@@ -17,8 +18,12 @@ class A1WBIC {
   lcm::LCM lcm;
   control::WholeBodyImpulseController controller;
 
-  a1_lcm_msgs::RobotLowCommand *commandMessage;
-  a1_lcm_msgs::RobotState *currentState;
+  a1_lcm_msgs::RobotLowCommand *lowCommandMessage;
+  a1_lcm_msgs::WbicCommand *currentCommandMessage;
+
+  bool firstCommandRecieved;
+
+  ChronoTimePoint lastCommandTimestamp;
 
   lcm::Subscription *stateSub;
   lcm::Subscription *commandSub;

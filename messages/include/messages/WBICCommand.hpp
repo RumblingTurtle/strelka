@@ -10,9 +10,6 @@ namespace messages {
  *  Every messsage entry should be in world frame
  */
 class WBICCommand {
-  /*
-
-  */
   Vec4<float> _desiredContactState;
   Vec3<float> _desiredBodyRPY;
   Vec3<float> _desiredBodyAngularVelocity;

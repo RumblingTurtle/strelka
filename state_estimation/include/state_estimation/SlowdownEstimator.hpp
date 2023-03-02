@@ -1,7 +1,8 @@
 #ifndef SLOWDOWN_ESTIMATOR_H
 #define SLOWDOWN_ESTIMATOR_H
 
-#include <chrono>
+#include <common/typedefs.hpp>
+#include <common/utilities.hpp>
 #include <exception>
 #include <lcm/lcm-cpp.hpp>
 #include <messages/a1_lcm_msgs/RobotRawState.hpp>
@@ -23,8 +24,6 @@ class InvalidSlowdownEstimate : std::exception {
  *
  */
 class SlowdownEstimator {
-  typedef std::chrono::time_point<std::chrono::high_resolution_clock>
-      ChronoTimePoint;
 
   static const int MAX_MEASUREMENT_COUNT = 1000;
   int measurementCount;
