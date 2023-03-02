@@ -14,28 +14,28 @@
 
 <> Local planner
     + Decouple LocalPlanner from A1
+    + Documentation
     - Redo Local planner as a builder LocalPlanner<FootPlanner,BodyTrajectoryPlanner,Sequencer>();
-    - Documentation
 
 <> Body trajectory planner
     + Common interface
+    + Documentation
     - Lowpass filter for pitch and height
-    - Documentation
 
 <> Foot planner
     + Common interface
     + Move A1 constants to Robot->UnitreeA1
         A1::constants::FOOT_RADIUS
         A1::constants::TRUNK_TO_THIGH_OFFSETS
-    - Documentation
+    + Documentation
 
 <> State estimation
     + Slowdown estimator for simulation 
     - Multinomial moving window filter for outputs
     - Resetable observer
+    - KalmanFilterObserver Documentation
     ? External odometry parsing
     ? ROS-less slowdown?
-    - Documentation
     
 <> Messaging
     + lcm.handle() == 0
@@ -50,6 +50,11 @@
     + Write high level abstraction Robot() -> A1Robot(RobotState.lcm)
     + Separate local planner elements from A1 specifics
     - Decouple strelka and ros entirely(at least for now)
+    - Optimize build times for:
+        - Dynamics/FloatingBaseModel.cpp.o
+        - Dynamics/Quadruped.cpp.o
+        - WBC/WBIC/KinWBC.cpp.o
+        - WBC/WBIC/WBIC.cpp.o
     ? Threads for multiple topics 
 
 <> Testing

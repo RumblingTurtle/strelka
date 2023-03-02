@@ -56,11 +56,11 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
 
   memcpy(wbicCommand->mpcForces, localPlanner.mpcForces().data(),
          sizeof(float) * 12);
-  memcpy(wbicCommand->pFoot, localPlanner.desiredFootP().data(),
+  memcpy(wbicCommand->pFoot, localPlanner.desiredFootPositions().data(),
          sizeof(float) * 12);
-  memcpy(wbicCommand->vFoot, localPlanner.desiredFootV().data(),
+  memcpy(wbicCommand->vFoot, localPlanner.desiredFootVelocities().data(),
          sizeof(float) * 12);
-  memcpy(wbicCommand->aFoot, localPlanner.desiredFootA().data(),
+  memcpy(wbicCommand->aFoot, localPlanner.desiredFootAccelerations().data(),
          sizeof(float) * 12);
 
   wbicCommand->stop = 0;

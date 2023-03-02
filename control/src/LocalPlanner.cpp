@@ -64,15 +64,15 @@ void LocalPlanner::update(robots::Robot &robot,
                                 _desiredFootA);
 }
 
-float LocalPlanner::footState(int legId) { return _footState[legId]; }
+bool LocalPlanner::footState(int legId) { return _footState[legId]; }
 
 Vec12<float> &LocalPlanner::mpcForces() { return _mpcForces; }
 
-Vec12<float> &LocalPlanner::desiredFootP() { return _desiredFootP; }
+Vec12<float> &LocalPlanner::desiredFootPositions() { return _desiredFootP; }
 
-Vec12<float> &LocalPlanner::desiredFootV() { return _desiredFootV; }
+Vec12<float> &LocalPlanner::desiredFootVelocities() { return _desiredFootV; }
 
-Vec12<float> &LocalPlanner::desiredFootA() { return _desiredFootA; }
+Vec12<float> &LocalPlanner::desiredFootAccelerations() { return _desiredFootA; }
 
 Vec3<float> &LocalPlanner::desiredRpy() { return _desiredRpy; }
 
