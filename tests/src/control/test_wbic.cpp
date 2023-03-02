@@ -14,7 +14,7 @@ int main() {
 
   WholeBodyImpulseController::WBICOutput outs;
 
-  UnitreeA1 robot = createDummyA1RobotWithRawState();
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithRawState();
 
   a1_lcm_msgs::RobotState robotState;
   a1_lcm_msgs::WbicCommand wbicCommand;

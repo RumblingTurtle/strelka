@@ -147,7 +147,7 @@ Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
 
 float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
 
-UnitreeA1 createDummyA1RobotWithRawState() {
+UnitreeA1 UnitreeA1::createDummyA1RobotWithRawState() {
   a1_lcm_msgs::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
       .gyro = {0, 0, 0},
@@ -164,7 +164,7 @@ UnitreeA1 createDummyA1RobotWithRawState() {
   return UnitreeA1(&dummyState);
 }
 
-UnitreeA1 createDummyA1RobotWithStateEstimates() {
+UnitreeA1 UnitreeA1::createDummyA1RobotWithStateEstimates() {
   a1_lcm_msgs::RobotState dummyState{.quaternion = {1, 0, 0, 0},
                                      .gyro = {0, 0, 0},
                                      .accel = {0, 0, 0},

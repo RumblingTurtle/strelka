@@ -9,7 +9,7 @@ int main() {
   using namespace strelka::robots;
   using namespace strelka::messages;
 
-  UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithStateEstimates();
 
   BodyTrajectoryPlanner planner{};
   float desiredVelocityX = 0.2;

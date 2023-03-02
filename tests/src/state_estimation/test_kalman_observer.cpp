@@ -22,7 +22,7 @@ int main() {
   };
 
   KalmanFilterObserver observer(params);
-  UnitreeA1 robot = createDummyA1RobotWithRawState();
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithRawState();
 
   for (int updateCount = 0; updateCount < 10; updateCount++) {
     observer.update(robot, false, Vec3<float>::Zero());

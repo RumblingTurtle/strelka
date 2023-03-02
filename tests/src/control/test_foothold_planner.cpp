@@ -22,7 +22,7 @@ int main() {
   const float dt = 0.001;
   const int horizonSteps = 10;
 
-  UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithStateEstimates();
   HighLevelCommand command =
       HighLevelCommand::makeDummyCommandMessage(desiredVelocityX);
   GaitScheduler scheduler{TEST_GAIT};

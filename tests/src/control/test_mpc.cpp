@@ -25,7 +25,7 @@ int main() {
 
   HighLevelCommand command =
       HighLevelCommand::makeDummyCommandMessage(desiredVelocityX);
-  UnitreeA1 robot = createDummyA1RobotWithStateEstimates();
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithStateEstimates();
 
   GaitScheduler scheduler{TEST_GAIT};
   BodyTrajectoryPlanner bodyPlanner{};

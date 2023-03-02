@@ -87,10 +87,11 @@ public:
   virtual Vec3<float> currentRPY();
 
   Eigen::Matrix<float, 12, 3> footJacobians();
+
+  static UnitreeA1 createDummyA1RobotWithStateEstimates();
+  static UnitreeA1 createDummyA1RobotWithRawState();
 };
 
-UnitreeA1 createDummyA1RobotWithStateEstimates();
-UnitreeA1 createDummyA1RobotWithRawState();
 } // namespace robots
 } // namespace strelka
 #endif // UNITREE_A1_H
