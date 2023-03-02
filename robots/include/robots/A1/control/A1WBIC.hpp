@@ -4,6 +4,7 @@
 #include <common/typedefs.hpp>
 #include <common/utilities.hpp>
 #include <control/WholeBodyImpulseController.hpp>
+#include <iostream>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <messages/a1_lcm_msgs/RobotState.hpp>
 #include <messages/a1_lcm_msgs/WbicCommand.hpp>
@@ -20,8 +21,10 @@ class A1WBIC {
 
   a1_lcm_msgs::RobotLowCommand *lowCommandMessage;
   a1_lcm_msgs::WbicCommand *currentCommandMessage;
+  a1_lcm_msgs::RobotState *currentRobotStateMessage;
 
   bool firstCommandRecieved;
+  bool firstStateMessageRecieved;
 
   ChronoTimePoint lastCommandTimestamp;
 
@@ -34,9 +37,10 @@ class A1WBIC {
   void commandHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                      const a1_lcm_msgs::WbicCommand *commandMsg);
 
-  void initialize();
-
 public:
+  static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
+  bool rolloverProtection(robots::Robot &robot);
+  bool outputSafetyCheck(WholeBodyImpulseController::WBICOutput &wbicOutput);
   A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters);
   ~A1WBIC();
   void processLoop();
