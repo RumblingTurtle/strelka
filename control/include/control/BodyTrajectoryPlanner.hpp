@@ -5,6 +5,7 @@
 #include <common/macros.hpp>
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
+#include <filters/FirstOrderLPF.hpp>
 #include <messages/HighLevelCommand.hpp>
 
 namespace strelka {
@@ -17,6 +18,8 @@ class BodyTrajectoryPlanner {
 
   Mat43<float> prevContactPosWorld;
   Mat43<float> prevContactPosBody;
+  filters::FirstOrderLPF<float> heightFilter;
+  filters::FirstOrderLPF<float> pitchFilter;
 
   bool firstRun;
 

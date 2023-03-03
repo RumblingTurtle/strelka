@@ -2,10 +2,12 @@
 
 namespace strelka {
 namespace control {
-BodyTrajectoryPlanner::BodyTrajectoryPlanner() : firstRun(true) {
+BodyTrajectoryPlanner::BodyTrajectoryPlanner()
+    : firstRun(true), heightFilter(0.001, 2.0), pitchFilter(0.001, 0.9) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }
+
 DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectoryTest(
     robots::Robot &robot, messages::HighLevelCommand &command, float dt,
     int horizonSteps) {
@@ -58,9 +60,20 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     }
   }
 
-  float estimatedTerrainPitch = 0;
+  // Fit least squares through last contact points
+  Eigen::Matrix<float, 4, 3> A;
+  A.setOnes();
+  A.block<4, 2>(0, 0) = prevContactPosBody.block<4, 2>(0, 0);
 
-  float estimatedContactHeight = prevContactPosWorld.col(2).mean();
+  Vec4<float> b = prevContactPosBody.block<4, 1>(0, 2);
+  Vec3<float> slopeCoefficients = A.colPivHouseholderQr().solve(b);
+
+  float estimatedTerrainPitch = pitchFilter.filter(-slopeCoefficients(0));
+  float estimatedContactHeight =
+      heightFilter.filter(prevContactPosWorld.col(2).mean());
+
+  if (firstRun) {
+  }
 
   Vec3<float> desiredAngularVelocity =
       command.desiredAngularVelocityBodyFrame();

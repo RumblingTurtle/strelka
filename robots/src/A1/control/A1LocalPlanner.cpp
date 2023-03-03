@@ -20,7 +20,7 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
                                  const a1_lcm_msgs::RobotState *messageIn) {
 
   messages::HighLevelCommand command =
-      messages::HighLevelCommand::makeDummyCommandMessage(0.1, 0.2);
+      messages::HighLevelCommand::makeDummyCommandMessage(0.2, 0.0);
   robots::UnitreeA1 robot{messageIn};
 
   float dt = messageIn->tick;

@@ -65,7 +65,7 @@ public:
     a1_lcm_msgs::HighLevelCommand highCommandMsg{
         .linearSpeed = {desiredVelocityX, 0, 0},
         .angularVelocity = {0, 0, desiredVelocityYaw},
-        .footHeight = 0.08,
+        .footHeight = 0.12,
         .footClearance = 0.02,
         .hipOffsets = {0, 0},
         .rpy = {0, 0, 0},
