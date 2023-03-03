@@ -23,6 +23,7 @@
 <> Body trajectory planner
     + Common interface
     + Documentation
+    - Pitch and height estimation
     - Lowpass filter for pitch and height
 
 <> Foot planner
@@ -31,10 +32,13 @@
         A1::constants::FOOT_RADIUS
         A1::constants::TRUNK_TO_THIGH_OFFSETS
     + Documentation
+    - ik checks
+    - stepping up/down
+    - 4 knot bezier curve for swing trajectory
 
 <> State estimation
     + Slowdown estimator for simulation 
-    - Multinomial moving window filter for outputs
+    + Multinomial moving window filter for outputs
     - Resetable observer
     - KalmanFilterObserver Documentation
     ? External odometry parsing
@@ -47,6 +51,8 @@
     - Timeouts for topics
     - Sim/Hardware bridge to lcm
     - Make lcm message names more comprehensive 
+    - Real robot/Gazebo -> RawRobot state
+    - Low level command -> Real robot/Gazebo
 
 <> Code structure
     + Replace defines with constants
@@ -69,5 +75,13 @@
     + Automatic source file search
             FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
 
-<???> Elevation mapping
+<???>
     ? Gridmap to LCM
+    ? Balance controller
+    ? CLI gui
+
+
+
+    
+
+
