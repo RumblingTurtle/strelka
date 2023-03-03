@@ -23,8 +23,8 @@
 <> Body trajectory planner
     + Common interface
     + Documentation
-    - Pitch and height estimation
-    - Lowpass filter for pitch and height
+    + Pitch and height estimation
+    + Lowpass filter for pitch and height
 
 <> Foot planner
     + Common interface
@@ -32,13 +32,14 @@
         A1::constants::FOOT_RADIUS
         A1::constants::TRUNK_TO_THIGH_OFFSETS
     + Documentation
-    - ik checks
-    - stepping up/down
+    + stepping up/down
+    - ik checks for next foothold predictions(not really needed for blind walking)
     - 4 knot bezier curve for swing trajectory
 
 <> State estimation
     + Slowdown estimator for simulation 
     + Multinomial moving window filter for outputs
+    + Simple foot contact height estimation for stepping up on obstacles
     - Resetable observer
     - KalmanFilterObserver Documentation
     ? External odometry parsing
