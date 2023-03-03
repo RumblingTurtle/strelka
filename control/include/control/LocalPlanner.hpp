@@ -40,7 +40,7 @@ class LocalPlanner {
   Vec3<float> _desiredAccelerationBody;
 
 public:
-  LocalPlanner(float mpcBodyMass, const Vec3<float> bodyInertia,
+  LocalPlanner(Gait gait, float mpcBodyMass, const Vec3<float> bodyInertia,
                float stepDt = 0.02, int horizonSteps = 15);
 
   /**

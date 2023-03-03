@@ -51,6 +51,7 @@ void A1GazeboInterface::MoveToHandle::handle(
   }
 
   float dt = data->tick - prevTick;
+  assert(dt > 0);
   prevTick = data->tick;
 
   timeLeft -= dt;
@@ -118,7 +119,7 @@ void A1GazeboInterface::moveTo(const Vec12<float> &angles, float moveTime) {
 
   lcm::Subscription *sub =
       lcm.subscribe("raw_state", &MoveToHandle::handle, &moveHandle);
-
+  sub->setQueueCapacity(1);
   while (moveHandle.timeLeft > 0 && lcm.handle() == 0) {
   }
 

@@ -4,7 +4,7 @@ namespace strelka {
 namespace control {
 
 A1LocalPlanner::A1LocalPlanner()
-    : prevTick(-1), localPlanner(A1::constants::MPC_BODY_MASS,
+    : prevTick(-1), localPlanner(GAITS::TROT, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();
 }

@@ -3,10 +3,11 @@
 namespace strelka {
 namespace control {
 
-LocalPlanner::LocalPlanner(float mpcBodyMass, const Vec3<float> bodyInertia,
-                           float stepDt, int horizonSteps)
-    : scheduler(GAITS::TROT), bodyPlanner(), footPlanner(scheduler),
-      _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
+LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
+                           const Vec3<float> bodyInertia, float stepDt,
+                           int horizonSteps)
+    : scheduler(gait), bodyPlanner(), footPlanner(scheduler), _stepDt(stepDt),
+      _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
   FOR_EACH_LEG { _footState[LEG_ID] = 1; }
   _mpcForces.setZero();
