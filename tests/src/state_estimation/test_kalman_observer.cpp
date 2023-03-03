@@ -25,7 +25,7 @@ int main() {
   UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithRawState();
 
   for (int updateCount = 0; updateCount < 10; updateCount++) {
-    observer.update(robot, false, Vec3<float>::Zero());
+    observer.update(robot, false, Vec3<float>::Zero(), Vec4<float>::Zero());
   }
 
   std::cout << observer.position() << std::endl;

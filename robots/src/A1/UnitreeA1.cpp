@@ -50,8 +50,6 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
 
     _footContacts(LEG_ID) =
         message->footForces[LEG_ID] > A1::constants::FOOT_FORCE_THRESHOLD;
-
-    _footContactHeights(LEG_ID) = A1::constants::FOOT_RADIUS;
   }
 
   _accelerometerWorldFrame =
@@ -109,10 +107,6 @@ Vec3<float> UnitreeA1::gyroscopeBodyFrame() { return _gyroscopeBodyFrame; }
 
 Vec3<float> UnitreeA1::accelerometerWorldFrame() {
   return _accelerometerWorldFrame;
-}
-
-float UnitreeA1::footContactHeightWorldFrame(int legId) {
-  return _footContactHeights(legId);
 }
 
 Vec12<float> UnitreeA1::q() { return _q; };

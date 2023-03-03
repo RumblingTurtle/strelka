@@ -3,7 +3,7 @@
 namespace strelka {
 
 namespace state_estimation {
-A1StateEstimator::A1StateEstimator() {
+A1StateEstimator::A1StateEstimator() : firstRun(true) {
   robotStateMsg = new a1_lcm_msgs::RobotState();
   observer = new KalmanFilterObserver();
 }
@@ -61,18 +61,43 @@ void A1StateEstimator::fillStateEstimatorData(
          sizeof(float) * 36);
 }
 
+void A1StateEstimator::updateFootContactHeights(robots::UnitreeA1 &robot) {
+  if (firstRun) {
+    FOR_EACH_LEG { contactHeightEstimates(LEG_ID) = robot.footRadius(); }
+    previousContacts = robot.footContacts();
+    firstRun = false;
+    return;
+  }
+
+  FOR_EACH_LEG {
+    bool justHitTheGround =
+        !previousContacts(LEG_ID) && robot.footContact(LEG_ID);
+
+    float footHeightWorldFrame =
+        (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)) +
+         observer->position())(2);
+
+    bool enoughHeightDifference =
+        std::abs(footHeightWorldFrame - contactHeightEstimates(LEG_ID)) >
+        HEIGHT_DIFF_THRESHOLD;
+
+    if (justHitTheGround && enoughHeightDifference) {
+      contactHeightEstimates(LEG_ID) = footHeightWorldFrame;
+    }
+  }
+  previousContacts = robot.footContacts();
+}
+
 void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
                               const std::string &chan,
                               const a1_lcm_msgs::RobotRawState *messageIn) {
 
   robots::UnitreeA1 robot(messageIn);
-
   // TODO: Add external odometry listener
-  observer->update(robot, false, Vec3<float>::Zero());
-
+  observer->update(robot, false, Vec3<float>::Zero(), contactHeightEstimates);
+  updateFootContactHeights(robot);
   propagateRobotRawState(messageIn, robotStateMsg);
   fillStateEstimatorData(robot, observer, robotStateMsg);
-
   lcm.publish("robot_state", robotStateMsg);
 }
 } // namespace state_estimation

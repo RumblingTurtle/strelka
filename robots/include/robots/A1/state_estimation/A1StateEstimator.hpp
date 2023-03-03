@@ -20,6 +20,11 @@ class A1StateEstimator {
   a1_lcm_msgs::RobotState *robotStateMsg;
   lcm::Subscription *sub;
 
+  bool firstRun;
+  Vec4<float> contactHeightEstimates;
+  Vec4<bool> previousContacts;
+
+  static constexpr float HEIGHT_DIFF_THRESHOLD = 0.03; // cm
   filters::MovingWindowFilter3D<float> velocityFilter{};
 
   void update(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
@@ -27,7 +32,7 @@ class A1StateEstimator {
 
   void propagateRobotRawState(const a1_lcm_msgs::RobotRawState *messageIn,
                               a1_lcm_msgs::RobotState *messageOut);
-
+  void updateFootContactHeights(robots::UnitreeA1 &robot);
   void fillStateEstimatorData(robots::UnitreeA1 &robot,
                               const KalmanFilterObserver *observer,
                               a1_lcm_msgs::RobotState *messageOut);

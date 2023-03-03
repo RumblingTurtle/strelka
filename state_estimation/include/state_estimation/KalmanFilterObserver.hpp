@@ -2,6 +2,7 @@
 #define KALMAN_FILTER_OBSERVER_H
 
 #include <common/Robot.hpp>
+#include <common/macros.hpp>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
@@ -22,8 +23,8 @@ class KalmanFilterObserver {
   constexpr static int SENSOR_DIM = 31;
 
   Eigen::Matrix<float, STATE_DIM, 1> _xhat;
-  Eigen::Matrix<float, 12, 1> _ps;
-  Eigen::Matrix<float, 12, 1> _vs;
+  Vec12<float> _ps;
+  Vec12<float> _vs;
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> _A;
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> _Q0;
   Eigen::Matrix<float, STATE_DIM, STATE_DIM> _P;
@@ -35,10 +36,10 @@ class KalmanFilterObserver {
   bool initialized;
 
   /*Outputs*/
-  Eigen::Vector3f _position;
-  Eigen::Vector3f _velocityBody;
-  Eigen::Vector3f _velocityWorld;
-  Eigen::Matrix<float, 12, 1> _footPositionsWorld;
+  Vec3<float> _position;
+  Vec3<float> _velocityBody;
+  Vec3<float> _velocityWorld;
+  Vec12<float> _footPositionsWorld;
   Eigen::Matrix3f _positionCovariance;
 
   void initialize();
@@ -57,13 +58,13 @@ public:
 
     float contactHeightSensorNoise;
 
-    Eigen::Vector3f externalOdometryNoisePosition;
+    Vec3<float> externalOdometryNoisePosition;
   } parameters;
 
-  Eigen::Vector3f position() const;
-  Eigen::Vector3f velocityBody() const;
-  Eigen::Vector3f velocityWorld() const;
-  Eigen::Matrix<float, 12, 1> footPositionsWorld() const;
+  Vec3<float> position() const;
+  Vec3<float> velocityBody() const;
+  Vec3<float> velocityWorld() const;
+  Vec12<float> footPositionsWorld() const;
   Eigen::Matrix3f positionCovariance() const;
 
   KalmanFilterObserver();
@@ -72,7 +73,7 @@ public:
   void setParameters(KalmanFilterObserverParams &);
 
   void update(robots::Robot &robot, bool useExternalOdometry,
-              Vec3<float> externalOdometryPosition);
+              Vec3<float> externalOdometryPosition, Vec4<float> contactHeights);
 
   void reset();
 };

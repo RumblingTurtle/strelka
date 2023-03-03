@@ -70,7 +70,8 @@ void KalmanFilterObserver::initialize() {
 
 void KalmanFilterObserver::update(robots::Robot &robot,
                                   bool useExternalOdometry,
-                                  Vec3<float> externalOdometryPosition) {
+                                  Vec3<float> externalOdometryPosition,
+                                  Vec4<float> contactHeights) {
   if (!initialized) {
     throw UninitializedKalmanFilter();
   }
@@ -115,33 +116,33 @@ void KalmanFilterObserver::update(robots::Robot &robot,
   int rindex3 = 0;
 
   Eigen::Matrix<float, 4, 1> pzs = Eigen::Matrix<float, 4, 1>::Zero();
-  Eigen::Vector3f p0, v0;
+  Vec3<float> p0, v0;
   p0 << _xhat[0], _xhat[1], _xhat[2];
   v0 << _xhat[3], _xhat[4], _xhat[5];
 
   Eigen::Matrix<float, 4, 1> trusts = Eigen::Matrix<float, 4, 1>::Zero();
   float h_i = 0.0f;
-  for (int i = 0; i < 4; i++) {
-    int i1 = 3 * i;
-    Eigen::Vector3f p_rel = robot.footPositionTrunkFrame(i);
-    Eigen::Vector3f dp_rel = robot.footVelocityTrunkFrame(i);
-    Eigen::Vector3f p_f = robot.rotateBodyToWorldFrame(p_rel);
-    Eigen::Vector3f dp_f = robot.rotateBodyToWorldFrame(
+  FOR_EACH_LEG {
+    int i1 = 3 * LEG_ID;
+    Vec3<float> p_rel = robot.footPositionTrunkFrame(LEG_ID);
+    Vec3<float> dp_rel = robot.footVelocityTrunkFrame(LEG_ID);
+    Vec3<float> p_f = robot.rotateBodyToWorldFrame(p_rel);
+    Vec3<float> dp_f = robot.rotateBodyToWorldFrame(
         robot.gyroscopeBodyFrame().cross(p_rel) + dp_rel);
-
+    float contactHeight = contactHeights(LEG_ID);
     qindex = 6 + i1;
     rindex1 = i1;
     rindex2 = 12 + i1;
-    rindex3 = 24 + i;
+    rindex3 = 24 + LEG_ID;
 
-    float trust = robot.footContact(i);
+    float trust = robot.footContact(LEG_ID);
 
     float high_suspect_number(100);
 
     Q.block<3, 3>(qindex, qindex) =
         (float(1) + (float(1) - trust) * high_suspect_number) *
         Q.block<3, 3>(qindex, qindex);
-    R.block<3, 3>(rindex1, rindex1) = 1 * R.block<3, 3>(rindex1, rindex1);
+    R.block<3, 3>(rindex1, rindex1) = R.block<3, 3>(rindex1, rindex1);
     R.block<3, 3>(rindex2, rindex2) =
         (float(1) + (float(1) - trust) * high_suspect_number) *
         R.block<3, 3>(rindex2, rindex2);
@@ -149,13 +150,12 @@ void KalmanFilterObserver::update(robots::Robot &robot,
         (float(1) + (float(1) - trust) * high_suspect_number) *
         R(rindex3, rindex3);
 
-    trusts(i) = trust;
+    trusts(LEG_ID) = trust;
 
     _ps.segment(i1, 3) = -p_f;
     _vs.segment(i1, 3) = (1.0f - trust) * v0 + trust * (-dp_f);
 
-    pzs(i) = (1.0f - trust) * (p0(2) + p_f(2)) +
-             trust * robot.footContactHeightWorldFrame(i);
+    pzs(LEG_ID) = (1.0f - trust) * (p0(2) + p_f(2)) + trust * contactHeight;
   }
 
   Eigen::Matrix<float, SENSOR_DIM, 1> y;
@@ -187,17 +187,17 @@ void KalmanFilterObserver::update(robots::Robot &robot,
   _positionCovariance = _P.block<3, 3>(0, 0);
 }
 
-Eigen::Vector3f KalmanFilterObserver::position() const { return _position; }
+Vec3<float> KalmanFilterObserver::position() const { return _position; }
 
-Eigen::Vector3f KalmanFilterObserver::velocityBody() const {
+Vec3<float> KalmanFilterObserver::velocityBody() const {
   return _velocityBody;
 };
 
-Eigen::Vector3f KalmanFilterObserver::velocityWorld() const {
+Vec3<float> KalmanFilterObserver::velocityWorld() const {
   return _velocityWorld;
 };
 
-Eigen::Matrix<float, 12, 1> KalmanFilterObserver::footPositionsWorld() const {
+Vec12<float> KalmanFilterObserver::footPositionsWorld() const {
   return _footPositionsWorld;
 };
 

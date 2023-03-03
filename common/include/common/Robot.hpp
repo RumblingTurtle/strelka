@@ -71,14 +71,6 @@ public:
   virtual Vec3<float> footVelocityTrunkFrame(int legId) = 0;
   virtual Vec3<float> footPositionWorldFrame(int legId) = 0;
 
-  /**
-   * @brief Returns height of the foot in contact in the odometry frame.
-   *
-   * You may redefine the logic behind the output value. This will infuence the
-   * height of the robot in world frame
-   */
-  virtual float footContactHeightWorldFrame(int legId) = 0;
-
   virtual Quat<float> bodyToWorldQuat() = 0;
   virtual Mat3<float> bodyToWorldMat() = 0;
 

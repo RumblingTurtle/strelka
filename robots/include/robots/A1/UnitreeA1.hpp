@@ -70,8 +70,6 @@ public:
 
   virtual Vec3<float> footPositionWorldFrame(int legId);
 
-  virtual float footContactHeightWorldFrame(int legId);
-
   virtual Quat<float> bodyToWorldQuat();
   virtual Mat3<float> bodyToWorldMat();
 
