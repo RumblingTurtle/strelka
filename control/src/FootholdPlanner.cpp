@@ -132,22 +132,22 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
       bool steppingUp = heightDiff > command.desiredFootHeight();
       bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
-      /*
-          if (steppingUp) {
-            swingHeight[LEG_ID] = heightDiff + 0.02;
-            swingBack[LEG_ID] = true;
-          }
 
-          if (steppingDown) {
-            swingHeight[LEG_ID] = 0.02;
-            swingBack[LEG_ID] = false;
-          }
+      if (steppingUp) {
+        swingHeight[LEG_ID] = heightDiff + 0.02;
+        swingBack[LEG_ID] = true;
+      }
 
-          if (!steppingUp && !steppingDown) {
-            swingHeight[LEG_ID] = command.desiredFootHeight();
-            swingBack[LEG_ID] = false;
-          }
-    */
+      if (steppingDown) {
+        swingHeight[LEG_ID] = 0.02;
+        swingBack[LEG_ID] = false;
+      }
+
+      if (!steppingUp && !steppingDown) {
+        swingHeight[LEG_ID] = command.desiredFootHeight();
+        swingBack[LEG_ID] = false;
+      }
+
       swingHeight[LEG_ID] = command.desiredFootHeight();
       swingBack[LEG_ID] = false;
     }
@@ -205,7 +205,11 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
                         desiredVelocityWorld);
   }
 
-  predictedFootWorld(2) = robot.footRadius();
+  /**
+   * Assume the next foothold's height is on the same level as the starting
+   * position.
+   */
+  predictedFootWorld(2) = robot.footRadius() + _footholds[legId].at(0)(2);
   return predictedFootWorld;
 }
 
