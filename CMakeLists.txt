@@ -3,6 +3,8 @@ project(strelka LANGUAGES C CXX)
 
 message("Build type ${CMAKE_BUILD_TYPE}")
 
+add_definitions(-DDFLOAT) 
+
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
 set(CMAKE_C_FLAGS_RELEASE "-O3  -march=native -std=gnu99 -I.")
 

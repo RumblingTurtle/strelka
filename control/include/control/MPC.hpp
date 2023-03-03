@@ -19,51 +19,51 @@ namespace control {
  *
  */
 class MPC {
-  const double _bodyMass;
-  const Mat3<double> inertia_;
-  const Mat3<double> inv_inertia_;
+  const float _bodyMass;
+  const Mat3<float> inertia_;
+  const Mat3<float> inv_inertia_;
   const int planning_horizon_;
-  const double timestep_;
+  const float timestep_;
 
   // 13 * horizon diagonal matrix.
-  SMat<double> qp_weights_;
+  SMat<float> qp_weights_;
 
   // NUM_LEGS * 3 * horizon diagonal matrix.
-  const double alpha_;
+  const float alpha_;
 
   // The following matrices will be updated for every call. However, their sizes
   // can be determined at class initialization time.
-  DMat<double> _a_mat;           // 13 x 13
-  DMat<double> _b_mat;           // 13 x (NUM_LEGS * 3)
-  DMat<double> ab_concatenated_; // 13 + NUM_LEGS * 3 x 13 + NUM_LEGS * 3
-  DMat<double> _a_exp;           // same dimension as _a_mat
-  DMat<double> _b_exp;           // same dimension as _b_mat
+  DMat<float> _a_mat;           // 13 x 13
+  DMat<float> _b_mat;           // 13 x (NUM_LEGS * 3)
+  DMat<float> ab_concatenated_; // 13 + NUM_LEGS * 3 x 13 + NUM_LEGS * 3
+  DMat<float> _a_exp;           // same dimension as _a_mat
+  DMat<float> _b_exp;           // same dimension as _b_mat
 
   // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
-  DMat<double> _a_qp;  // 13 * horizon x 13
-  DMat<double> _b_qp;  // 13 * horizon x NUM_LEGS * 3 * horizon sparse
-  DMat<double> _p_mat; // NUM_LEGS * 3 * horizon x NUM_LEGS * 3 * horizon
-  DVec<double> _q_vec; // NUM_LEGS * 3 * horizon vector
+  DMat<float> _a_qp;  // 13 * horizon x 13
+  DMat<float> _b_qp;  // 13 * horizon x NUM_LEGS * 3 * horizon sparse
+  DMat<float> _p_mat; // NUM_LEGS * 3 * horizon x NUM_LEGS * 3 * horizon
+  DVec<float> _q_vec; // NUM_LEGS * 3 * horizon vector
 
-  DMat<double> _b_exps; // 13 * horizon x (NUM_LEGS * 3 )
+  DMat<float> _b_exps; // 13 * horizon x (NUM_LEGS * 3 )
 
   // Contains the constraint matrix and bounds.
-  DMat<double> _constraint; // 5 * NUM_LEGS * horizon x 3 * NUM_LEGS * horizon
-  DVec<double> _constraint_lb; // 5 * NUM_LEGS * horizon
-  DVec<double> _constraint_ub; // 5 * NUM_LEGS * horizon
+  DMat<float> _constraint;    // 5 * NUM_LEGS * horizon x 3 * NUM_LEGS * horizon
+  DVec<float> _constraint_lb; // 5 * NUM_LEGS * horizon
+  DVec<float> _constraint_ub; // 5 * NUM_LEGS * horizon
 
-  Vec4<double> _footFrictionCoefficients;
-  double kMaxScale;
-  double kMinScale;
+  Vec4<float> _footFrictionCoefficients;
+  float kMaxScale;
+  float kMinScale;
 
-  DVec<double> qp_solution_;
+  DVec<float> qp_solution_;
   ::OSQPWorkspace *workspace_;
   // Whether optimizing for the first step
   bool initial_run_;
 
   void updateConstraints(DMat<bool> &contactTable);
 
-  DVec<double> &solveQP();
+  DVec<float> &solveQP();
 
   void updateObjectiveVector(robots::Robot &robot, DMat<float> &bodyTrajectory);
 
@@ -80,16 +80,16 @@ public:
   static constexpr int NUM_LEGS = 4;
   static constexpr int ACTION_DIM = NUM_LEGS * 3;
 
-  static constexpr double CONSTRAINT_MAX_SCALE = 10;
-  static constexpr double CONSTRAINT_MIN_SCALE = 0.1;
-  static constexpr double MPC_ALPHA = 1e-5;
-  static constexpr double FRICTION_COEFFS[4] = {0.45, 0.45, 0.45, 0.45};
-  static constexpr double MPC_WEIGHTS[13] = {
-      1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
+  static constexpr float CONSTRAINT_MAX_SCALE = 10;
+  static constexpr float CONSTRAINT_MIN_SCALE = 0.1;
+  static constexpr float MPC_ALPHA = 1e-5;
+  static constexpr float FRICTION_COEFFS[4] = {0.45, 0.45, 0.45, 0.45};
+  static constexpr float MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
+                                            0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
-  void fillQPWeights(const double *qp_weights);
-  MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
-      double timestep);
+  void fillQPWeights(const float *qp_weights);
+  MPC(float mass, const Vec3<float> &inertia, int planning_horizon,
+      float timestep);
 
   ~MPC();
   /**
@@ -108,7 +108,7 @@ public:
    * See BodyTrajectoryPlanner for an example
    *
    */
-  DVec<double> &
+  DVec<float> &
   computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
                        DMat<float> &contactPositionsWorldFrameRotated,
                        DMat<float> &bodyTrajectory);

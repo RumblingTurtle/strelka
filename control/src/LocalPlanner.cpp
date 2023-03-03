@@ -3,7 +3,7 @@
 namespace strelka {
 namespace control {
 
-LocalPlanner::LocalPlanner(double mpcBodyMass, const Vec3<double> bodyInertia,
+LocalPlanner::LocalPlanner(float mpcBodyMass, const Vec3<float> bodyInertia,
                            float stepDt, int horizonSteps)
     : scheduler(GAITS::TROT), bodyPlanner(), footPlanner(scheduler),
       _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
@@ -40,10 +40,10 @@ void LocalPlanner::update(robots::Robot &robot,
   DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
-  DVec<double> forces = mpc.computeContactForces(robot, contactTable,
-                                                 footholdTable, bodyTrajectory);
+  DVec<float> forces = mpc.computeContactForces(robot, contactTable,
+                                                footholdTable, bodyTrajectory);
 
-  _mpcForces = -forces.block<12, 1>(0, 0).cast<float>();
+  _mpcForces = -forces.block<12, 1>(0, 0);
 
   _desiredRpy = bodyTrajectory.block<1, 3>(0, 0);
   _desiredPositionBody = bodyTrajectory.block<1, 3>(0, 3);

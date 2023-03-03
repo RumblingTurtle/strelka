@@ -8,14 +8,14 @@ constexpr int MPC::CONSTRAINT_DIM;
 constexpr int MPC::NUM_LEGS;
 constexpr int MPC::ACTION_DIM;
 
-constexpr double MPC::CONSTRAINT_MAX_SCALE;
-constexpr double MPC::CONSTRAINT_MIN_SCALE;
-constexpr double MPC::MPC_ALPHA;
-constexpr double MPC::FRICTION_COEFFS[4];
-constexpr double MPC::MPC_WEIGHTS[13];
+constexpr float MPC::CONSTRAINT_MAX_SCALE;
+constexpr float MPC::CONSTRAINT_MIN_SCALE;
+constexpr float MPC::MPC_ALPHA;
+constexpr float MPC::FRICTION_COEFFS[4];
+constexpr float MPC::MPC_WEIGHTS[13];
 
-MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
-         double timestep)
+MPC::MPC(float mass, const Vec3<float> &inertia, int planning_horizon,
+         float timestep)
     : _bodyMass(mass), inertia_(inertia.asDiagonal()),
       inv_inertia_(inertia_.inverse()), planning_horizon_(planning_horizon),
       timestep_(timestep), alpha_(MPC_ALPHA), _a_mat(STATE_DIM, STATE_DIM),
@@ -51,7 +51,7 @@ MPC::MPC(double mass, const Vec3<double> &inertia, int planning_horizon,
   _p_mat.setZero();
 }
 
-void MPC::fillQPWeights(const double *qp_weights) {
+void MPC::fillQPWeights(const float *qp_weights) {
   for (int i = 0; i < MPC::STATE_DIM * planning_horizon_; i++) {
     qp_weights_.insert(i, i) = qp_weights[i % MPC::STATE_DIM];
   }
@@ -63,18 +63,18 @@ void MPC::computeABExponentials(robots::Robot &robot,
                                 DMat<float> &contactPositionsWorldFrameRotated,
                                 DMat<float> &bodyTrajectory) {
   // A mat calculation
-  double avg_yaw = bodyTrajectory.block(0, 2, planning_horizon_, 1).mean();
+  float avg_yaw = bodyTrajectory.block(0, 2, planning_horizon_, 1).mean();
   // The transformation of angular velocity to roll pitch yaw rate. Caveat:
   // rpy rate is not a proper vector and does not follow the common vector
   // transformation dicted by the rotation matrix. Here we assume the input
   // rotation is in X->Y->Z order in the extrinsic/fixed frame, or z->y'->x''
   // order in the intrinsic frame.
-  const double cos_yaw = cos(avg_yaw);
-  const double sin_yaw = sin(avg_yaw);
-  const double pitch = robot.currentRPY()(1);
-  const double cos_pitch = cos(pitch);
-  const double tan_pitch = tan(pitch);
-  Mat3<double> angular_velocity_to_rpy_rate;
+  const float cos_yaw = cos(avg_yaw);
+  const float sin_yaw = sin(avg_yaw);
+  const float pitch = robot.currentRPY()(1);
+  const float cos_pitch = cos(pitch);
+  const float tan_pitch = tan(pitch);
+  Mat3<float> angular_velocity_to_rpy_rate;
   angular_velocity_to_rpy_rate << cos_yaw / cos_pitch, sin_yaw / cos_pitch, 0,
       -sin_yaw, cos_yaw, 0, cos_yaw * tan_pitch, sin_yaw * tan_pitch, 1;
 
@@ -86,21 +86,20 @@ void MPC::computeABExponentials(robots::Robot &robot,
 
   ab_concatenated_.block<STATE_DIM, STATE_DIM>(0, 0) = _a_mat * timestep_;
 
-  Mat3<double> skew_mat;
+  Mat3<float> skew_mat;
   // B mat and A mat exponentials calculation
   for (int h = 0; h < planning_horizon_; h++) {
-    Vec3<double> current_rpy =
-        bodyTrajectory.block<1, 3>(h, 0).transpose().cast<double>();
-    Mat3<double> current_robot_rot;
+    Vec3<float> current_rpy = bodyTrajectory.block<1, 3>(h, 0).transpose();
+    Mat3<float> current_robot_rot;
     rotation::rpy2rot(current_rpy, current_robot_rot);
 
-    const Mat3<double> inv_inertia_world =
+    const Mat3<float> inv_inertia_world =
         current_robot_rot * inv_inertia_ * current_robot_rot.transpose();
 
     for (int leg_id = 0; leg_id < NUM_LEGS; leg_id++) {
-      double xPos = contactPositionsWorldFrameRotated(leg_id, h * 3);
-      double yPos = contactPositionsWorldFrameRotated(leg_id, h * 3 + 1);
-      double zPos = contactPositionsWorldFrameRotated(leg_id, h * 3 + 2);
+      float xPos = contactPositionsWorldFrameRotated(leg_id, h * 3);
+      float yPos = contactPositionsWorldFrameRotated(leg_id, h * 3 + 1);
+      float zPos = contactPositionsWorldFrameRotated(leg_id, h * 3 + 2);
 
       skew_mat << 0, -zPos, yPos, zPos, 0, -xPos, -yPos, xPos, 0;
 
@@ -115,7 +114,7 @@ void MPC::computeABExponentials(robots::Robot &robot,
     ab_concatenated_.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM) =
         _b_mat * timestep_;
 
-    DMat<double> ab_exp = ab_concatenated_.exp();
+    DMat<float> ab_exp = ab_concatenated_.exp();
     if (h == 0) {
       _a_exp = ab_exp.block<STATE_DIM, STATE_DIM>(0, 0);
       _b_exp = ab_exp.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM);
@@ -127,8 +126,8 @@ void MPC::computeABExponentials(robots::Robot &robot,
 }
 
 void MPC::computeQpMatrices() {
-  static DMat<double> alphaI =
-      alpha_ * DMat<double>::Identity(NUM_LEGS * 3, NUM_LEGS * 3);
+  static DMat<float> alphaI =
+      alpha_ * DMat<float>::Identity(NUM_LEGS * 3, NUM_LEGS * 3);
 
   _a_qp.block<STATE_DIM, STATE_DIM>(0, 0) = _a_exp;
   for (int i = 1; i < planning_horizon_; ++i) {
@@ -181,7 +180,7 @@ void MPC::updateConstraints(DMat<bool> &contactTable) {
       _constraint_lb(row + 3) = 0;
       _constraint_lb(row + 4) = fz_min * contactTable(j, i);
 
-      const double friction_ub =
+      const float friction_ub =
           (friction_coeff + 1) * fz_max * contactTable(j, i);
 
       _constraint_ub(row) = friction_ub;
@@ -201,15 +200,15 @@ void MPC::updateConstraints(DMat<bool> &contactTable) {
   }
 }
 
-DVec<double> &MPC::solveQP() {
-  static DVec<double> error_result;
+DVec<float> &MPC::solveQP() {
+  static DVec<float> error_result;
 
-  DVec<double> objective_vector = _q_vec;
+  DVec<float> objective_vector = _q_vec;
 
-  Eigen::SparseMatrix<double, Eigen::ColMajor, long long> objective_matrix =
+  Eigen::SparseMatrix<float, Eigen::ColMajor, long long> objective_matrix =
       _p_mat.sparseView();
 
-  Eigen::SparseMatrix<double, Eigen::ColMajor, long long> constraint_matrix =
+  Eigen::SparseMatrix<float, Eigen::ColMajor, long long> constraint_matrix =
       _constraint.sparseView();
 
   int num_variables = _constraint.cols();
@@ -228,7 +227,7 @@ DVec<double> &MPC::solveQP() {
   data.n = num_variables;
   data.m = num_constraints;
 
-  Eigen::SparseMatrix<double, Eigen::ColMajor, long long>
+  Eigen::SparseMatrix<float, Eigen::ColMajor, long long>
       objective_matrix_upper_triangle =
           objective_matrix.triangularView<Eigen::Upper>();
 
@@ -238,7 +237,7 @@ DVec<double> &MPC::solveQP() {
       num_variables,
       const_cast<long long *>(objective_matrix_upper_triangle.outerIndexPtr()),
       const_cast<long long *>(objective_matrix_upper_triangle.innerIndexPtr()),
-      const_cast<double *>(objective_matrix_upper_triangle.valuePtr()),
+      const_cast<float *>(objective_matrix_upper_triangle.valuePtr()),
       -1};
 
   data.P = &osqp_objective_matrix;
@@ -249,11 +248,11 @@ DVec<double> &MPC::solveQP() {
       num_variables,
       const_cast<long long *>(constraint_matrix.outerIndexPtr()),
       const_cast<long long *>(constraint_matrix.innerIndexPtr()),
-      const_cast<double *>(constraint_matrix.valuePtr()),
+      const_cast<float *>(constraint_matrix.valuePtr()),
       -1};
 
   data.A = &osqp_constraint_matrix;
-  data.q = const_cast<double *>(objective_vector.data());
+  data.q = const_cast<float *>(objective_vector.data());
   data.l = _constraint_lb.data();
   data.u = _constraint_ub.data();
 
@@ -288,40 +287,38 @@ DVec<double> &MPC::solveQP() {
     return error_result;
   }
 
-  Eigen::Map<Eigen::VectorXd> solution(qp_solution_.data(),
-                                       qp_solution_.size());
+  Eigen::Map<DVec<float>> solution(qp_solution_.data(), qp_solution_.size());
 
-  solution = -Eigen::Map<const Eigen::VectorXd>(workspace_->solution->x,
-                                                workspace_->data->n);
+  solution = -Eigen::Map<const DVec<float>>(workspace_->solution->x,
+                                            workspace_->data->n);
 
   return qp_solution_;
 }
 
 void MPC::updateObjectiveVector(robots::Robot &robot,
                                 DMat<float> &bodyTrajectory) {
-  DVec<double> currentState(13);
-  currentState.block<3, 1>(0, 0) = robot.currentRPY().cast<double>();
-  currentState.block<3, 1>(3, 0) = robot.positionWorldFrame().cast<double>();
+  DVec<float> currentState(13);
+  currentState.block<3, 1>(0, 0) = robot.currentRPY();
+  currentState.block<3, 1>(3, 0) = robot.positionWorldFrame();
 
   currentState.block<3, 1>(6, 0) =
-      robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame()).cast<double>();
+      robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame());
 
   currentState.block<3, 1>(9, 0) =
-      robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame())
-          .cast<double>();
+      robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame());
 
-  currentState(12) = (double)constants::GRAVITY_CONSTANT;
+  currentState(12) = constants::GRAVITY_CONSTANT;
   // std::cout << currentState << std::endl << std::endl;
-  DMat<double> bodyTraj = bodyTrajectory.transpose().cast<double>();
-  DVec<double> desiredStateTrajectory =
-      Eigen::Map<DVec<double>>(bodyTraj.data(), bodyTraj.size());
-
-  const DVec<double> state_diff = _a_qp * currentState - desiredStateTrajectory;
+  DMat<float> desiredStateTrajectory = bodyTrajectory.transpose();
+  DVec<float> flatDesiredStateTrajectory = Eigen::Map<DVec<float>>(
+      desiredStateTrajectory.data(), desiredStateTrajectory.size());
+  const DVec<float> state_diff =
+      _a_qp * currentState - flatDesiredStateTrajectory;
 
   _q_vec = 2 * _b_qp.transpose() * (qp_weights_ * state_diff);
 }
 
-DVec<double> &
+DVec<float> &
 MPC::computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
                           DMat<float> &contactPositionsWorldFrameRotated,
                           DMat<float> &bodyTrajectory) {

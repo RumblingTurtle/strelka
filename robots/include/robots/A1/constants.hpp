@@ -35,8 +35,8 @@ const float TRUNK_TO_THIGH_OFFSETS[12] = {0.1805, -0.1308, 0.0,     0.1805,
 const float FOOT_RADIUS = 0.02;
 const float FOOT_FORCE_THRESHOLD = 10.0;
 
-const Vec3<double> MPC_BODY_INERTIA{0.15, 0.34, 0.36};
-const double MPC_BODY_MASS = 12.8;
+const Vec3<float> MPC_BODY_INERTIA{0.15, 0.34, 0.36};
+const float MPC_BODY_MASS = 12.8;
 
 } // namespace constants
 } // namespace A1
