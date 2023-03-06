@@ -68,8 +68,10 @@
     ? Threads for multiple topics 
 
 <> Testing
-    - Add gtest to deps
-    - Design assertable tests
+    + Add gtest to deps
+    - Test all public interfaces 
+    - Test class to class relationships
+
 
 <> Build system
     - Macros for packages
@@ -80,9 +82,3 @@
     ? Gridmap to LCM
     ? Balance controller
     ? CLI gui
-
-
-
-    
-
-
