@@ -1,6 +1,6 @@
-printPackageHeader(tests)
+printPackageHeader(examples)
 
-SET(STRELKA_TESTS_DEPENDENCY_INCLUDE_DIRS 
+SET(STRELKA_EXAMPLES_DEPENDENCY_INCLUDE_DIRS 
     ${Eigen_INCLUDE_DIRS}
     ${STRELKA_COMMON_INCLUDE_DIRS}
     ${STRELKA_INTERFACES_INCLUDE_DIRS}
@@ -10,19 +10,18 @@ SET(STRELKA_TESTS_DEPENDENCY_INCLUDE_DIRS
     ${STRELKA_ROBOTS_INCLUDE_DIRS}
 )
 
-SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES 
+SET(STRELKA_EXAMPLES_DEPENDENCY_LIBRARIES 
     strelka_robots
     strelka_state_estimation
     strelka_control
 )
 
-FILE(GLOB STRELKA_TESTS_SOURCES LIST_DIRECTORIES true ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*_test.cpp)
+FILE(GLOB STRELKA_EXAMPLES_SOURCES LIST_DIRECTORIES true "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-foreach(file_path ${STRELKA_TESTS_SOURCES})
+foreach(file_path ${STRELKA_EXAMPLES_SOURCES})
     string( REPLACE ".cpp" "" new_name ${file_path} )
     get_filename_component(filename ${new_name} NAME)
     message("Prepping " ${filename})
     add_executable( ${filename} ${file_path} )
-    target_link_libraries(${filename} ${STRELKA_TESTS_DEPENDENCY_LIBRARIES} GTest::gtest_main)
-    gtest_discover_tests(${filename})
+    target_link_libraries(${filename} ${STRELKA_EXAMPLES_DEPENDENCY_LIBRARIES})
 endforeach()

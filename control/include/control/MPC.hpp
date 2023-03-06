@@ -73,6 +73,8 @@ class MPC {
 
   void computeQpMatrices();
 
+  void fillQPWeights(const float *qp_weights);
+
 public:
   // 6 dof pose + 6 dof velocity + 1 gravity
   static constexpr int STATE_DIM = 13;
@@ -87,7 +89,6 @@ public:
   static constexpr float MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
                                             0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
-  void fillQPWeights(const float *qp_weights);
   MPC(float mass, const Vec3<float> &inertia, int planning_horizon,
       float timestep);
 

@@ -9,12 +9,13 @@ A1StateEstimator::A1StateEstimator() : firstRun(true) {
 }
 
 void A1StateEstimator::processLoop() {
-  SlowdownEstimator slowdownEstimator(lcm);
+  SlowdownEstimator slowdownEstimator(lcm, A1::constants::RAW_STATE_TOPIC_NAME);
   slowdownEstimator.estimateDts();
 
   DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
   observer->setParameters(DEFAULT_KALMAN_FILTER_PARAMS);
-  sub = lcm.subscribe("raw_state", &A1StateEstimator::update, this);
+  sub = lcm.subscribe(A1::constants::RAW_STATE_TOPIC_NAME,
+                      &A1StateEstimator::update, this);
   sub->setQueueCapacity(1);
   while (lcm.handle() == 0) {
   }

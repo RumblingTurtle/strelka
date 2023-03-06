@@ -14,7 +14,8 @@
 
 namespace strelka {
 namespace robots {
-class NoStateEstimateException : std::exception {
+class NoStateEstimateException : public std::exception {
+public:
   const char *what() {
     return "UnitreeA1 robot has no state estimate. Build a UnitreeA1 class "
            "using a1_lcm_msgs::RobotState";
@@ -87,7 +88,8 @@ public:
   Eigen::Matrix<float, 12, 3> footJacobians();
 
   static UnitreeA1 createDummyA1RobotWithStateEstimates();
-  static UnitreeA1 createDummyA1RobotWithRawState();
+  static UnitreeA1 createDummyA1RobotWithRawState(
+      const Vec3<float> &motorAngles = A1::constants::STAND_ANGLES);
 };
 
 } // namespace robots

@@ -3,6 +3,7 @@
 
 #include <common/typedefs.hpp>
 #include <interfaces/QuadrupedInterface.hpp>
+#include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
 #include <messages/a1_lcm_msgs/RobotLowCommand.hpp>
@@ -14,45 +15,64 @@
 
 namespace strelka {
 namespace interfaces {
-class A1GazeboInterface : public QuadrupedInterface {
-  lcm::LCM lcm;
-  a1_lcm_msgs::RobotLowCommand commandMessage;
 
-  struct MoveToHandle {
+class RobotStateTopicDoesNotExist : public std::exception {
+public:
+  const char *what() {
+    return "Robot state topic set for in A1GazeboInterface does not exist";
+  }
+};
+
+class A1GazeboInterface : public QuadrupedInterface {
+  a1_lcm_msgs::RobotLowCommand commandMessage;
+  lcm::LCM lcm;
+
+  class MoveToHandle {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     float moveTime;
     float timeLeft;
     float prevTick;
-    bool firstHandle;
+    const char *stateTopicName;
+    lcm::LCM lcm;
 
     Vec12<float> startAngles;
-    const Vec12<float> &desiredAngles;
+    Vec12<float> desiredAngles;
     A1GazeboInterface &interface;
 
-    MoveToHandle(float moveTime, const Vec12<float> &desiredAngles,
-                 A1GazeboInterface &interface);
+  public:
+    MoveToHandle(A1GazeboInterface &interface, const char *stateTopicName);
 
-    void handle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                const a1_lcm_msgs::RobotRawState *data);
+    void run(float moveTime, const Vec12<float> &desiredAngles);
+    void moveHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+                    const a1_lcm_msgs::RobotRawState *data);
+
+    void initStartAnglesHandle(const lcm::ReceiveBuffer *rbuf,
+                               const std::string &chan,
+                               const a1_lcm_msgs::RobotRawState *data);
+
+    Vec12<float> getInitAngles();
   };
 
 public:
   explicit A1GazeboInterface() {}
 
-  virtual void sendCommandMessage(const Vec12<float> &command) override;
+  void sendCommandMessage(const Vec12<float> &command) override;
 
-  virtual void setTorques(const Vec12<float> &torques) override;
+  void setTorques(const Vec12<float> &torques) override;
 
-  virtual void setAngles(const Vec12<float> &q) override;
+  void setAngles(const Vec12<float> &q) override;
 
-  virtual void setAngles(const Vec12<float> &q,
-                         const Vec12<float> &dq) override;
+  void setAngles(const Vec12<float> &q, const Vec12<float> &dq) override;
 
-  virtual void moveTo(const Vec12<float> &angles, float moveTime) override;
+  Vec12<float> getAngles() override;
 
-  virtual void moveToInit(float moveTime = 3.0) override;
+  void moveTo(const Vec12<float> &angles, float moveTime) override;
 
-  virtual void moveToStand(float moveTime = 3.0) override;
+  void moveTo(const Vec3<float> &angles, float moveTime);
+
+  void moveToInit(float moveTime = 3.0) override;
+
+  void moveToStand(float moveTime = 3.0) override;
 };
 } // namespace interfaces
 } // namespace strelka

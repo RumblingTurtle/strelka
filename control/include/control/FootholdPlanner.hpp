@@ -19,6 +19,7 @@ namespace strelka {
 namespace control {
 
 class InvalidFootholdIdx {
+public:
   const char *what() {
     return "FootholdPlanner: invalid foothold index in getFoothold";
   }

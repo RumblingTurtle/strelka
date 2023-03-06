@@ -27,7 +27,10 @@ void SlowdownEstimator::reset() {
   measurementCount = 0;
 }
 
-SlowdownEstimator::SlowdownEstimator(lcm::LCM &lcm) : lcm(lcm) { reset(); }
+SlowdownEstimator::SlowdownEstimator(lcm::LCM &lcm, const char *topicName)
+    : lcm(lcm), topicName(topicName) {
+  reset();
+}
 
 bool SlowdownEstimator::estimateIsValid() { return measurementCount > 0; }
 

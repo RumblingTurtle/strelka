@@ -38,6 +38,8 @@ const float FOOT_FORCE_THRESHOLD = 10.0;
 const Vec3<float> MPC_BODY_INERTIA{0.15, 0.34, 0.36};
 const float MPC_BODY_MASS = 12.8;
 
+const char *const RAW_STATE_TOPIC_NAME = "raw_state";
+
 } // namespace constants
 } // namespace A1
 } // namespace strelka

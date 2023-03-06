@@ -141,7 +141,8 @@ Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
 
 float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
 
-UnitreeA1 UnitreeA1::createDummyA1RobotWithRawState() {
+UnitreeA1
+UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
   a1_lcm_msgs::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
       .gyro = {0, 0, 0},
@@ -154,7 +155,7 @@ UnitreeA1 UnitreeA1::createDummyA1RobotWithRawState() {
       .tick = 0.0,
   };
 
-  memcpy(dummyState.q, A1::constants::INIT_ANGLES.data(), sizeof(float) * 12);
+  memcpy(dummyState.q, motorAngles.data(), sizeof(float) * 12);
   return UnitreeA1(&dummyState);
 }
 

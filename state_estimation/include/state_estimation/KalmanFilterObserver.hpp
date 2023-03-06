@@ -10,7 +10,8 @@
 
 namespace strelka {
 namespace state_estimation {
-class UninitializedKalmanFilter : std::exception {
+class UninitializedKalmanFilter : public std::exception {
+public:
   const char *what() {
     return "KalmanFilterObserver haven't been provided with initial "
            "parameters. Call setParameters(KalmanFilterObserverParams &) or "

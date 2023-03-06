@@ -10,7 +10,8 @@
 namespace strelka {
 
 namespace state_estimation {
-class InvalidSlowdownEstimate : std::exception {
+class InvalidSlowdownEstimate : public std::exception {
+public:
   const char *what() {
     return "Slownown estimator haven't made any measurements "
            "or encountered an "
@@ -34,6 +35,7 @@ class SlowdownEstimator {
   float dtEstimateReal;
   ChronoTimePoint prevTickReal;
   lcm::LCM &lcm;
+  const char *topicName;
 
   void updateDt(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                 const a1_lcm_msgs::RobotRawState *messageIn);
@@ -41,7 +43,7 @@ class SlowdownEstimator {
   void reset();
 
 public:
-  SlowdownEstimator(lcm::LCM &lcm);
+  SlowdownEstimator(lcm::LCM &lcm, const char *topicName);
 
   /**
    * @return false if o measurements are made

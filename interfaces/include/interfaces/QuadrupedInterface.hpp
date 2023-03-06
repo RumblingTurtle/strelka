@@ -18,6 +18,13 @@ public:
   virtual void setAngles(const Vec12<float> &q, const Vec12<float> &dq) = 0;
 
   /**
+   * @brief Get current angle configuration
+   *
+   * @return Vec12<float> current motor angles
+   */
+  virtual Vec12<float> getAngles() = 0;
+
+  /**
    * @brief Moves the robot to specified angle configuration over moveTime
    * seconds
    *
@@ -26,6 +33,7 @@ public:
    * configuration
    */
   virtual void moveTo(const Vec12<float> &angles, float moveTime) = 0;
+
   /**
    * @brief Moves the robot to initial configuration over moveTime seconds
    * Initial configuration might be lying on the ground or calibration
@@ -35,6 +43,7 @@ public:
    * configuration
    */
   virtual void moveToInit(float moveTime = 3.0) = 0;
+
   /**
    * @brief Moves the robot to stand configuration over moveTime seconds
    *
