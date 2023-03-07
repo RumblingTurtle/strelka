@@ -99,7 +99,7 @@ void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
   updateFootContactHeights(robot);
   propagateRobotRawState(messageIn, robotStateMsg);
   fillStateEstimatorData(robot, observer, robotStateMsg);
-  lcm.publish("robot_state", robotStateMsg);
+  lcm.publish(A1::constants::ROBOT_STATE_TOPIC_NAME, robotStateMsg);
 }
 } // namespace state_estimation
 } // namespace strelka

@@ -65,7 +65,8 @@ bool A1WBIC::outputSafetyCheck(
 void A1WBIC::processLoop() {
   static WholeBodyImpulseController::WBICOutput wbicOutput;
 
-  stateSub = lcm.subscribe("robot_state", &A1WBIC::stateHandle, this);
+  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
+                           &A1WBIC::stateHandle, this);
   commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
   stateSub->setQueueCapacity(1);
   commandSub->setQueueCapacity(1);

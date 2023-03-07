@@ -75,7 +75,8 @@ void A1LocalPlanner::commandHandle(
 }
 
 void A1LocalPlanner::processLoop() {
-  stateSub = lcm.subscribe("robot_state", &A1LocalPlanner::stateHandle, this);
+  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
+                           &A1LocalPlanner::stateHandle, this);
   /*
   commandSub =
       lcm.subscribe("high_command", &LocalPlanner::commandHandle, this);
