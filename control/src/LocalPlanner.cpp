@@ -27,6 +27,8 @@ LocalPlanner::~LocalPlanner() {}
 void LocalPlanner::update(robots::Robot &robot,
                           messages::HighLevelCommand &command, float dt) {
 
+  command.setIgnoreDesiredBodyVelocity(scheduler.isCurrentGaitStationary());
+
   Vec4<bool> footContacts = robot.footContacts();
   scheduler.step(dt, footContacts);
 
@@ -58,11 +60,11 @@ void LocalPlanner::update(robots::Robot &robot,
                         scheduler.legLostContact(LEG_ID);
     _footState[LEG_ID] = useForceTask;
     if (scheduler.legLostContact(LEG_ID)) {
-      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 10;
+      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 5;
     }
   }
 
-  footPlanner.getFootDesiredPVA(robot, _desiredFootP, _desiredFootV,
+  footPlanner.getFootDesiredPVA(robot, command, _desiredFootP, _desiredFootV,
                                 _desiredFootA);
 }
 

@@ -72,6 +72,8 @@ public:
 
   bool legLostContact(int legId);
 
+  bool isCurrentGaitStationary();
+
   /**
    * @brief Update the leg states given elapsed time since last update and
    * current contact state of the legs

@@ -2,7 +2,7 @@
 
 int main() {
   using namespace strelka::control;
-  A1LocalPlanner planner{strelka::GAITS::FLYTROT};
+  A1LocalPlanner planner{strelka::GAITS::TROT};
   planner.processLoop();
   return 0;
 }

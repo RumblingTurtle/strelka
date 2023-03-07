@@ -22,6 +22,7 @@ struct Gait {
   float _dutyFactor[4];
   float _phaseDuration[4];
   float _phaseOffset[4];
+  bool _stationaryGait;
 
   inline float phaseOffset(int legId) {
     assert(legId >= 0 && legId < 4);
@@ -47,43 +48,54 @@ struct Gait {
     assert(legId >= 0 && legId < 4);
     return dutyFactor(legId) * phaseDuration(legId);
   }
+
+  inline bool isStationary() { return _stationaryGait; }
 };
 
 namespace GAITS {
 static Gait STAND = {.name = "stand",
                      ._dutyFactor = {1, 1, 1, 1},
                      ._phaseDuration = {0.3, 0.3, 0.3, 0.3},
-                     ._phaseOffset = {0, 0, 0, 0}};
+                     ._phaseOffset = {0, 0, 0, 0},
+                     ._stationaryGait = true};
 
 static Gait STEP = {.name = "step",
                     ._dutyFactor = {0.2, 1, 1, 1},
                     ._phaseDuration = {10, 10, 10, 10},
-                    ._phaseOffset = {0, 0, 0, 0}};
+                    ._phaseOffset = {0, 0, 0, 0},
+                    ._stationaryGait = true};
 
 static Gait TROT = {.name = "trot",
                     ._dutyFactor = {0.6, 0.6, 0.6, 0.6},
                     ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                    ._phaseOffset = {0.0, 0.5, 0.5, 0.0}};
+                    ._phaseOffset = {0.0, 0.5, 0.5, 0.0},
+                    ._stationaryGait = false};
 
 static Gait FLYTROT = {.name = "flytrot",
                        ._dutyFactor = {0.4, 0.4, 0.4, 0.4},
                        ._phaseDuration = {0.3, 0.3, 0.3, 0.3},
-                       ._phaseOffset = {0.0, 0.5, 0.5, 0.0}};
-
-static Gait GALOP = {.name = "galop",
-                     ._dutyFactor = {0.2, 0.2, 0.2, 0.2},
-                     ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                     ._phaseOffset = {0.0, 0.8571, 0.3571, 0.5}};
-
-static Gait BOUND = {.name = "bound",
-                     ._dutyFactor = {0.3, 0.3, 0.3, 0.3},
-                     ._phaseDuration = {0.3, 0.3, 0.3, 0.3},
-                     ._phaseOffset = {0.0, 0.0, 0.414, 0.414}};
+                       ._phaseOffset = {0.0, 0.5, 0.5, 0.0},
+                       ._stationaryGait = false};
 
 static Gait PRONK = {.name = "pronk",
                      ._dutyFactor = {0.3, 0.3, 0.3, 0.3},
                      ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                     ._phaseOffset = {0, 0, 0, 0}};
+                     ._phaseOffset = {0, 0, 0, 0},
+                     ._stationaryGait = false};
+
+/*
+static Gait GALOP = {.name = "galop",
+                     ._dutyFactor = {0.2, 0.2, 0.2, 0.2},
+                     ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
+                     ._phaseOffset = {0.0, 0.8571, 0.3571, 0.5},
+                    ._stationaryGait = false};
+
+static Gait BOUND = {.name = "bound",
+                     ._dutyFactor = {0.3, 0.3, 0.3, 0.3},
+                     ._phaseDuration = {0.3, 0.3, 0.3, 0.3},
+                     ._phaseOffset = {0.0, 0.0, 0.414, 0.414},
+                    ._stationaryGait = false};
+*/
 } // namespace GAITS
 
 } // namespace strelka

@@ -124,4 +124,7 @@ float GaitScheduler::stanceDuration(int legId) {
   return sequencer.currentGait().stanceDuration(legId);
 }
 
+bool GaitScheduler::isCurrentGaitStationary() {
+  return sequencer.currentGait().isStationary();
+}
 }; // namespace strelka

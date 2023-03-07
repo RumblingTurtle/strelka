@@ -23,8 +23,10 @@ class HighLevelCommand {
   Vec3<float> _desiredComOffset;
   float _desiredFootHeight;
   float _desiredBodyHeight;
+  float _footClearance;
+  float _ignoreVelocity;
   /*
-    float footClearance;
+
 
     float hipOffsets[2];
 
@@ -34,7 +36,8 @@ class HighLevelCommand {
   */
 
 public:
-  HighLevelCommand(const a1_lcm_msgs::HighLevelCommand *commandMsg) {
+  HighLevelCommand(const a1_lcm_msgs::HighLevelCommand *commandMsg)
+      : _ignoreVelocity(false) {
     _desiredAngularVelocityBodyFrame =
         Eigen::Map<const Vec3<float>>(commandMsg->angularVelocity, 3);
     _desiredLinearVelocityBodyFrame =
@@ -46,19 +49,28 @@ public:
     _desiredComOffset(2) = 0;
     _desiredBodyHeight = commandMsg->bodyHeight;
     _desiredFootHeight = commandMsg->footHeight;
+    _footClearance = commandMsg->footClearance;
   }
 
   Vec3<float> desiredAngularVelocityBodyFrame() {
+    if (_ignoreVelocity)
+      return Vec3<float>{0, 0, 0};
     return _desiredAngularVelocityBodyFrame;
   };
   Vec3<float> desiredLinearVelocityBodyFrame() {
+    if (_ignoreVelocity)
+      return Vec3<float>{0, 0, 0};
     return _desiredLinearVelocityBodyFrame;
   };
   Vec3<float> desiredRPY() { return _desiredRPY; };
   Vec3<float> desiredComOffset() { return _desiredComOffset; };
   float desiredBodyHeight() { return _desiredBodyHeight; };
   float desiredFootHeight() { return _desiredFootHeight; };
+  float footClearance() { return _footClearance; }
 
+  void setIgnoreDesiredBodyVelocity(bool ignoreVelocity) {
+    _ignoreVelocity = ignoreVelocity;
+  }
   static HighLevelCommand
   makeDummyCommandMessage(float desiredVelocityX = 0.0,
                           float desiredVelocityYaw = 0.0) {

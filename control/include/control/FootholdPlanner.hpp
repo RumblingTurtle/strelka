@@ -130,11 +130,13 @@ public:
    * LOSE_CONTACT or EARLY_CONTACT.
    *
    * @param robot Object implementing Robot interface
+   * @param command  HighLevelCommand object
    * @param desiredFootPositions
    * @param desiredFootVelocities
    * @param desiredFootAccelerations
    */
   void getFootDesiredPVA(robots::Robot &robot,
+                         messages::HighLevelCommand &command,
                          Vec12<float> &desiredFootPositions,
                          Vec12<float> &desiredFootVelocities,
                          Vec12<float> &desiredFootAccelerations);

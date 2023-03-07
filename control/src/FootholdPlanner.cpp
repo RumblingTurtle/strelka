@@ -196,13 +196,13 @@ Vec3<float> FootholdPlanner::adjustFoothold(Vec3<float> nominalFootPosition,
                                             Vec3<float> currentRobotPosition,
                                             Mat3<float> currentRobotRotation,
                                             int legId, robots::Robot &robot) {
-  nominalFootPosition(2) = robot.footRadius() + getFoothold(legId, 0)(2);
+  nominalFootPosition(2) = getFoothold(legId, 0)(2);
   return nominalFootPosition;
 };
 
 void FootholdPlanner::getFootDesiredPVA(
-    robots::Robot &robot, Vec12<float> &desiredFootPositions,
-    Vec12<float> &desiredFootVelocities,
+    robots::Robot &robot, messages::HighLevelCommand &command,
+    Vec12<float> &desiredFootPositions, Vec12<float> &desiredFootVelocities,
     Vec12<float> &desiredFootAccelerations) {
 
   FOR_EACH_LEG {
@@ -214,6 +214,7 @@ void FootholdPlanner::getFootDesiredPVA(
 
       Vec3<float> pStart = getFoothold(LEG_ID, 0);
       Vec3<float> pEnd = getFoothold(LEG_ID, 1);
+      pEnd(2) += command.footClearance();
 
       desiredFootPosition = trajectory::getSwingTrajectoryPosition(
           pStart, pEnd, swingHeight[LEG_ID],
