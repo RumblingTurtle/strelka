@@ -37,12 +37,11 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   Vec4<float> b = prevContactPosBody.block<4, 1>(0, 2);
   Vec3<float> slopeCoefficients = A.colPivHouseholderQr().solve(b);
 
-  float estimatedTerrainPitch = pitchFilter.filter(-slopeCoefficients(0));
+  float slopePitch = -slopeCoefficients(0);
+  slopePitch = clamp<float>(slopePitch, -M_PI_4 / 2, M_PI_4 / 2);
+  float estimatedTerrainPitch = pitchFilter.filter(slopePitch);
   float estimatedContactHeight =
       heightFilter.filter(prevContactPosWorld.col(2).mean());
-
-  if (firstRun) {
-  }
 
   Vec3<float> desiredAngularVelocity =
       command.desiredAngularVelocityBodyFrame();

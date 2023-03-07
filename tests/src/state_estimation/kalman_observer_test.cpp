@@ -40,12 +40,11 @@ protected:
 };
 
 TEST_F(KalmanFilterTest, ConvergesOnZ) {
-  Vec4<float> contactHeights = Vec4<float>::Zero();
   float footPosZ = -robot->footPositionTrunkFrame(0)(2);
 
   for (int updateCount = 0; updateCount < OBSERVER_TEST_UPDATE_COUNT;
        updateCount++) {
-    observer->update(*robot, false, Vec3<float>::Zero(), contactHeights);
+    observer->update(*robot, false, Vec3<float>::Zero(), Vec4<float>::Zero());
   }
 
   // NOTE: Is this approximation correct?

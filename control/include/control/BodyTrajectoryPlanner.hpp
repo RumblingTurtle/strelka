@@ -5,7 +5,9 @@
 #include <common/macros.hpp>
 #include <common/rotation.hpp>
 #include <common/typedefs.hpp>
+#include <common/utilities.hpp>
 #include <filters/FirstOrderLPF.hpp>
+#include <iostream>
 #include <messages/HighLevelCommand.hpp>
 
 namespace strelka {

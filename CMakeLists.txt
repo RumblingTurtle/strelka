@@ -3,7 +3,7 @@ project(strelka LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
-message("Build type ${CMAKE_BUILD_TYPE}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Macros)

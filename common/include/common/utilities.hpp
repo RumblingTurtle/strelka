@@ -52,4 +52,7 @@ template <typename Callable> inline double executionTime(Callable functor) {
   return timePointDiffInMilliseconds(getWallTime(), t);
 }
 
+template <typename T> inline T clamp(T v, T low, T high) {
+  return v < low ? low : v > high ? high : v;
+}
 #endif // STRELKA_UTILITIES_H
