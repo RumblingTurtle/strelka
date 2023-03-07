@@ -25,4 +25,3 @@ foreach(file_path ${STRELKA_EXAMPLES_SOURCES})
     add_executable( ${filename} ${file_path} )
     target_link_libraries(${filename} ${STRELKA_EXAMPLES_DEPENDENCY_LIBRARIES})
 endforeach()
-lcm_local_planner
