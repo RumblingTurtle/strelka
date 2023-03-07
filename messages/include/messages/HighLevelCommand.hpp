@@ -53,13 +53,15 @@ public:
   }
 
   Vec3<float> desiredAngularVelocityBodyFrame() {
-    if (_ignoreVelocity)
+    if (_ignoreVelocity) {
       return Vec3<float>{0, 0, 0};
+    }
     return _desiredAngularVelocityBodyFrame;
   };
   Vec3<float> desiredLinearVelocityBodyFrame() {
-    if (_ignoreVelocity)
+    if (_ignoreVelocity) {
       return Vec3<float>{0, 0, 0};
+    }
     return _desiredLinearVelocityBodyFrame;
   };
   Vec3<float> desiredRPY() { return _desiredRPY; };

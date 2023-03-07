@@ -1,21 +1,15 @@
 printPackageHeader(control)
 
-SET(STRELKA_CONTROL_DEPENDENCY_INCLUDE_DIRS 
-    ${Eigen_INCLUDE_DIRS};
-    ${STRELKA_MESSAGES_INCLUDE_DIRS};
-    ${STRELKA_COMMON_INCLUDE_DIRS};
-    ${STRELKA_FILTERS_INCLUDE_DIRS};
-    ${WBIC_INCLUDE_DIRS};
-    ${OSQP_INCLUDE_DIRS};
-)
-
 FILE(GLOB_RECURSE STRELKA_CONTROL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-add_library(strelka_control ${STRELKA_CONTROL_SOURCES})
-target_include_directories(strelka_control PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${STRELKA_CONTROL_DEPENDENCY_INCLUDE_DIRS})
-target_link_libraries(strelka_control wbic osqp)
-
-set(STRELKA_CONTROL_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PARENT_SCOPE
+SET(DEPENDENCY_LIBRARIES 
+    strelka_filters 
+    strelka_common
+    strelka_messages 
+    wbic 
+    osqp
 )
+
+add_library(strelka_control ${STRELKA_CONTROL_SOURCES})
+target_include_directories(strelka_control PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(strelka_control ${DEPENDENCY_LIBRARIES})

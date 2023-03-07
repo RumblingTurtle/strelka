@@ -24,7 +24,7 @@ TEST(BodyPlannerTests, TrajectoryIntegration) {
   DMat<float> trajectory =
       planner.getDesiredBodyTrajectory(robot, command, dt, horizonSteps);
 
-  float trajectoryPosX = trajectory(9, 3);
+  float trajectoryPosX = trajectory(horizonSteps - 1, 3);
   float integratedPosX = dt * desiredVelocityX * horizonSteps;
   EXPECT_NEAR(trajectoryPosX, integratedPosX, 1e-4);
 }

@@ -22,7 +22,8 @@ protected:
   Gait TEST_GAIT = {.name = "test",
                     ._dutyFactor = {0.6, 0.6, 0.6, 0.6},
                     ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                    ._phaseOffset = {0.0, 0.0, 0.0, 0.0}};
+                    ._phaseOffset = {0.0, 0.0, 0.0, 0.0},
+                    ._stationaryGait = false};
 
   HighLevelCommand *command;
 

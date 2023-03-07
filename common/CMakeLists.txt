@@ -1,1 +1,4 @@
-SET(STRELKA_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+printPackageHeader(common)
+
+add_library(strelka_common INTERFACE)
+target_include_directories(strelka_common INTERFACE ./include)

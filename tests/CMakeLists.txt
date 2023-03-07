@@ -1,16 +1,6 @@
 printPackageHeader(tests)
 
-SET(STRELKA_TESTS_DEPENDENCY_INCLUDE_DIRS 
-    ${Eigen_INCLUDE_DIRS}
-    ${STRELKA_COMMON_INCLUDE_DIRS}
-    ${STRELKA_INTERFACES_INCLUDE_DIRS}
-    ${STRELKA_STATE_ESTIMATION_INCLUDE_DIRS}
-    ${STRELKA_CONTROL_INCLUDE_DIRS}
-    ${STRELKA_MESSAGES_INCLUDE_DIRS}
-    ${STRELKA_ROBOTS_INCLUDE_DIRS}
-)
-
-SET(STRELKA_TESTS_DEPENDENCY_LIBRARIES 
+SET(DEPENDENCY_LIBRARIES 
     strelka_robots
     strelka_state_estimation
     strelka_control
@@ -23,6 +13,6 @@ foreach(file_path ${STRELKA_TESTS_SOURCES})
     get_filename_component(filename ${new_name} NAME)
     message("Prepping " ${filename})
     add_executable( ${filename} ${file_path} )
-    target_link_libraries(${filename} ${STRELKA_TESTS_DEPENDENCY_LIBRARIES} GTest::gtest_main)
+    target_link_libraries(${filename} ${DEPENDENCY_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(${filename})
 endforeach()

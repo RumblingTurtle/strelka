@@ -36,13 +36,17 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include(GoogleTest)
 
+
 add_subdirectory(third_party)
-add_subdirectory(messages)
 add_subdirectory(common)
+add_subdirectory(messages)
+
+include_directories(${STRELKA_MESSAGES_INCLUDE_DIRS})
+include_directories(${STRELKA_COMMON_INCLUDE_DIRS})
+
 add_subdirectory(filters)
 add_subdirectory(control)
 add_subdirectory(state_estimation)
-add_subdirectory(interfaces)
 add_subdirectory(robots)
-add_subdirectory(examples)
 add_subdirectory(tests)
+add_subdirectory(examples)

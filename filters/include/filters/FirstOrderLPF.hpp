@@ -1,5 +1,7 @@
 #ifndef FIRST_ORDER_LFP_H
 #define FIRST_ORDER_LFP_H
+
+#include <assert.h>
 namespace strelka {
 namespace filters {
 
@@ -18,33 +20,11 @@ template <typename T> class FirstOrderLPF {
   bool firstValueRecieved;
 
 public:
-  FirstOrderLPF(T samplePeriod, T cutoffFrequency)
-      : firstValueRecieved(false), cutoffFrequency(cutoffFrequency) {
-    assert(cutoffFrequency > 0 && samplePeriod > 0);
-
-    alpha = (2 - samplePeriod * cutoffFrequency) /
-            (2 + samplePeriod * cutoffFrequency);
-    beta =
-        samplePeriod * cutoffFrequency / (2 + samplePeriod * cutoffFrequency);
-  }
-
+  FirstOrderLPF(T samplePeriod, T cutoffFrequency);
   /**
    * @brief Return filtered value given the new sample x
    */
-  T filter(T x) {
-    if (!firstValueRecieved) {
-      firstValueRecieved = true;
-      xPrev = x;
-      yPrev = x;
-      return x;
-    }
-
-    float y = alpha * yPrev + beta * (x + xPrev);
-
-    xPrev = x;
-    yPrev = y;
-    return y;
-  }
+  T filter(T x);
 };
 } // namespace filters
 } // namespace strelka

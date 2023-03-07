@@ -1,20 +1,12 @@
 printPackageHeader(state_estimation)
 
-SET(STRELKA_STATE_ESTIMATION_DEPENDENCY_INCLUDE_DIRS 
-    ${Eigen_INCLUDE_DIRS};
-    ${STRELKA_MESSAGES_INCLUDE_DIRS};
-    ${STRELKA_COMMON_INCLUDE_DIRS};
-    ${STRELKA_FILTERS_INCLUDE_DIRS};
-)
-
-
 FILE(GLOB_RECURSE STRELKA_STATE_ESTIMATION_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
+SET(DEPENDENCY_LIBRARIES
+    strelka_filters 
+    strelka_common
+    strelka_messages)
+    
 add_library(strelka_state_estimation ${STRELKA_STATE_ESTIMATION_SOURCES})
-target_include_directories(strelka_state_estimation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${STRELKA_STATE_ESTIMATION_DEPENDENCY_INCLUDE_DIRS})
-target_link_libraries(strelka_state_estimation)
-
-set(STRELKA_STATE_ESTIMATION_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PARENT_SCOPE
-)
+target_include_directories(strelka_state_estimation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(strelka_state_estimation ${DEPENDENCY_LIBRARIES})

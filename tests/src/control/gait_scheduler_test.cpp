@@ -16,7 +16,8 @@ protected:
     TEST_GAIT = {.name = "test",
                  ._dutyFactor = {0.6, 0.6, 0.6, 0.6},
                  ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
-                 ._phaseOffset = {0.0, 0.0, 0.0, 0.0}};
+                 ._phaseOffset = {0.0, 0.0, 0.0, 0.0},
+                 ._stationaryGait = false};
 
     scheduler = new GaitScheduler{TEST_GAIT};
   }
@@ -25,7 +26,7 @@ protected:
 };
 
 TEST_F(GaitSchedulerFixture, Contacts) {
-  scheduler->step(0.4, {1, 1, 1, 1});
+  scheduler->step(0.1, {1, 1, 1, 1});
 
   FOR_EACH_LEG {
     EXPECT_TRUE(scheduler->legInStance(LEG_ID)) << "LEG_ID: " << LEG_ID;

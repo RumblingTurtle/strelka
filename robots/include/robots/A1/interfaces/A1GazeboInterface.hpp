@@ -1,8 +1,8 @@
 #ifndef A1_GAZEBO_INTERFACE_H
 #define A1_GAZEBO_INTERFACE_H
 
+#include <common/QuadrupedInterface.hpp>
 #include <common/typedefs.hpp>
-#include <interfaces/QuadrupedInterface.hpp>
 #include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
