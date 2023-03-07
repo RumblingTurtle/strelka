@@ -19,24 +19,6 @@ Vec3<float> FootholdPlanner::getFoothold(int legId, int footholdId) {
   throw InvalidFootholdIdx();
 }
 
-DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholdsTest(
-    robots::Robot &robot, messages::HighLevelCommand &command,
-    DMat<float> &bodyTrajectory, DMat<bool> &contactTable) {
-  const int horizonSteps = bodyTrajectory.rows();
-  DMat<float> footholdTable(4, 3 * horizonSteps);
-  footholdTable.setZero();
-  for (int h = 0; h < horizonSteps; h++) {
-    FOR_EACH_LEG {
-      footholdTable.block<1, 3>(LEG_ID, 3 * h) =
-          (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)))
-              .transpose();
-
-      footholdTable(LEG_ID, 3 * h + 2) -= robot.footRadius();
-    }
-  }
-  return footholdTable;
-}
-
 DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
     robots::Robot &robot, messages::HighLevelCommand &command,
     DMat<float> &bodyTrajectory, DMat<bool> &contactTable) {

@@ -109,10 +109,6 @@ public:
       robots::Robot &robot, messages::HighLevelCommand &command,
       DMat<float> &bodyTrajectory, DMat<bool> &contactTable);
 
-  DMat<float> calculateWorldFrameRotatedFootholdsTest(
-      robots::Robot &robot, messages::HighLevelCommand &command,
-      DMat<float> &bodyTrajectory, DMat<bool> &contactTable);
-
   /**
    * @brief Updates footholds for each leg.
    *

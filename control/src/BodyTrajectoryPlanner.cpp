@@ -8,37 +8,6 @@ BodyTrajectoryPlanner::BodyTrajectoryPlanner()
   prevContactPosBody.setZero();
 }
 
-DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectoryTest(
-    robots::Robot &robot, messages::HighLevelCommand &command, float dt,
-    int horizonSteps) {
-
-  DMat<float> trajectory(horizonSteps, 13);
-  trajectory.setZero();
-  Vec3<float> desiredComOffset = command.desiredComOffset();
-  Vec3<float> currentRPY = rotation::quat2euler(robot.bodyToWorldQuat());
-  Mat3<float> bodyToWorldRot;
-  Vec3<float> currentRobotPos = robot.positionWorldFrame();
-  rotation::quat2rot(robot.bodyToWorldQuat(), bodyToWorldRot);
-
-  for (int h = 0; h < horizonSteps; h++) {
-    trajectory(h, 0) = 0;
-    trajectory(h, 1) = 0;
-    trajectory(h, 2) = currentRPY(2);
-
-    trajectory(h, 3) = 0 + desiredComOffset(0);
-    trajectory(h, 4) = 0 + desiredComOffset(1);
-    trajectory(h, 5) = command.desiredBodyHeight();
-
-    // Prefer to stablize roll and pitch.
-    trajectory.block<1, 3>(h, 6).setZero();
-    trajectory.block<1, 3>(h, 9).setZero();
-    trajectory(h, 12) = constants::GRAVITY_CONSTANT;
-  }
-
-  firstRun = false;
-  return trajectory;
-}
-
 DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
     robots::Robot &robot, messages::HighLevelCommand &command, float dt,
     int horizonSteps) {
