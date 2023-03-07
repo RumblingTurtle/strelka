@@ -87,21 +87,24 @@ bool GaitScheduler::isLegScheduledToSwing(int legId) {
   return scheduledState[legId] == LegState::SWING;
 }
 
-bool GaitScheduler::isLegSwinging(int legId) {
-  return currentLegState[legId] == LegState::SWING;
-}
-
 bool GaitScheduler::swingStarted(int legId) {
   return scheduledState[legId] == LegState::SWING &&
          prevScheduledState[legId] == LegState::STANCE;
 }
 
-bool GaitScheduler::footInContact(int legId) {
-  return currentLegState[legId] == LegState::EARLY_CONTACT ||
-         currentLegState[legId] == LegState::STANCE;
+bool GaitScheduler::legInSwing(int legId) {
+  return currentLegState[legId] == LegState::SWING;
 }
 
-bool GaitScheduler::lostContact(int legId) {
+bool GaitScheduler::legInEarlyContact(int legId) {
+  return currentLegState[legId] == LegState::STANCE;
+}
+
+bool GaitScheduler::legInStance(int legId) {
+  return currentLegState[legId] == LegState::STANCE;
+}
+
+bool GaitScheduler::legLostContact(int legId) {
   return currentLegState[legId] == LegState::LOST_CONTACT;
 }
 

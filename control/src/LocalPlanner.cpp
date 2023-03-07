@@ -53,11 +53,12 @@ void LocalPlanner::update(robots::Robot &robot,
   _desiredAccelerationBody.setZero();
 
   FOR_EACH_LEG {
-    bool useForceTask =
-        scheduler.footInContact(LEG_ID) || scheduler.lostContact(LEG_ID);
+    bool useForceTask = scheduler.legInStance(LEG_ID) ||
+                        scheduler.legInEarlyContact(LEG_ID) ||
+                        scheduler.legLostContact(LEG_ID);
     _footState[LEG_ID] = useForceTask;
-    if (scheduler.lostContact(LEG_ID)) {
-      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 5;
+    if (scheduler.legLostContact(LEG_ID)) {
+      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 10;
     }
   }
 

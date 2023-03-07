@@ -28,7 +28,7 @@ TEST_F(GaitSchedulerFixture, Contacts) {
   scheduler->step(0.4, {1, 1, 1, 1});
 
   FOR_EACH_LEG {
-    EXPECT_TRUE(scheduler->footInContact(LEG_ID)) << "LEG_ID: " << LEG_ID;
+    EXPECT_TRUE(scheduler->legInStance(LEG_ID)) << "LEG_ID: " << LEG_ID;
   }
 }
 
@@ -70,7 +70,7 @@ TEST_F(GaitSchedulerFixture, FootStates) {
 
     EXPECT_TRUE(scheduler->swingStarted(LEG_ID)) << "LEG_ID: " << LEG_ID;
 
-    EXPECT_TRUE(!scheduler->lostContact(LEG_ID)) << "LEG_ID: " << LEG_ID;
+    EXPECT_TRUE(!scheduler->legLostContact(LEG_ID)) << "LEG_ID: " << LEG_ID;
   }
 }
 

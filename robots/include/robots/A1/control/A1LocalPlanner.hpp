@@ -28,7 +28,7 @@ class A1LocalPlanner {
   float prevTick;
 
 public:
-  A1LocalPlanner();
+  A1LocalPlanner(Gait initialGait);
 
   ~A1LocalPlanner();
 

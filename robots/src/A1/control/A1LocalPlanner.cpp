@@ -3,8 +3,8 @@
 namespace strelka {
 namespace control {
 
-A1LocalPlanner::A1LocalPlanner()
-    : prevTick(-1), localPlanner(GAITS::TROT, A1::constants::MPC_BODY_MASS,
+A1LocalPlanner::A1LocalPlanner(Gait initialGait)
+    : prevTick(-1), localPlanner(initialGait, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();
 }
@@ -20,7 +20,7 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
                                  const a1_lcm_msgs::RobotState *messageIn) {
 
   messages::HighLevelCommand command =
-      messages::HighLevelCommand::makeDummyCommandMessage(0.2, 0.0);
+      messages::HighLevelCommand::makeDummyCommandMessage(0.1, 0.0);
   robots::UnitreeA1 robot{messageIn};
 
   float dt = messageIn->tick;

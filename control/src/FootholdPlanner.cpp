@@ -47,7 +47,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
             // as a hackish way to remove feedback term
             Vec3<float> newFoothold = predictNextFootPos(
                 bodyPosWorld, bodyToWorldRot_h,
-                _footholds[LEG_ID][footholdCount(LEG_ID) - 1], robot, command,
+                getFoothold(LEG_ID, footholdCount(LEG_ID) - 1), robot, command,
                 0.0, LEG_ID, FOOTHOLD_PREDICTION_TYPE::SIMPLE);
 
             _footholds[LEG_ID].push_back(newFoothold);
@@ -56,7 +56,7 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
       }
 
       Vec3<float> footholdWorld =
-          _footholds[LEG_ID][currentFootholdIdx[LEG_ID]] -
+          getFoothold(LEG_ID, currentFootholdIdx[LEG_ID]) -
           Vec3<float>{0, 0, robot.footRadius()};
 
       footholdTable.block<1, 3>(LEG_ID, 3 * h) =
@@ -71,12 +71,20 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
   Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
   FOR_EACH_LEG {
-    bool updateAsStance = gaitScheduler.footInContact(LEG_ID) ||
-                          gaitScheduler.lostContact(LEG_ID);
+    if (firstRun) {
+      Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
+      _footholds[LEG_ID].push_back(startPos);
+      _footholds[LEG_ID].push_back(startPos);
+      firstRun = false;
+    }
+
+    bool updateAsStance = gaitScheduler.legInStance(LEG_ID) ||
+                          gaitScheduler.legInEarlyContact(LEG_ID) ||
+                          gaitScheduler.legLostContact(LEG_ID);
 
     bool swingStarted = gaitScheduler.swingStarted(LEG_ID);
 
-    if (updateAsStance || firstRun) {
+    if (updateAsStance) {
       lastContactPosWorld.block<1, 3>(LEG_ID, 0) =
           robot.footPositionWorldFrame(LEG_ID).transpose();
     }
@@ -102,15 +110,12 @@ void FootholdPlanner::calculateNextFootholdPositions(
       }
 
       Vec3<float> predictedFootPosition = predictNextFootPos(
-          robot.positionWorldFrame(), bodyToWorldRot, _footholds[LEG_ID][0],
+          robot.positionWorldFrame(), bodyToWorldRot, getFoothold(LEG_ID, 0),
           robot, command, FEEDBACK_GAIN, LEG_ID, predictType);
-
-      // Skip adjustment for now (no elevation map)
-      // Vec3<float> adjustedFootPosition;
 
       _footholds[LEG_ID].push_back(predictedFootPosition);
 
-      float heightDiff = _footholds[LEG_ID][0](0) - _footholds[LEG_ID][1](1);
+      float heightDiff = getFoothold(LEG_ID, 0)(2) - getFoothold(LEG_ID, 1)(2);
 
       bool steppingUp = heightDiff > command.desiredFootHeight();
       bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
@@ -134,10 +139,6 @@ void FootholdPlanner::calculateNextFootholdPositions(
       swingBack[LEG_ID] = false;
     }
   }
-
-  if (firstRun) {
-    firstRun = false;
-  }
 }
 
 Vec3<float> FootholdPlanner::predictNextFootPos(
@@ -155,7 +156,7 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
       linearizedAngularVelocityWorld +
       bodyToWorldRot * command.desiredLinearVelocityBodyFrame();
 
-  // TODO implement hip offset
+  // TODO: implement hip offset
   Vec3<float> hipPosWorld =
       bodyToWorldRot * trunkToThighOffset + currentPosition;
 
@@ -187,13 +188,17 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
                         desiredVelocityWorld);
   }
 
-  /**
-   * Assume the next foothold's height is on the same level as the starting
-   * position.
-   */
-  predictedFootWorld(2) = robot.footRadius() + _footholds[legId].at(0)(2);
-  return predictedFootWorld;
+  return adjustFoothold(predictedFootWorld, currentPosition, bodyToWorldRot,
+                        legId, robot);
 }
+
+Vec3<float> FootholdPlanner::adjustFoothold(Vec3<float> nominalFootPosition,
+                                            Vec3<float> currentRobotPosition,
+                                            Mat3<float> currentRobotRotation,
+                                            int legId, robots::Robot &robot) {
+  nominalFootPosition(2) = robot.footRadius() + getFoothold(legId, 0)(2);
+  return nominalFootPosition;
+};
 
 void FootholdPlanner::getFootDesiredPVA(
     robots::Robot &robot, Vec12<float> &desiredFootPositions,
@@ -205,10 +210,10 @@ void FootholdPlanner::getFootDesiredPVA(
     Vec3<float> desiredFootVelocity;
     Vec3<float> desiredFootAcceleration;
 
-    if (gaitScheduler.isLegSwinging(LEG_ID)) {
+    if (gaitScheduler.legInSwing(LEG_ID)) {
 
-      Vec3<float> pStart = _footholds[LEG_ID][0];
-      Vec3<float> pEnd = _footholds[LEG_ID][1];
+      Vec3<float> pStart = getFoothold(LEG_ID, 0);
+      Vec3<float> pEnd = getFoothold(LEG_ID, 1);
 
       desiredFootPosition = trajectory::getSwingTrajectoryPosition(
           pStart, pEnd, swingHeight[LEG_ID],

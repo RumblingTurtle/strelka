@@ -65,12 +65,12 @@ public:
     a1_lcm_msgs::HighLevelCommand highCommandMsg{
         .linearSpeed = {desiredVelocityX, 0, 0},
         .angularVelocity = {0, 0, desiredVelocityYaw},
-        .footHeight = 0.12,
-        .footClearance = 0.02,
+        .footHeight = 0.08,
+        .footClearance = 0.002,
         .hipOffsets = {0, 0},
         .rpy = {0, 0, 0},
         .comOffset = {0, 0},
-        .bodyHeight = 0.27,
+        .bodyHeight = 0.26,
         .stop = false};
 
     return HighLevelCommand(&highCommandMsg);

@@ -138,6 +138,19 @@ public:
                          Vec12<float> &desiredFootPositions,
                          Vec12<float> &desiredFootVelocities,
                          Vec12<float> &desiredFootAccelerations);
+
+  /**
+   * @brief Adjusts foothold according to some criterion
+   *
+   * Default implementation assumes that the next foothold's height is on the
+   * same level as the starting position.
+   *
+   * @returns Vec3<float> Adjusted foothold position in world frame
+   */
+  virtual Vec3<float> adjustFoothold(Vec3<float> nominalFootPosition,
+                                     Vec3<float> currentRobotPosition,
+                                     Mat3<float> currentRobotRotation,
+                                     int legId, robots::Robot &robot);
 };
 
 } // namespace control

@@ -52,8 +52,6 @@ public:
   DMat<bool> getContactTable(float dt, int horizonSteps,
                              Vec4<bool> currentContacts);
 
-  bool isLegSwinging(int legId);
-
   bool isLegScheduledToSwing(int legId);
 
   float normalizedPhase(int legId);
@@ -66,9 +64,13 @@ public:
 
   bool swingStarted(int legId);
 
-  bool footInContact(int legId);
+  bool legInSwing(int legId);
 
-  bool lostContact(int legID);
+  bool legInEarlyContact(int legId);
+
+  bool legInStance(int legId);
+
+  bool legLostContact(int legId);
 
   /**
    * @brief Update the leg states given elapsed time since last update and
