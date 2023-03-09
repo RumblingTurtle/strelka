@@ -1,9 +1,9 @@
-#include <common/macros.hpp>
 #include <gtest/gtest.h>
-#include <robots/A1/UnitreeA1.hpp>
-#include <robots/A1/constants.hpp>
-#include <robots/A1/interfaces/A1GazeboInterface.hpp>
-#include <state_estimation/KalmanFilterObserver.hpp>
+#include <strelka_common/macros.hpp>
+#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka_robots/A1/constants.hpp>
+#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
+#include <strelka_state_estimation/KalmanFilterObserver.hpp>
 
 namespace {
 using namespace strelka::robots;

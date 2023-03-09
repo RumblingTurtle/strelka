@@ -1,10 +1,10 @@
-#include <common/macros.hpp>
-#include <control/BodyTrajectoryPlanner.hpp>
-#include <control/FootholdPlanner.hpp>
 #include <gtest/gtest.h>
-#include <messages/HighLevelCommand.hpp>
-#include <robots/A1/UnitreeA1.hpp>
-#include <robots/A1/constants.hpp>
+#include <strelka_common/macros.hpp>
+#include <strelka_control/BodyTrajectoryPlanner.hpp>
+#include <strelka_control/FootholdPlanner.hpp>
+#include <strelka_messages/HighLevelCommand.hpp>
+#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka_robots/A1/constants.hpp>
 
 namespace {
 

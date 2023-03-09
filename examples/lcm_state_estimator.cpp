@@ -1,5 +1,5 @@
-#include <robots/A1/interfaces/A1GazeboInterface.hpp>
-#include <robots/A1/state_estimation/A1StateEstimator.hpp>
+#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
+#include <strelka_robots/A1/state_estimation/A1StateEstimator.hpp>
 
 int main() {
   using namespace strelka::interfaces;

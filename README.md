@@ -12,5 +12,5 @@ cd build && ctest --output-on-failure
 ```
 # Profile LCM messages
 ```
-lcm-mon -t ~/strelka/messages/lcm
+lcm-mon -t ~/strelka/strelka_messages/lcm
 ```

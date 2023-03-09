@@ -74,7 +74,7 @@
 
 
 <> Build system
-    - Macros for packages
+    + Macros for packages
     + Automatic source file search
             FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
 

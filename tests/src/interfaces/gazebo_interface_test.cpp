@@ -1,6 +1,6 @@
-#include <common/macros.hpp>
 #include <gtest/gtest.h>
-#include <robots/A1/interfaces/A1GazeboInterface.hpp>
+#include <strelka_common/macros.hpp>
+#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
 
 namespace {
 using namespace strelka::interfaces;

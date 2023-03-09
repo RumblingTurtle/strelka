@@ -1,6 +1,6 @@
-printPackageHeader(examples)
+print_pkg_header(examples)
 
-SET(STRELKA_EXAMPLES_DEPENDENCY_LIBRARIES 
+SET(DEPENDENCY_LIBRARIES 
     strelka_robots
     strelka_state_estimation
     strelka_control
@@ -14,5 +14,5 @@ foreach(file_path ${STRELKA_EXAMPLES_SOURCES})
     get_filename_component(filename ${new_name} NAME)
     message("Prepping " ${filename})
     add_executable( ${filename} ${file_path} )
-    target_link_libraries(${filename} ${STRELKA_EXAMPLES_DEPENDENCY_LIBRARIES})
+    target_link_libraries(${filename} ${DEPENDENCY_LIBRARIES})
 endforeach()

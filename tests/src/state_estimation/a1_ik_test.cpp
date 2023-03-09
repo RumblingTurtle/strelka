@@ -1,10 +1,10 @@
 
 
-#include <common/macros.hpp>
 #include <gtest/gtest.h>
-#include <robots/A1/UnitreeA1.hpp>
-#include <robots/A1/constants.hpp>
-#include <robots/A1/kinematics.hpp>
+#include <strelka_common/macros.hpp>
+#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka_robots/A1/constants.hpp>
+#include <strelka_robots/A1/kinematics.hpp>
 
 namespace {
 using namespace strelka::robots;

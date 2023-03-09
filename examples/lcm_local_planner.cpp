@@ -1,4 +1,4 @@
-#include <robots/A1/control/A1LocalPlanner.hpp>
+#include <strelka_robots/A1/control/A1LocalPlanner.hpp>
 
 int main() {
   using namespace strelka::control;
