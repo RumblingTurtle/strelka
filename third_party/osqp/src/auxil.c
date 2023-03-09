@@ -10,7 +10,7 @@
 * Auxiliary functions needed to compute ADMM iterations * *
 ***********************************************************/
 #if EMBEDDED != 1
-c_float compute_rho_estimate(OSQPWorkspace *work) {
+c_float compute_rho_estimate(struct OSQPWorkspace *work) {
   c_int   n, m;                       // Dimensions
   c_float pri_res, dua_res;           // Primal and dual residuals
   c_float pri_res_norm, dua_res_norm; // Normalization for the residuals
@@ -54,7 +54,7 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   return rho_estimate;
 }
 
-c_int adapt_rho(OSQPWorkspace *work) {
+c_int adapt_rho(struct OSQPWorkspace *work) {
   c_int   exitflag; // Exitflag
   c_float rho_new;  // New rho value
 
@@ -76,7 +76,7 @@ c_int adapt_rho(OSQPWorkspace *work) {
   return exitflag;
 }
 
-void set_rho_vec(OSQPWorkspace *work) {
+void set_rho_vec(struct OSQPWorkspace *work) {
   c_int i;
 
   work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
@@ -100,7 +100,7 @@ void set_rho_vec(OSQPWorkspace *work) {
   }
 }
 
-c_int update_rho_vec(OSQPWorkspace *work) {
+c_int update_rho_vec(struct OSQPWorkspace *work) {
   c_int i, exitflag, constr_type_changed;
 
   exitflag            = 0;
@@ -155,13 +155,13 @@ void swap_vectors(c_float **a, c_float **b) {
   *a   = temp;
 }
 
-void cold_start(OSQPWorkspace *work) {
+void cold_start(struct OSQPWorkspace *work) {
   vec_set_scalar(work->x, 0., work->data->n);
   vec_set_scalar(work->z, 0., work->data->m);
   vec_set_scalar(work->y, 0., work->data->m);
 }
 
-static void compute_rhs(OSQPWorkspace *work) {
+static void compute_rhs(struct OSQPWorkspace *work) {
   c_int i; // Index
 
   for (i = 0; i < work->data->n; i++) {
@@ -177,7 +177,7 @@ static void compute_rhs(OSQPWorkspace *work) {
   }
 }
 
-void update_xz_tilde(OSQPWorkspace *work) {
+void update_xz_tilde(struct OSQPWorkspace *work) {
   // Compute right-hand side
   compute_rhs(work);
 
@@ -185,7 +185,7 @@ void update_xz_tilde(OSQPWorkspace *work) {
   work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
 }
 
-void update_x(OSQPWorkspace *work) {
+void update_x(struct OSQPWorkspace *work) {
   c_int i;
 
   // update x
@@ -200,7 +200,7 @@ void update_x(OSQPWorkspace *work) {
   }
 }
 
-void update_z(OSQPWorkspace *work) {
+void update_z(struct OSQPWorkspace *work) {
   c_int i;
 
   // update z
@@ -214,7 +214,7 @@ void update_z(OSQPWorkspace *work) {
   project(work, work->z);
 }
 
-void update_y(OSQPWorkspace *work) {
+void update_y(struct OSQPWorkspace *work) {
   c_int i; // Index
 
   for (i = 0; i < work->data->m; i++) {
@@ -227,7 +227,7 @@ void update_y(OSQPWorkspace *work) {
   }
 }
 
-c_float compute_obj_val(OSQPWorkspace *work, c_float *x) {
+c_float compute_obj_val(struct OSQPWorkspace *work, c_float *x) {
   c_float obj_val;
 
   obj_val = quad_form(work->data->P, x) +
@@ -240,7 +240,7 @@ c_float compute_obj_val(OSQPWorkspace *work, c_float *x) {
   return obj_val;
 }
 
-c_float compute_pri_res(OSQPWorkspace *work, c_float *x, c_float *z) {
+c_float compute_pri_res(struct OSQPWorkspace *work, c_float *x, c_float *z) {
   // NB: Use z_prev as working vector
   // pr = Ax - z
 
@@ -256,7 +256,7 @@ c_float compute_pri_res(OSQPWorkspace *work, c_float *x, c_float *z) {
   return vec_norm_inf(work->z_prev, work->data->m);
 }
 
-c_float compute_pri_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
+c_float compute_pri_tol(struct OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   c_float max_rel_eps, temp_rel_eps;
 
   // max_rel_eps = max(||z||, ||A x||)
@@ -287,7 +287,7 @@ c_float compute_pri_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_float compute_dua_res(OSQPWorkspace *work, c_float *x, c_float *y) {
+c_float compute_dua_res(struct OSQPWorkspace *work, c_float *x, c_float *y) {
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
   // dr = q + A'*y + P*x
@@ -320,7 +320,7 @@ c_float compute_dua_res(OSQPWorkspace *work, c_float *x, c_float *y) {
   return vec_norm_inf(work->x_prev, work->data->n);
 }
 
-c_float compute_dua_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
+c_float compute_dua_tol(struct OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   c_float max_rel_eps, temp_rel_eps;
 
   // max_rel_eps = max(||q||, ||A' y|, ||P x||)
@@ -361,7 +361,7 @@ c_float compute_dua_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
+c_int is_primal_infeasible(struct OSQPWorkspace *work, c_float eps_prim_inf) {
   // This function checks for the primal infeasibility termination criteria.
   //
   // 1) A' * delta_y < eps * ||delta_y||
@@ -426,7 +426,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   return 0;
 }
 
-c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
+c_int is_dual_infeasible(struct OSQPWorkspace *work, c_float eps_dual_inf) {
   // This function checks for the scaled dual infeasibility termination
   // criteria.
   //
@@ -524,7 +524,7 @@ c_int has_solution(OSQPInfo * info){
 
 }
 
-void store_solution(OSQPWorkspace *work) {
+void store_solution(struct OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
@@ -564,7 +564,7 @@ void store_solution(OSQPWorkspace *work) {
   }
 }
 
-void update_info(OSQPWorkspace *work,
+void update_info(struct OSQPWorkspace *work,
                  c_int          iter,
                  c_int          compute_objective,
                  c_int          polish) {
@@ -681,7 +681,7 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
 }
 
-c_int check_termination(OSQPWorkspace *work, c_int approximate) {
+c_int check_termination(struct OSQPWorkspace *work, c_int approximate) {
   c_float eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
   c_int   exitflag;
   c_int   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;

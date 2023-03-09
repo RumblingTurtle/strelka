@@ -4,12 +4,12 @@
 #include <eigen3/Eigen/LU>
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixExponential.h>
-#include <osqp/ctrlc.h>
-#include <osqp/osqp.h>
 #include <strelka_common/Robot.hpp>
 #include <strelka_common/constants.hpp>
 #include <strelka_common/rotation.hpp>
 #include <strelka_common/typedefs.hpp>
+
+struct OSQPWorkspace;
 
 namespace strelka {
 namespace control {

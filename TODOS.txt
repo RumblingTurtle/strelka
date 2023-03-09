@@ -47,13 +47,17 @@
     
 <> Messaging
     + lcm.handle() == 0
+    + Sim bridge to lcm
+    + Gazebo -> RawRobot state
+    + Low level command  -> Gazebo
+    + Timeouts for wbic command
+    - Timeouts for low level command command
     - Custom update rate settings
     - Ensure lcm.good()
-    - Timeouts for topics
-    - Sim/Hardware bridge to lcm
+    - Hardware bridge to lcm
     - Make lcm message names more comprehensive 
-    - Real robot/Gazebo -> RawRobot state
-    - Low level command -> Real robot/Gazebo
+    - Real robot -> RawRobot state
+    - Low level command -> Real robot
 
 <> Code structure
     + Replace defines with constants
@@ -79,6 +83,5 @@
             FILE(GLOB_RECURSE STRELKA_CONTROL_WBIC_SOURCES *.cpp)
 
 <???>
-    ? Gridmap to LCM
     ? Balance controller
     ? CLI gui

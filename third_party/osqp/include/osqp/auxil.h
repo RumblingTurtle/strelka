@@ -18,20 +18,20 @@ extern "C" {
  * @param work Workspace
  * @return     rho estimate
  */
-c_float compute_rho_estimate(OSQPWorkspace *work);
+c_float compute_rho_estimate(struct OSQPWorkspace *work);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param work Workspace
  * @return     Exitflag
  */
-c_int   adapt_rho(OSQPWorkspace *work);
+c_int   adapt_rho(struct OSQPWorkspace *work);
 
 /**
  * Set values of rho vector based on constraint types
  * @param work Workspace
  */
-void    set_rho_vec(OSQPWorkspace *work);
+void    set_rho_vec(struct OSQPWorkspace *work);
 
 /**
  * Update values of rho vector based on updated constraints.
@@ -40,7 +40,7 @@ void    set_rho_vec(OSQPWorkspace *work);
  * @param work Workspace
  * @return     Exitflag
  */
-c_int   update_rho_vec(OSQPWorkspace *work);
+c_int   update_rho_vec(struct OSQPWorkspace *work);
 
 # endif // EMBEDDED
 
@@ -57,14 +57,14 @@ void swap_vectors(c_float **a,
  * Cold start workspace variables xz and y
  * @param work Workspace
  */
-void cold_start(OSQPWorkspace *work);
+void cold_start(struct OSQPWorkspace *work);
 
 
 /**
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param work [description]
  */
-void update_xz_tilde(OSQPWorkspace *work);
+void update_xz_tilde(struct OSQPWorkspace *work);
 
 
 /**
@@ -72,14 +72,14 @@ void update_xz_tilde(OSQPWorkspace *work);
  * Update also delta_x (For for dual infeasibility)
  * @param work Workspace
  */
-void update_x(OSQPWorkspace *work);
+void update_x(struct OSQPWorkspace *work);
 
 
 /**
  * Update z (third ADMM step)
  * @param work Workspace
  */
-void update_z(OSQPWorkspace *work);
+void update_z(struct OSQPWorkspace *work);
 
 
 /**
@@ -87,16 +87,16 @@ void update_z(OSQPWorkspace *work);
  * Update also delta_y to check for primal infeasibility
  * @param work Workspace
  */
-void update_y(OSQPWorkspace *work);
+void update_y(struct OSQPWorkspace *work);
 
 
 /**
  * Compute objective function from data at value x
- * @param  work OSQPWorkspace structure
+ * @param  work struct OSQPWorkspace structure
  * @param  x    Value x
  * @return      Objective function value
  */
-c_float compute_obj_val(OSQPWorkspace *work,
+c_float compute_obj_val(struct OSQPWorkspace *work,
                         c_float       *x);
 
 /**
@@ -109,7 +109,7 @@ c_int has_solution(OSQPInfo *info);
  * Store the QP solution
  * @param work Workspace
  */
-void store_solution(OSQPWorkspace *work);
+void store_solution(struct OSQPWorkspace *work);
 
 
 /**
@@ -119,7 +119,7 @@ void store_solution(OSQPWorkspace *work);
  * @param compute_objective  Boolean (if compute the objective or not)
  * @param polish             Boolean (if called from polish)
  */
-void update_info(OSQPWorkspace *work,
+void update_info(struct OSQPWorkspace *work,
                  c_int          iter,
                  c_int          compute_objective,
                  c_int          polish);
@@ -150,7 +150,7 @@ void update_status(OSQPInfo *info,
  * @param  approximate Boolean
  * @return      Residuals check
  */
-c_int check_termination(OSQPWorkspace *work,
+c_int check_termination(struct OSQPWorkspace *work,
                         c_int          approximate);
 
 

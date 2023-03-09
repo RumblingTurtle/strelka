@@ -1,13 +1,12 @@
 /* Solution polish based on assuming the active set */
 #ifndef POLISH_H
-# define POLISH_H
+#define POLISH_H
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+#endif // ifdef __cplusplus
 
-
-# include "types.h"
+#include "types.h"
 
 /**
  * Solution polish: Solve equality constrained QP with assumed active
@@ -15,11 +14,10 @@ extern "C" {
  * @param  work Workspace
  * @return      Exitflag
  */
-c_int polish(OSQPWorkspace *work);
+c_int polish(struct OSQPWorkspace *work);
 
-
-# ifdef __cplusplus
+#ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+#endif // ifdef __cplusplus
 
 #endif // ifndef POLISH_H

@@ -55,7 +55,7 @@ void print_header(void) {
   c_print("\n");
 }
 
-void print_setup_header(const OSQPWorkspace *work) {
+void print_setup_header(const struct OSQPWorkspace *work) {
   OSQPData *data;
   OSQPSettings *settings;
   c_int nnz; // Number of nonzeros in the problem
@@ -130,7 +130,7 @@ void print_setup_header(const OSQPWorkspace *work) {
   c_print("\n");
 }
 
-void print_summary(OSQPWorkspace *work) {
+void print_summary(struct OSQPWorkspace *work) {
   OSQPInfo *info;
 
   info = work->info;
@@ -155,7 +155,7 @@ void print_summary(OSQPWorkspace *work) {
   work->summary_printed = 1; // Summary has been printed
 }
 
-void print_polish(OSQPWorkspace *work) {
+void print_polish(struct OSQPWorkspace *work) {
   OSQPInfo *info;
 
   info = work->info;

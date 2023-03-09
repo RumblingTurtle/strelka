@@ -1,10 +1,12 @@
 #ifndef WHOLEBODYIMPEDANCE_CTRL_H
 #define WHOLEBODYIMPEDANCE_CTRL_H
 
-#include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <strelka_common/Robot.hpp>
 #include <strelka_common/typedefs.hpp>
 #include <strelka_messages/WBICCommand.hpp>
+
+template <class T = float> class LocomotionCtrl;
+template <class T = float> class FloatingBaseModel;
 
 namespace strelka {
 namespace control {

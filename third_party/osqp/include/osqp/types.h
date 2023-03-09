@@ -179,7 +179,7 @@ typedef struct {
 /**
  * OSQP Workspace
  */
-typedef struct {
+struct OSQPWorkspace {
   /// Problem data to work on (possibly scaled)
   OSQPData *data;
 
@@ -286,7 +286,7 @@ typedef struct {
   c_int summary_printed; ///< Has last summary been printed? (true/false)
 # endif // ifdef PRINTING
 
-} OSQPWorkspace;
+};
 
 
 /**

@@ -1,5 +1,9 @@
 
 #include <strelka_control/MPC.hpp>
+
+#include <osqp/ctrlc.h>
+#include <osqp/osqp.h>
+
 namespace strelka {
 namespace control {
 

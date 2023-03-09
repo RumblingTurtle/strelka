@@ -16,7 +16,7 @@
  * @param  work Workspace
  * @return      Number of rows in Ared, negative if error
  */
-static c_int form_Ared(OSQPWorkspace *work) {
+static c_int form_Ared(struct OSQPWorkspace *work) {
   c_int j, ptr;
   c_int Ared_nnz = 0;
 
@@ -102,7 +102,7 @@ static c_int form_Ared(OSQPWorkspace *work) {
  * @param  rhs  right-hand-side
  * @return      reduced rhs
  */
-static void form_rhs_red(OSQPWorkspace *work, c_float *rhs) {
+static void form_rhs_red(struct OSQPWorkspace *work, c_float *rhs) {
   c_int j;
 
   // Form the rhs of the reduced KKT linear system
@@ -131,7 +131,7 @@ static void form_rhs_red(OSQPWorkspace *work, c_float *rhs) {
  * @param  b    RHS of the linear system
  * @return      Exitflag
  */
-static c_int iterative_refinement(OSQPWorkspace *work,
+static c_int iterative_refinement(struct OSQPWorkspace *work,
                                   LinSysSolver  *p,
                                   c_float       *z,
                                   c_float       *b) {
@@ -185,7 +185,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
  * @param work Workspace
  * @param yred Dual variables associated to active constraints
  */
-static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
+static void get_ypol_from_yred(struct OSQPWorkspace *work, c_float *yred) {
   c_int j;
 
   // If there are no active constraints
@@ -209,7 +209,7 @@ static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
   }
 }
 
-c_int polish(OSQPWorkspace *work) {
+c_int polish(struct OSQPWorkspace *work) {
   c_int mred, polish_successful, exitflag;
   c_float *rhs_red;
   LinSysSolver *plsh;

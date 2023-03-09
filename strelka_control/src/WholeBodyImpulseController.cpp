@@ -1,3 +1,4 @@
+#include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <strelka_control/WholeBodyImpulseController.hpp>
 
 namespace strelka {

@@ -41,7 +41,9 @@ macro(define_package)
         FILE(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
             
         add_library(${PACKAGE_NAME_LOWER} ${SRC_FILES})
-        target_include_directories(${PACKAGE_NAME_LOWER} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+        target_include_directories(${PACKAGE_NAME_LOWER} PUBLIC 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        )
         target_link_libraries(${PACKAGE_NAME_LOWER} ${_define_package_DEPENDS})
 
         install(
@@ -52,8 +54,7 @@ macro(define_package)
         target_include_directories(${PACKAGE_NAME_LOWER} INTERFACE ./include)
     endif()
 
-    install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    install(DIRECTORY include/ DESTINATION include)
 
     print_pkg_footer()
 endmacro()

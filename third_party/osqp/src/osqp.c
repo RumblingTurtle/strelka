@@ -73,10 +73,10 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings *settings) {
+c_int osqp_setup(struct OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings *settings) {
   c_int exitflag;
 
-  OSQPWorkspace * work;
+  struct OSQPWorkspace * work;
 
   // Validate data
   if (validate_data(data)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
@@ -85,7 +85,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   if (validate_settings(settings)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
   // Allocate empty workspace
-  work = c_calloc(1, sizeof(OSQPWorkspace));
+  work = c_calloc(1, sizeof(struct OSQPWorkspace));
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   *workp = work;
 
@@ -285,7 +285,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 #endif // #ifndef EMBEDDED
 
 
-c_int osqp_solve(OSQPWorkspace *work) {
+c_int osqp_solve(struct OSQPWorkspace *work) {
 
   c_int exitflag;
   c_int iter;
@@ -643,7 +643,7 @@ exit:
 
 #ifndef EMBEDDED
 
-c_int osqp_cleanup(OSQPWorkspace *work) {
+c_int osqp_cleanup(struct OSQPWorkspace *work) {
   c_int exitflag = 0;
 
   if (work) { // If workspace has been allocated
@@ -749,7 +749,7 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
+c_int osqp_update_lin_cost(struct OSQPWorkspace *work, const c_float *q_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -781,7 +781,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
   return 0;
 }
 
-c_int osqp_update_bounds(OSQPWorkspace *work,
+c_int osqp_update_bounds(struct OSQPWorkspace *work,
                          const c_float *l_new,
                          const c_float *u_new) {
   c_int i, exitflag = 0;
@@ -832,7 +832,7 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
   return exitflag;
 }
 
-c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
+c_int osqp_update_lower_bound(struct OSQPWorkspace *work, const c_float *l_new) {
   c_int i, exitflag = 0;
 
   // Check if workspace has been initialized
@@ -879,7 +879,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   return exitflag;
 }
 
-c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
+c_int osqp_update_upper_bound(struct OSQPWorkspace *work, const c_float *u_new) {
   c_int i, exitflag = 0;
 
   // Check if workspace has been initialized
@@ -926,7 +926,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   return exitflag;
 }
 
-c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
+c_int osqp_warm_start(struct OSQPWorkspace *work, const c_float *x, const c_float *y) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -951,7 +951,7 @@ c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
   return 0;
 }
 
-c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
+c_int osqp_warm_start_x(struct OSQPWorkspace *work, const c_float *x) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -973,7 +973,7 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   return 0;
 }
 
-c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
+c_int osqp_warm_start_y(struct OSQPWorkspace *work, const c_float *y) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -996,7 +996,7 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
 
 #if EMBEDDED != 1
 
-c_int osqp_update_P(OSQPWorkspace *work,
+c_int osqp_update_P(struct OSQPWorkspace *work,
                     const c_float *Px_new,
                     const c_int   *Px_new_idx,
                     c_int          P_new_n) {
@@ -1076,7 +1076,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
 }
 
 
-c_int osqp_update_A(OSQPWorkspace *work,
+c_int osqp_update_A(struct OSQPWorkspace *work,
                     const c_float *Ax_new,
                     const c_int   *Ax_new_idx,
                     c_int          A_new_n) {
@@ -1155,7 +1155,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
 }
 
 
-c_int osqp_update_P_A(OSQPWorkspace *work,
+c_int osqp_update_P_A(struct OSQPWorkspace *work,
                       const c_float *Px_new,
                       const c_int   *Px_new_idx,
                       c_int          P_new_n,
@@ -1265,7 +1265,7 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
   return exitflag;
 }
 
-c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
+c_int osqp_update_rho(struct OSQPWorkspace *work, c_float rho_new) {
   c_int exitflag, i;
 
   // Check if workspace has been initialized
@@ -1323,7 +1323,7 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
 /****************************
 * Update problem settings  *
 ****************************/
-c_int osqp_update_max_iter(OSQPWorkspace *work, c_int max_iter_new) {
+c_int osqp_update_max_iter(struct OSQPWorkspace *work, c_int max_iter_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1342,7 +1342,7 @@ c_int osqp_update_max_iter(OSQPWorkspace *work, c_int max_iter_new) {
   return 0;
 }
 
-c_int osqp_update_eps_abs(OSQPWorkspace *work, c_float eps_abs_new) {
+c_int osqp_update_eps_abs(struct OSQPWorkspace *work, c_float eps_abs_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1361,7 +1361,7 @@ c_int osqp_update_eps_abs(OSQPWorkspace *work, c_float eps_abs_new) {
   return 0;
 }
 
-c_int osqp_update_eps_rel(OSQPWorkspace *work, c_float eps_rel_new) {
+c_int osqp_update_eps_rel(struct OSQPWorkspace *work, c_float eps_rel_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1380,7 +1380,7 @@ c_int osqp_update_eps_rel(OSQPWorkspace *work, c_float eps_rel_new) {
   return 0;
 }
 
-c_int osqp_update_eps_prim_inf(OSQPWorkspace *work, c_float eps_prim_inf_new) {
+c_int osqp_update_eps_prim_inf(struct OSQPWorkspace *work, c_float eps_prim_inf_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1399,7 +1399,7 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace *work, c_float eps_prim_inf_new) {
   return 0;
 }
 
-c_int osqp_update_eps_dual_inf(OSQPWorkspace *work, c_float eps_dual_inf_new) {
+c_int osqp_update_eps_dual_inf(struct OSQPWorkspace *work, c_float eps_dual_inf_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1419,7 +1419,7 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace *work, c_float eps_dual_inf_new) {
   return 0;
 }
 
-c_int osqp_update_alpha(OSQPWorkspace *work, c_float alpha_new) {
+c_int osqp_update_alpha(struct OSQPWorkspace *work, c_float alpha_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1438,7 +1438,7 @@ c_int osqp_update_alpha(OSQPWorkspace *work, c_float alpha_new) {
   return 0;
 }
 
-c_int osqp_update_warm_start(OSQPWorkspace *work, c_int warm_start_new) {
+c_int osqp_update_warm_start(struct OSQPWorkspace *work, c_int warm_start_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1457,7 +1457,7 @@ c_int osqp_update_warm_start(OSQPWorkspace *work, c_int warm_start_new) {
   return 0;
 }
 
-c_int osqp_update_scaled_termination(OSQPWorkspace *work, c_int scaled_termination_new) {
+c_int osqp_update_scaled_termination(struct OSQPWorkspace *work, c_int scaled_termination_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1476,7 +1476,7 @@ c_int osqp_update_scaled_termination(OSQPWorkspace *work, c_int scaled_terminati
   return 0;
 }
 
-c_int osqp_update_check_termination(OSQPWorkspace *work, c_int check_termination_new) {
+c_int osqp_update_check_termination(struct OSQPWorkspace *work, c_int check_termination_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1497,7 +1497,7 @@ c_int osqp_update_check_termination(OSQPWorkspace *work, c_int check_termination
 
 #ifndef EMBEDDED
 
-c_int osqp_update_delta(OSQPWorkspace *work, c_float delta_new) {
+c_int osqp_update_delta(struct OSQPWorkspace *work, c_float delta_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1516,7 +1516,7 @@ c_int osqp_update_delta(OSQPWorkspace *work, c_float delta_new) {
   return 0;
 }
 
-c_int osqp_update_polish(OSQPWorkspace *work, c_int polish_new) {
+c_int osqp_update_polish(struct OSQPWorkspace *work, c_int polish_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1541,7 +1541,7 @@ c_int osqp_update_polish(OSQPWorkspace *work, c_int polish_new) {
   return 0;
 }
 
-c_int osqp_update_polish_refine_iter(OSQPWorkspace *work, c_int polish_refine_iter_new) {
+c_int osqp_update_polish_refine_iter(struct OSQPWorkspace *work, c_int polish_refine_iter_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1560,7 +1560,7 @@ c_int osqp_update_polish_refine_iter(OSQPWorkspace *work, c_int polish_refine_it
   return 0;
 }
 
-c_int osqp_update_verbose(OSQPWorkspace *work, c_int verbose_new) {
+c_int osqp_update_verbose(struct OSQPWorkspace *work, c_int verbose_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1583,7 +1583,7 @@ c_int osqp_update_verbose(OSQPWorkspace *work, c_int verbose_new) {
 
 #ifdef PROFILING
 
-c_int osqp_update_time_limit(OSQPWorkspace *work, c_float time_limit_new) {
+c_int osqp_update_time_limit(struct OSQPWorkspace *work, c_float time_limit_new) {
 
   // Check if workspace has been initialized
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
