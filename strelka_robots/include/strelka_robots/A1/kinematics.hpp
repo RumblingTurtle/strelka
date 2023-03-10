@@ -6,7 +6,7 @@
 #define A1_KINEMATICS_H
 
 #include <math.h>
-#include <strelka_common/typedefs.hpp>
+#include <strelka/common/typedefs.hpp>
 #include <strelka_robots/A1/constants.hpp>
 
 namespace strelka {

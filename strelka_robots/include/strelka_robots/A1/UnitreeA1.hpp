@@ -4,11 +4,11 @@
 #include <strelka_robots/A1/kinematics.hpp>
 
 #include <exception>
-#include <strelka_common/Robot.hpp>
-#include <strelka_common/constants.hpp>
-#include <strelka_common/macros.hpp>
-#include <strelka_common/rotation.hpp>
-#include <strelka_common/typedefs.hpp>
+#include <strelka/common/Robot.hpp>
+#include <strelka/common/constants.hpp>
+#include <strelka/common/macros.hpp>
+#include <strelka/common/rotation.hpp>
+#include <strelka/common/typedefs.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
 

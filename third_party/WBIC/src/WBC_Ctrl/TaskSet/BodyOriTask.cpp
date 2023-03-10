@@ -1,11 +1,11 @@
-#include <WBC_Ctrl/TaskSet/BodyOriTask.hpp>
+#include <WBIC/WBC_Ctrl/TaskSet/BodyOriTask.hpp>
 // (Rx, Ry, Rz)
-#include <Dynamics/FloatingBaseModel.h>
-#include <Dynamics/Quadruped.h>
-#include <Math/orientation_tools.h>
-#include <Utilities/pretty_print.h>
+#include <WBIC/Dynamics/FloatingBaseModel.h>
+#include <WBIC/Dynamics/Quadruped.h>
+#include <WBIC/Math/orientation_tools.h>
+#include <WBIC/Utilities/pretty_print.h>
 template <typename T>
-BodyOriTask<T>::BodyOriTask(const FloatingBaseModel<T>* robot)
+BodyOriTask<T>::BodyOriTask(const FloatingBaseModel<T> *robot)
     : Task<T>(3), _robot_sys(robot) {
   TK::Jt_ = DMat<T>::Zero(TK::dim_task_, cheetah::dim_config);
   TK::Jt_.block(0, 0, 3, 3).setIdentity();
@@ -16,13 +16,12 @@ BodyOriTask<T>::BodyOriTask(const FloatingBaseModel<T>* robot)
   _Kd = DVec<T>::Constant(TK::dim_task_, 1.);
 }
 
-template <typename T>
-BodyOriTask<T>::~BodyOriTask() {}
+template <typename T> BodyOriTask<T>::~BodyOriTask() {}
 
 template <typename T>
-bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
-                                    const DVec<T>& acc_des) {
-  Quat<T>* ori_cmd = (Quat<T>*)pos_des;
+bool BodyOriTask<T>::_UpdateCommand(const void *pos_des, const DVec<T> &vel_des,
+                                    const DVec<T> &acc_des) {
+  Quat<T> *ori_cmd = (Quat<T> *)pos_des;
   Quat<T> link_ori = (_robot_sys->_state.bodyOrientation);
 
   Quat<T> link_ori_inv;
@@ -41,7 +40,7 @@ bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
   // Configuration space: Local
   // Operational Space: Global
   Mat3<T> Rot = ori::quaternionToRotationMatrix(link_ori);
-  Vec3<T> vel_err = Rot.transpose()*(TK::vel_des_ - curr_vel.head(3));
+  Vec3<T> vel_err = Rot.transpose() * (TK::vel_des_ - curr_vel.head(3));
 
   // Rx, Ry, Rz
   for (int i(0); i < 3; ++i) {
@@ -49,16 +48,16 @@ bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
     TK::vel_des_[i] = vel_des[i];
     TK::acc_des_[i] = acc_des[i];
 
-    TK::op_cmd_[i] = _Kp[i] * ori_err_so3[i] +
-                     _Kd[i] * vel_err[i] + TK::acc_des_[i];
+    TK::op_cmd_[i] =
+        _Kp[i] * ori_err_so3[i] + _Kd[i] * vel_err[i] + TK::acc_des_[i];
   }
-  //printf("[Body Ori Task]\n");
-  //pretty_print(TK::pos_err_, std::cout, "pos_err_");
-  //pretty_print(*ori_cmd, std::cout, "des_ori");
-  //pretty_print(link_ori, std::cout, "curr_ori");
-  //pretty_print(ori_err, std::cout, "quat_err");
-  //pretty_print(_Kp, std::cout, "_Kp");
-  //pretty_print(_Kp_kin, std::cout, "_Kp_kin");
+  // printf("[Body Ori Task]\n");
+  // pretty_print(TK::pos_err_, std::cout, "pos_err_");
+  // pretty_print(*ori_cmd, std::cout, "des_ori");
+  // pretty_print(link_ori, std::cout, "curr_ori");
+  // pretty_print(ori_err, std::cout, "quat_err");
+  // pretty_print(_Kp, std::cout, "_Kp");
+  // pretty_print(_Kp_kin, std::cout, "_Kp_kin");
 
   // pretty_print(link_ori_inv, std::cout, "ori_inv");
   // pretty_print(ori_err, std::cout, "ori_err");
@@ -69,17 +68,15 @@ bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des,
   return true;
 }
 
-template <typename T>
-bool BodyOriTask<T>::_UpdateTaskJacobian() {
+template <typename T> bool BodyOriTask<T>::_UpdateTaskJacobian() {
   Quat<T> quat = _robot_sys->_state.bodyOrientation;
   Mat3<T> Rot = ori::quaternionToRotationMatrix(quat);
   TK::Jt_.block(0, 0, 3, 3) = Rot.transpose();
-  //pretty_print(Rot, std::cout, "Rot mat");
+  // pretty_print(Rot, std::cout, "Rot mat");
   return true;
 }
 
-template <typename T>
-bool BodyOriTask<T>::_UpdateTaskJDotQdot() {
+template <typename T> bool BodyOriTask<T>::_UpdateTaskJDotQdot() {
   return true;
 }
 

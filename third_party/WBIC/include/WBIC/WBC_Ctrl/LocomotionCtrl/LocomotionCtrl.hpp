@@ -1,12 +1,12 @@
 #ifndef LOCOMOTION_CONTROLLER
 #define LOCOMOTION_CONTROLLER
 
-#include <WBC_Ctrl/ContactSet/SingleContact.hpp>
-#include <WBC_Ctrl/TaskSet/BodyOriTask.hpp>
-#include <WBC_Ctrl/TaskSet/BodyPosTask.hpp>
-#include <WBC_Ctrl/TaskSet/LinkPosTask.hpp>
-#include <WBC_Ctrl/WBC_Ctrl.hpp>
-#include <cppTypes.h>
+#include <WBIC/WBC_Ctrl/ContactSet/SingleContact.hpp>
+#include <WBIC/WBC_Ctrl/TaskSet/BodyOriTask.hpp>
+#include <WBIC/WBC_Ctrl/TaskSet/BodyPosTask.hpp>
+#include <WBIC/WBC_Ctrl/TaskSet/LinkPosTask.hpp>
+#include <WBIC/WBC_Ctrl/WBC_Ctrl.hpp>
+#include <WBIC/cppTypes.h>
 #include <vector>
 
 template <typename T> class LocomotionCtrlData {

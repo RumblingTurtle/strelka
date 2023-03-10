@@ -1,7 +1,7 @@
 
 
 #include <gtest/gtest.h>
-#include <strelka_common/macros.hpp>
+#include <strelka/common/macros.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/constants.hpp>
 #include <strelka_robots/A1/kinematics.hpp>

@@ -2,16 +2,16 @@
 #define A1WBIC_H
 
 #include <iostream>
-#include <strelka_common/typedefs.hpp>
-#include <strelka_common/utilities.hpp>
-#include <strelka_control/WholeBodyImpulseController.hpp>
+#include <strelka/common/typedefs.hpp>
+#include <strelka/common/utilities.hpp>
+#include <strelka/control/WholeBodyImpulseController.hpp>
+#include <strelka/state_estimation/SlowdownEstimator.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
 #include <strelka_messages/a1_lcm_msgs/WbicCommand.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/control/A1WbicDynamics.hpp>
 #include <strelka_robots/A1/kinematics.hpp>
-#include <strelka_state_estimation/SlowdownEstimator.hpp>
 
 namespace strelka {
 namespace control {

@@ -10,8 +10,8 @@
 #include <iostream>
 #include <type_traits>
 
-#include "Math/orientation_tools.h"
-#include "spatial.h"
+#include <WBIC/Dynamics/spatial.h>
+#include <WBIC/Math/orientation_tools.h>
 
 using namespace ori;
 using namespace spatial;
@@ -19,15 +19,14 @@ using namespace spatial;
 /*!
  * Representation of Rigid Body Inertia as a 6x6 Spatial Inertia Tensor
  */
-template <typename T>
-class SpatialInertia {
- public:
+template <typename T> class SpatialInertia {
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   /*!
    * Construct spatial inertia from mass, center of mass, and 3x3 rotational
    * inertia
    */
-  SpatialInertia(T mass, const Vec3<T>& com, const Mat3<T>& inertia) {
+  SpatialInertia(T mass, const Vec3<T> &com, const Mat3<T> &inertia) {
     Mat3<T> cSkew = vectorToSkewMat(com);
     _inertia.template topLeftCorner<3, 3>() =
         inertia + mass * cSkew * cSkew.transpose();
@@ -39,7 +38,7 @@ class SpatialInertia {
   /*!
    * Construct spatial inertia from 6x6 matrix
    */
-  explicit SpatialInertia(const Mat6<T>& inertia) { _inertia = inertia; }
+  explicit SpatialInertia(const Mat6<T> &inertia) { _inertia = inertia; }
 
   /*!
    * If no argument is given, zero.
@@ -49,7 +48,7 @@ class SpatialInertia {
   /*!
    * Construct spatial inertia from mass property vector
    */
-  explicit SpatialInertia(const MassProperties<T>& a) {
+  explicit SpatialInertia(const MassProperties<T> &a) {
     _inertia(0, 0) = a(4);
     _inertia(0, 1) = a(9);
     _inertia(0, 2) = a(8);
@@ -72,7 +71,7 @@ class SpatialInertia {
    *   Wensing, Kim, Slotine
    * @param P
    */
-  explicit SpatialInertia(const Mat4<T>& P) {
+  explicit SpatialInertia(const Mat4<T> &P) {
     Mat6<T> I;
     T m = P(3, 3);
     Vec3<T> h = P.template topRightCorner<3, 1>();
@@ -99,11 +98,11 @@ class SpatialInertia {
   /*!
    * Get 6x6 spatial inertia
    */
-  const Mat6<T>& getMatrix() const { return _inertia; }
+  const Mat6<T> &getMatrix() const { return _inertia; }
 
-  void setMatrix(const Mat6<T>& mat) { _inertia = mat; }
+  void setMatrix(const Mat6<T> &mat) { _inertia = mat; }
 
-  void addMatrix(const Mat6<T>& mat) { _inertia += mat; }
+  void addMatrix(const Mat6<T> &mat) { _inertia += mat; }
 
   /*!
    * Get mass
@@ -166,8 +165,8 @@ class SpatialInertia {
     return SpatialInertia(P);
   }
 
- private:
+private:
   Mat6<T> _inertia;
 };
 
-#endif  // LIBBIOMIMETICS_SPATIALINERTIA_H
+#endif // LIBBIOMIMETICS_SPATIALINERTIA_H

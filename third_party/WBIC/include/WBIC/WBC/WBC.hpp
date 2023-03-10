@@ -1,20 +1,19 @@
 #ifndef WHOLE_BODY_CONTROLLER
 #define WHOLE_BODY_CONTROLLER
 
-#include <Utilities/pseudoInverse.h>
-#include <cppTypes.h>
+#include <WBIC/Utilities/pseudoInverse.h>
+#include <WBIC/WBC/ContactSpec.hpp>
+#include <WBIC/WBC/Task.hpp>
+#include <WBIC/cppTypes.h>
 #include <vector>
-#include "ContactSpec.hpp"
-#include "Task.hpp"
 
 // Assume first 6 (or 3 in 2D case) joints are for the representation of
 // a floating base.
 
 #define WB WBC<T>
 
-template <typename T>
-class WBC {
- public:
+template <typename T> class WBC {
+public:
   WBC(size_t num_qdot) : num_act_joint_(num_qdot - 6), num_qdot_(num_qdot) {
     Sa_ = DMat<T>::Zero(num_act_joint_, num_qdot_);
     Sv_ = DMat<T>::Zero(6, num_qdot_);
@@ -24,15 +23,15 @@ class WBC {
   }
   virtual ~WBC() {}
 
-  virtual void UpdateSetting(const DMat<T>& A, const DMat<T>& Ainv,
-                             const DVec<T>& cori, const DVec<T>& grav,
-                             void* extra_setting = NULL) = 0;
+  virtual void UpdateSetting(const DMat<T> &A, const DMat<T> &Ainv,
+                             const DVec<T> &cori, const DVec<T> &grav,
+                             void *extra_setting = NULL) = 0;
 
-  virtual void MakeTorque(DVec<T>& cmd, void* extra_input = NULL) = 0;
+  virtual void MakeTorque(DVec<T> &cmd, void *extra_input = NULL) = 0;
 
- protected:
+protected:
   // full rank fat matrix only
-  void _WeightedInverse(const DMat<T>& J, const DMat<T>& Winv, DMat<T>& Jinv,
+  void _WeightedInverse(const DMat<T> &J, const DMat<T> &Winv, DMat<T> &Jinv,
                         double threshold = 0.0001) {
     DMat<T> lambda(J * Winv * J.transpose());
     DMat<T> lambda_inv;
@@ -43,8 +42,8 @@ class WBC {
   size_t num_act_joint_;
   size_t num_qdot_;
 
-  DMat<T> Sa_;  // Actuated joint
-  DMat<T> Sv_;  // Virtual joint
+  DMat<T> Sa_; // Actuated joint
+  DMat<T> Sv_; // Virtual joint
 
   DMat<T> A_;
   DMat<T> Ainv_;

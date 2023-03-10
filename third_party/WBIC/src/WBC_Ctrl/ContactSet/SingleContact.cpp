@@ -1,8 +1,9 @@
-#include <WBC_Ctrl/ContactSet/SingleContact.hpp>
+#include <WBIC/WBC_Ctrl/ContactSet/SingleContact.hpp>
 
 // [ Fx, Fy, Fz ]
 template <typename T>
-SingleContact<T>::SingleContact(const FloatingBaseModel<T>* robot, int pt, float mu, float max_fz)
+SingleContact<T>::SingleContact(const FloatingBaseModel<T> *robot, int pt,
+                                float mu, float max_fz)
     : ContactSpec<T>(3), _max_Fz(max_fz), _contact_pt(pt), _dim_U(6) {
   Contact::idx_Fz_ = 2;
   robot_sys_ = robot;
@@ -26,11 +27,9 @@ SingleContact<T>::SingleContact(const FloatingBaseModel<T>* robot, int pt, float
   Contact::Uf_(5, 2) = -1.;
 }
 
-template <typename T>
-SingleContact<T>::~SingleContact() {}
+template <typename T> SingleContact<T>::~SingleContact() {}
 
-template <typename T>
-bool SingleContact<T>::_UpdateJc() {
+template <typename T> bool SingleContact<T>::_UpdateJc() {
   Contact::Jc_ = robot_sys_->_Jc[_contact_pt];
 
   // Quat<T> quat = robot_sys_->_state.bodyOrientation;
@@ -43,20 +42,15 @@ bool SingleContact<T>::_UpdateJc() {
   return true;
 }
 
-template <typename T>
-bool SingleContact<T>::_UpdateJcDotQdot() {
+template <typename T> bool SingleContact<T>::_UpdateJcDotQdot() {
   Contact::JcDotQdot_ = robot_sys_->_Jcdqd[_contact_pt];
   // pretty_print(Contact::JcDotQdot_, std::cout, "JcDotQdot");
   return true;
 }
 
-template <typename T>
-bool SingleContact<T>::_UpdateUf() {
-  return true;
-}
+template <typename T> bool SingleContact<T>::_UpdateUf() { return true; }
 
-template <typename T>
-bool SingleContact<T>::_UpdateInequalityVector() {
+template <typename T> bool SingleContact<T>::_UpdateInequalityVector() {
   Contact::ieq_vec_ = DVec<T>::Zero(_dim_U);
   Contact::ieq_vec_[5] = -_max_Fz;
   return true;

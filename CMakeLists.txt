@@ -3,6 +3,7 @@ project(strelka LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -20,15 +21,15 @@ endif (LCM_FOUND)
 # Used for OSQP
 add_definitions(-DDFLOAT) 
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
-set(CMAKE_C_FLAGS_RELEASE "-O3  -march=native -std=gnu99 -I.")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -fPIC -fPIE")
+set(CMAKE_CXX_FLAGS_DEBUG "-fPIC -fPIE")
+
+set(CMAKE_C_FLAGS_RELEASE "-O3  -march=native -std=gnu99 -I. -fPIC -fPIE")
+set(CMAKE_C_FLAGS_DEBUG "-fPIC -fPIE")
 
 add_subdirectory(third_party)
-add_subdirectory(strelka_common)
 add_subdirectory(strelka_messages)
-add_subdirectory(strelka_filters)
-add_subdirectory(strelka_control)
-add_subdirectory(strelka_state_estimation)
+add_subdirectory(strelka)
 add_subdirectory(strelka_robots)
 add_subdirectory(examples)
 add_subdirectory(tests)

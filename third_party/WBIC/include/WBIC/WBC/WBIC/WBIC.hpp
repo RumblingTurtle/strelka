@@ -3,17 +3,16 @@
 
 #include <Goldfarb_Optimizer/QuadProg++.hh>
 
-#include <WBC/ContactSpec.hpp>
-#include <WBC/Task.hpp>
-#include <WBC/WBC.hpp>
+#include <WBIC/WBC/ContactSpec.hpp>
+#include <WBIC/WBC/Task.hpp>
+#include <WBIC/WBC/WBC.hpp>
 
+#include <WBIC/Utilities/pretty_print.h>
 #include <eigen3/Eigen/LU>
 #include <eigen3/Eigen/SVD>
-#include <Utilities/pretty_print.h>
 
-template <typename T>
-class WBIC_ExtraData {
- public:
+template <typename T> class WBIC_ExtraData {
+public:
   // Output
   DVec<T> _opt_result;
   DVec<T> _qddot;
@@ -27,40 +26,39 @@ class WBIC_ExtraData {
   ~WBIC_ExtraData() {}
 };
 
-template <typename T>
-class WBIC : public WBC<T> {
- public:
-  WBIC(size_t num_qdot, const std::vector<ContactSpec<T>*>* contact_list,
-       const std::vector<Task<T>*>* task_list);
+template <typename T> class WBIC : public WBC<T> {
+public:
+  WBIC(size_t num_qdot, const std::vector<ContactSpec<T> *> *contact_list,
+       const std::vector<Task<T> *> *task_list);
   virtual ~WBIC() {}
 
-  virtual void UpdateSetting(const DMat<T>& A, const DMat<T>& Ainv,
-                             const DVec<T>& cori, const DVec<T>& grav,
-                             void* extra_setting = NULL);
+  virtual void UpdateSetting(const DMat<T> &A, const DMat<T> &Ainv,
+                             const DVec<T> &cori, const DVec<T> &grav,
+                             void *extra_setting = NULL);
 
-  virtual void MakeTorque(DVec<T>& cmd, void* extra_input = NULL);
+  virtual void MakeTorque(DVec<T> &cmd, void *extra_input = NULL);
 
- private:
-  const std::vector<ContactSpec<T>*>* _contact_list;
-  const std::vector<Task<T>*>* _task_list;
+private:
+  const std::vector<ContactSpec<T> *> *_contact_list;
+  const std::vector<Task<T> *> *_task_list;
 
-  void _SetEqualityConstraint(const DVec<T>& qddot);
+  void _SetEqualityConstraint(const DVec<T> &qddot);
   void _SetInEqualityConstraint();
   void _ContactBuilding();
 
-  void _GetSolution(const DVec<T>& qddot, DVec<T>& cmd);
+  void _GetSolution(const DVec<T> &qddot, DVec<T> &cmd);
   void _SetCost();
   void _SetOptimizationSize();
 
-  size_t _dim_opt;      // Contact pt delta, First task delta, reaction force
-  size_t _dim_eq_cstr;  // equality constraints
+  size_t _dim_opt;     // Contact pt delta, First task delta, reaction force
+  size_t _dim_eq_cstr; // equality constraints
 
-  size_t _dim_rf;  // inequality constraints
+  size_t _dim_rf; // inequality constraints
   size_t _dim_Uf;
 
   size_t _dim_floating;
 
-  WBIC_ExtraData<T>* _data;
+  WBIC_ExtraData<T> *_data;
 
   GolDIdnani::GVect<double> z;
   // Cost

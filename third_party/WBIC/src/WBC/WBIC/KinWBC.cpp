@@ -1,4 +1,4 @@
-#include <WBC/WBIC/KinWBC.hpp>
+#include <WBIC/WBC/WBIC/KinWBC.hpp>
 
 template <typename T>
 KinWBC<T>::KinWBC(size_t num_qdot)
@@ -8,13 +8,14 @@ KinWBC<T>::KinWBC(size_t num_qdot)
 
 template <typename T>
 bool KinWBC<T>::FindConfiguration(
-    const DVec<T>& curr_config, const std::vector<Task<T>*>& task_list,
-    const std::vector<ContactSpec<T>*>& contact_list, DVec<T>& jpos_cmd,
-    DVec<T>& jvel_cmd) {
+    const DVec<T> &curr_config, const std::vector<Task<T> *> &task_list,
+    const std::vector<ContactSpec<T> *> &contact_list, DVec<T> &jpos_cmd,
+    DVec<T> &jvel_cmd) {
 
   // Contact Jacobian Setup
-  DMat<T> Nc(num_qdot_, num_qdot_); Nc.setIdentity();
-  if(contact_list.size() > 0){
+  DMat<T> Nc(num_qdot_, num_qdot_);
+  Nc.setIdentity();
+  if (contact_list.size() > 0) {
     DMat<T> Jc, Jc_i;
     contact_list[0]->getContactJacobian(Jc);
     size_t num_rows = Jc.rows();
@@ -35,7 +36,7 @@ bool KinWBC<T>::FindConfiguration(
   DVec<T> delta_q, qdot;
   DMat<T> Jt, JtPre, JtPre_pinv, N_nx, N_pre;
 
-  Task<T>* task = task_list[0];
+  Task<T> *task = task_list[0];
   task->getTaskJacobian(Jt);
   JtPre = Jt * Nc;
   _PseudoInverse(JtPre, JtPre_pinv);
@@ -74,14 +75,14 @@ bool KinWBC<T>::FindConfiguration(
 }
 
 template <typename T>
-void KinWBC<T>::_BuildProjectionMatrix(const DMat<T>& J, DMat<T>& N) {
+void KinWBC<T>::_BuildProjectionMatrix(const DMat<T> &J, DMat<T> &N) {
   DMat<T> J_pinv;
   _PseudoInverse(J, J_pinv);
   N = I_mtx - J_pinv * J;
 }
 
 template <typename T>
-void KinWBC<T>::_PseudoInverse(const DMat<T> J, DMat<T>& Jinv) {
+void KinWBC<T>::_PseudoInverse(const DMat<T> J, DMat<T> &Jinv) {
   pseudoInverse(J, threshold_, Jinv);
 }
 

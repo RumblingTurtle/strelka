@@ -8,7 +8,7 @@
 #ifndef PROJECT_CPPTYPES_H
 #define PROJECT_CPPTYPES_H
 
-#include "cTypes.h"
+#include <WBIC/cTypes.h>
 #include <eigen3/Eigen/Dense>
 #include <vector>
 

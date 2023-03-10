@@ -2,9 +2,9 @@
 #define A1_LOCAL_PLANNER_H
 
 #include <chrono>
-#include <strelka_common/macros.hpp>
-#include <strelka_common/typedefs.hpp>
-#include <strelka_control/LocalPlanner.hpp>
+#include <strelka/common/macros.hpp>
+#include <strelka/common/typedefs.hpp>
+#include <strelka/control/LocalPlanner.hpp>
 
 #include <lcm/lcm-cpp.hpp>
 

@@ -1,22 +1,24 @@
-#include <WBC/WBIC/WBIC.hpp>
-
-  template <typename T>
-WBIC<T>::WBIC(size_t num_qdot, const std::vector<ContactSpec<T>*>* contact_list,
-    const std::vector<Task<T>*>* task_list)
-  : WBC<T>(num_qdot), _dim_floating(6) {
-    _contact_list = contact_list;
-    _task_list = task_list;
-
-    _eye = DMat<T>::Identity(WB::num_qdot_, WB::num_qdot_);
-    _eye_floating = DMat<T>::Identity(_dim_floating, _dim_floating);
-  }
+#include <WBIC/WBC/WBIC/WBIC.hpp>
 
 template <typename T>
-void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input) {
+WBIC<T>::WBIC(size_t num_qdot,
+              const std::vector<ContactSpec<T> *> *contact_list,
+              const std::vector<Task<T> *> *task_list)
+    : WBC<T>(num_qdot), _dim_floating(6) {
+  _contact_list = contact_list;
+  _task_list = task_list;
+
+  _eye = DMat<T>::Identity(WB::num_qdot_, WB::num_qdot_);
+  _eye_floating = DMat<T>::Identity(_dim_floating, _dim_floating);
+}
+
+template <typename T>
+void WBIC<T>::MakeTorque(DVec<T> &cmd, void *extra_input) {
   if (!WB::b_updatesetting_) {
     printf("[Wanning] WBIC setting is not done\n");
   }
-  if (extra_input) _data = static_cast<WBIC_ExtraData<T>*>(extra_input);
+  if (extra_input)
+    _data = static_cast<WBIC_ExtraData<T> *>(extra_input);
 
   // resize G, g0, CE, ce0, CI, ci0
   _SetOptimizationSize();
@@ -44,7 +46,7 @@ void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input) {
   }
 
   // Task
-  Task<T>* task;
+  Task<T> *task;
   DMat<T> Jt, JtBar, JtPre;
   DVec<T> JtDotQdot, xddot;
 
@@ -85,7 +87,8 @@ void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input) {
   (void)f;
 
   // pretty_print(qddot_pre, std::cout, "qddot_cmd");
-  for (size_t i(0); i < _dim_floating; ++i) qddot_pre[i] += z[i];
+  for (size_t i(0); i < _dim_floating; ++i)
+    qddot_pre[i] += z[i];
   _GetSolution(qddot_pre, cmd);
 
   _data->_opt_result = DVec<T>(_dim_opt);
@@ -94,7 +97,7 @@ void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input) {
   }
 
   // std::cout << "f: " << f << std::endl;
-  //std::cout << "x: " << z << std::endl;
+  // std::cout << "x: " << z << std::endl;
 
   // DVec<T> check_eq = _dyn_CE * _data->_opt_result + _dyn_ce0;
   // pretty_print(check_eq, std::cout, "equality constr");
@@ -122,17 +125,17 @@ void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input) {
 }
 
 template <typename T>
-void WBIC<T>::_SetEqualityConstraint(const DVec<T>& qddot) {
+void WBIC<T>::_SetEqualityConstraint(const DVec<T> &qddot) {
   if (_dim_rf > 0) {
     _dyn_CE.block(0, 0, _dim_eq_cstr, _dim_floating) =
-      WB::A_.block(0, 0, _dim_floating, _dim_floating);
+        WB::A_.block(0, 0, _dim_floating, _dim_floating);
     _dyn_CE.block(0, _dim_floating, _dim_eq_cstr, _dim_rf) =
-      -WB::Sv_ * _Jc.transpose();
+        -WB::Sv_ * _Jc.transpose();
     _dyn_ce0 = -WB::Sv_ * (WB::A_ * qddot + WB::cori_ + WB::grav_ -
-        _Jc.transpose() * _Fr_des);
+                           _Jc.transpose() * _Fr_des);
   } else {
     _dyn_CE.block(0, 0, _dim_eq_cstr, _dim_floating) =
-      WB::A_.block(0, 0, _dim_floating, _dim_floating);
+        WB::A_.block(0, 0, _dim_floating, _dim_floating);
     _dyn_ce0 = -WB::Sv_ * (WB::A_ * qddot + WB::cori_ + WB::grav_);
   }
 
@@ -146,8 +149,7 @@ void WBIC<T>::_SetEqualityConstraint(const DVec<T>& qddot) {
   // pretty_print(_dyn_ce0, std::cout, "WBIC: ce0");
 }
 
-template <typename T>
-void WBIC<T>::_SetInEqualityConstraint() {
+template <typename T> void WBIC<T>::_SetInEqualityConstraint() {
   _dyn_CI.block(0, _dim_floating, _dim_Uf, _dim_rf) = _Uf;
   _dyn_ci0 = _Uf_ieq_vec - _Uf * _Fr_des;
 
@@ -161,8 +163,7 @@ void WBIC<T>::_SetInEqualityConstraint() {
   // pretty_print(_dyn_ci0, std::cout, "WBIC: ci0");
 }
 
-template <typename T>
-void WBIC<T>::_ContactBuilding() {
+template <typename T> void WBIC<T>::_ContactBuilding() {
   DMat<T> Uf;
   DVec<T> Uf_ieq_vec;
   // Initial
@@ -208,18 +209,18 @@ void WBIC<T>::_ContactBuilding() {
 
     // Fr desired
     _Fr_des.segment(dim_accumul_rf, dim_new_rf) =
-      (*_contact_list)[i]->getRFDesired();
+        (*_contact_list)[i]->getRFDesired();
     dim_accumul_rf += dim_new_rf;
     dim_accumul_uf += dim_new_uf;
   }
   // pretty_print(_Fr_des, std::cout, "[WBIC] Fr des");
-  //pretty_print(_Jc, std::cout, "[WBIC] Jc");
+  // pretty_print(_Jc, std::cout, "[WBIC] Jc");
   // pretty_print(_JcDotQdot, std::cout, "[WBIC] JcDot Qdot");
   // pretty_print(_Uf, std::cout, "[WBIC] Uf");
 }
 
 template <typename T>
-void WBIC<T>::_GetSolution(const DVec<T>& qddot, DVec<T>& cmd) {
+void WBIC<T>::_GetSolution(const DVec<T> &qddot, DVec<T> &cmd) {
   DVec<T> tot_tau;
   if (_dim_rf > 0) {
     _data->_Fr = DVec<T>(_dim_rf);
@@ -227,7 +228,7 @@ void WBIC<T>::_GetSolution(const DVec<T>& qddot, DVec<T>& cmd) {
     for (size_t i(0); i < _dim_rf; ++i)
       _data->_Fr[i] = z[i + _dim_floating] + _Fr_des[i];
     tot_tau =
-      WB::A_ * qddot + WB::cori_ + WB::grav_ - _Jc.transpose() * _data->_Fr;
+        WB::A_ * qddot + WB::cori_ + WB::grav_ - _Jc.transpose() * _data->_Fr;
 
   } else {
     tot_tau = WB::A_ * qddot + WB::cori_ + WB::grav_;
@@ -246,8 +247,7 @@ void WBIC<T>::_GetSolution(const DVec<T>& qddot, DVec<T>& cmd) {
   // pretty_print(_Fr_des, std::cout, "Fr des");
 }
 
-template <typename T>
-void WBIC<T>::_SetCost() {
+template <typename T> void WBIC<T>::_SetCost() {
   // Set Cost
   size_t idx_offset(0);
   for (size_t i(0); i < _dim_floating; ++i) {
@@ -262,9 +262,9 @@ void WBIC<T>::_SetCost() {
 }
 
 template <typename T>
-void WBIC<T>::UpdateSetting(const DMat<T>& A, const DMat<T>& Ainv,
-    const DVec<T>& cori, const DVec<T>& grav,
-    void* extra_setting) {
+void WBIC<T>::UpdateSetting(const DMat<T> &A, const DMat<T> &Ainv,
+                            const DVec<T> &cori, const DVec<T> &grav,
+                            void *extra_setting) {
   WB::A_ = A;
   WB::Ainv_ = Ainv;
   WB::cori_ = cori;
@@ -274,11 +274,10 @@ void WBIC<T>::UpdateSetting(const DMat<T>& A, const DMat<T>& Ainv,
   (void)extra_setting;
 }
 
-template <typename T>
-void WBIC<T>::_SetOptimizationSize() {
+template <typename T> void WBIC<T>::_SetOptimizationSize() {
   // Dimension
   _dim_rf = 0;
-  _dim_Uf = 0;  // Dimension of inequality constraint
+  _dim_Uf = 0; // Dimension of inequality constraint
   for (size_t i(0); i < (*_contact_list).size(); ++i) {
     _dim_rf += (*_contact_list)[i]->getDim();
     _dim_Uf += (*_contact_list)[i]->getDimRFConstraint();

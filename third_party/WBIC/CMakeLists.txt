@@ -1,5 +1,5 @@
-FILE(GLOB_RECURSE WBIC_SOURCES src/*.cpp)
+FILE(GLOB_RECURSE WBIC_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_library(wbic STATIC ${WBIC_SOURCES})
-target_include_directories(wbic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/WBIC)
-target_link_libraries(wbic Goldfarb_Optimizer)
+add_library(wbic ${WBIC_SOURCES})
+target_include_directories(wbic PUBLIC include/)
+target_link_libraries(wbic goldfarb)

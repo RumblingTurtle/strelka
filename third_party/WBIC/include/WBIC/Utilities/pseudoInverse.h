@@ -1,7 +1,7 @@
 #ifndef PSEUDOINVERSE
 #define PSEUDOINVERSE
 
-#include <stdio.h>
+#include <WBIC/cppTypes.h>
 #include <eigen3/Eigen/LU>
 #include <eigen3/Eigen/SVD>
 using namespace std;
@@ -13,8 +13,8 @@ using namespace std;
  * @param invMatrix : output matrix
  */
 template <typename T>
-void pseudoInverse(DMat<T> const& matrix, double sigmaThreshold,
-                   DMat<T>& invMatrix) {
+void pseudoInverse(DMat<T> const &matrix, double sigmaThreshold,
+                   DMat<T> &invMatrix) {
   if ((1 == matrix.rows()) && (1 == matrix.cols())) {
     invMatrix.resize(1, 1);
     if (matrix.coeff(0, 0) > sigmaThreshold) {

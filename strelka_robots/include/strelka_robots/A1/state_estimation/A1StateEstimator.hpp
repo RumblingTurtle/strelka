@@ -2,16 +2,16 @@
 #define A1_STATE_ESITMATOR_H
 
 #include <lcm/lcm-cpp.hpp>
-#include <strelka_common/constants.hpp>
-#include <strelka_common/rotation.hpp>
-#include <strelka_filters/MovingWindowFilter3D.hpp>
+#include <strelka/common/constants.hpp>
+#include <strelka/common/rotation.hpp>
+#include <strelka/filters/MovingWindowFilter3D.hpp>
+#include <strelka/state_estimation/KalmanFilterObserver.hpp>
+#include <strelka/state_estimation/SlowdownEstimator.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/constants.hpp>
 #include <strelka_robots/A1/kinematics.hpp>
-#include <strelka_state_estimation/KalmanFilterObserver.hpp>
-#include <strelka_state_estimation/SlowdownEstimator.hpp>
 namespace strelka {
 namespace state_estimation {
 class A1StateEstimator {

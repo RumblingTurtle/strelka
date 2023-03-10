@@ -6,6 +6,16 @@ cd ~/strelka
 cmake -S . -B build -DCMAKE_BUILD_TYPE=[Debug|Release]
 cmake --build build
 ```
+# Install
+```
+cd ~/strelka/build
+sudo make install
+sudo ldconfig
+```
+# Uninstall
+```
+sudo ~/strelka/uninstall.sh
+```
 # Run tests
 ```
 cd build && ctest --output-on-failure

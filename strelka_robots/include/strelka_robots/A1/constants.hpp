@@ -6,7 +6,7 @@
 #ifndef A1_CONSTANTS_H
 #define A1_CONSTANTS_H
 
-#include <strelka_common/typedefs.hpp>
+#include <strelka/common/typedefs.hpp>
 namespace strelka {
 namespace A1 {
 namespace constants {

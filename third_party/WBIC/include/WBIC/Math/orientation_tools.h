@@ -20,8 +20,8 @@
 #include <iostream>
 #include <type_traits>
 
-#include "Math/MathUtilities.h"
-#include "cppTypes.h"
+#include <WBIC/Math/MathUtilities.h>
+#include <WBIC/cppTypes.h>
 
 namespace ori {
 
@@ -32,8 +32,7 @@ enum class CoordinateAxis { X, Y, Z };
 /*!
  * Convert radians to degrees
  */
-template <typename T>
-T rad2deg(T rad) {
+template <typename T> T rad2deg(T rad) {
   static_assert(std::is_floating_point<T>::value,
                 "must use floating point value");
   return rad * T(180) / T(M_PI);
@@ -42,21 +41,18 @@ T rad2deg(T rad) {
 /*!
  * Convert degrees to radians
  */
-template <typename T>
-T deg2rad(T deg) {
+template <typename T> T deg2rad(T deg) {
   static_assert(std::is_floating_point<T>::value,
                 "must use floating point value");
   return deg * T(M_PI) / T(180);
 }
-
 
 /*!
  * Compute rotation matrix for coordinate transformation. Note that
  * coordinateRotation(CoordinateAxis:X, .1) * v will rotate v by -.1 radians -
  * this transforms into a frame rotated by .1 radians!.
  */
-template <typename T>
-Mat3<T> coordinateRotation(CoordinateAxis axis, T theta) {
+template <typename T> Mat3<T> coordinateRotation(CoordinateAxis axis, T theta) {
   static_assert(std::is_floating_point<T>::value,
                 "must use floating point value");
   T s = std::sin(theta);
@@ -75,14 +71,12 @@ Mat3<T> coordinateRotation(CoordinateAxis axis, T theta) {
   return R;
 }
 
-template<typename T>
-Mat3<typename T::Scalar> crossMatrix(const Eigen::MatrixBase<T>& v) {
+template <typename T>
+Mat3<typename T::Scalar> crossMatrix(const Eigen::MatrixBase<T> &v) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 3,
-    "must have 3x1 vector");
+                "must have 3x1 vector");
   Mat3<typename T::Scalar> m;
-  m << 0, -v(2), v(1),
-       v(2), 0, -v(0),
-       -v(1), v(0), 0;
+  m << 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0;
   return m;
 }
 
@@ -90,7 +84,7 @@ Mat3<typename T::Scalar> crossMatrix(const Eigen::MatrixBase<T>& v) {
  * Go from rpy to rotation matrix.
  */
 template <typename T>
-Mat3<typename T::Scalar> rpyToRotMat(const Eigen::MatrixBase<T>& v) {
+Mat3<typename T::Scalar> rpyToRotMat(const Eigen::MatrixBase<T> &v) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 3,
                 "must have 3x1 vector");
   Mat3<typename T::Scalar> m = coordinateRotation(CoordinateAxis::X, v[0]) *
@@ -103,7 +97,7 @@ Mat3<typename T::Scalar> rpyToRotMat(const Eigen::MatrixBase<T>& v) {
  * Convert a 3x1 vector to a skew-symmetric 3x3 matrix
  */
 template <typename T>
-Mat3<typename T::Scalar> vectorToSkewMat(const Eigen::MatrixBase<T>& v) {
+Mat3<typename T::Scalar> vectorToSkewMat(const Eigen::MatrixBase<T> &v) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 3,
                 "Must have 3x1 matrix");
   Mat3<typename T::Scalar> m;
@@ -115,7 +109,7 @@ Mat3<typename T::Scalar> vectorToSkewMat(const Eigen::MatrixBase<T>& v) {
  * Put the skew-symmetric component of 3x3 matrix m into a 3x1 vector
  */
 template <typename T>
-Vec3<typename T::Scalar> matToSkewVec(const Eigen::MatrixBase<T>& m) {
+Vec3<typename T::Scalar> matToSkewVec(const Eigen::MatrixBase<T> &m) {
   static_assert(T::ColsAtCompileTime == 3 && T::RowsAtCompileTime == 3,
                 "Must have 3x3 matrix");
   return 0.5 * Vec3<typename T::Scalar>(m(2, 1) - m(1, 2), m(0, 2) - m(2, 0),
@@ -126,8 +120,8 @@ Vec3<typename T::Scalar> matToSkewVec(const Eigen::MatrixBase<T>& m) {
  * Convert a coordinate transformation matrix to an orientation quaternion.
  */
 template <typename T>
-Quat<typename T::Scalar> rotationMatrixToQuaternion(
-    const Eigen::MatrixBase<T>& r1) {
+Quat<typename T::Scalar>
+rotationMatrixToQuaternion(const Eigen::MatrixBase<T> &r1) {
   static_assert(T::ColsAtCompileTime == 3 && T::RowsAtCompileTime == 3,
                 "Must have 3x3 matrix");
   Quat<typename T::Scalar> q;
@@ -167,8 +161,8 @@ Quat<typename T::Scalar> rotationMatrixToQuaternion(
  * by the quaternion
  */
 template <typename T>
-Mat3<typename T::Scalar> quaternionToRotationMatrix(
-    const Eigen::MatrixBase<T>& q) {
+Mat3<typename T::Scalar>
+quaternionToRotationMatrix(const Eigen::MatrixBase<T> &q) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
   typename T::Scalar e0 = q(0);
@@ -192,7 +186,7 @@ Mat3<typename T::Scalar> quaternionToRotationMatrix(
  * angles in (roll, pitch, yaw).
  */
 template <typename T>
-Vec3<typename T::Scalar> quatToRPY(const Eigen::MatrixBase<T>& q) {
+Vec3<typename T::Scalar> quatToRPY(const Eigen::MatrixBase<T> &q) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
   Vec3<typename T::Scalar> rpy;
@@ -208,7 +202,7 @@ Vec3<typename T::Scalar> quatToRPY(const Eigen::MatrixBase<T>& q) {
 }
 
 template <typename T>
-Quat<typename T::Scalar> rpyToQuat(const Eigen::MatrixBase<T>& rpy) {
+Quat<typename T::Scalar> rpyToQuat(const Eigen::MatrixBase<T> &rpy) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 3,
                 "Must have 3x1 vec");
   Mat3<typename T::Scalar> R = rpyToRotMat(rpy);
@@ -220,7 +214,7 @@ Quat<typename T::Scalar> rpyToQuat(const Eigen::MatrixBase<T>& rpy) {
  * Convert a quaternion to so3.
  */
 template <typename T>
-Vec3<typename T::Scalar> quatToso3(const Eigen::MatrixBase<T>& q) {
+Vec3<typename T::Scalar> quatToso3(const Eigen::MatrixBase<T> &q) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
   Vec3<typename T::Scalar> so3;
@@ -232,7 +226,7 @@ Vec3<typename T::Scalar> quatToso3(const Eigen::MatrixBase<T>& q) {
 }
 
 template <typename T>
-Vec3<typename T::Scalar> rotationMatrixToRPY(const Eigen::MatrixBase<T>& R) {
+Vec3<typename T::Scalar> rotationMatrixToRPY(const Eigen::MatrixBase<T> &R) {
   static_assert(T::ColsAtCompileTime == 3 && T::RowsAtCompileTime == 3,
                 "Must have 3x3 matrix");
   Quat<typename T::Scalar> q = rotationMatrixToQuaternion(R);
@@ -247,8 +241,8 @@ Vec3<typename T::Scalar> rotationMatrixToRPY(const Eigen::MatrixBase<T>& R) {
  * @return
  */
 template <typename T, typename T2>
-Quat<typename T::Scalar> quatDerivative(const Eigen::MatrixBase<T>& q,
-                                        const Eigen::MatrixBase<T2>& omega) {
+Quat<typename T::Scalar> quatDerivative(const Eigen::MatrixBase<T> &q,
+                                        const Eigen::MatrixBase<T2> &omega) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
   static_assert(T2::ColsAtCompileTime == 1 && T2::RowsAtCompileTime == 3,
@@ -258,9 +252,9 @@ Quat<typename T::Scalar> quatDerivative(const Eigen::MatrixBase<T>& q,
   Q << q[0], -q[1], -q[2], -q[3], q[1], q[0], -q[3], q[2], q[2], q[3], q[0],
       -q[1], q[3], -q[2], q[1], q[0];
 
-  Quat<typename T::Scalar> qq(
-      quaternionDerviativeStabilization * omega.norm() * (1 - q.norm()),
-      omega[0], omega[1], omega[2]);
+  Quat<typename T::Scalar> qq(quaternionDerviativeStabilization * omega.norm() *
+                                  (1 - q.norm()),
+                              omega[0], omega[1], omega[2]);
   Quat<typename T::Scalar> dq = 0.5 * Q * qq;
   return dq;
 }
@@ -269,8 +263,8 @@ Quat<typename T::Scalar> quatDerivative(const Eigen::MatrixBase<T>& q,
  * Take the product of two quaternions
  */
 template <typename T>
-Quat<typename T::Scalar> quatProduct(const Eigen::MatrixBase<T>& q1,
-                                     const Eigen::MatrixBase<T>& q2) {
+Quat<typename T::Scalar> quatProduct(const Eigen::MatrixBase<T> &q1,
+                                     const Eigen::MatrixBase<T> &q2) {
   typename T::Scalar r1 = q1[0];
   typename T::Scalar r2 = q2[0];
   Vec3<typename T::Scalar> v1(q1[1], q1[2], q1[3]);
@@ -290,8 +284,8 @@ Quat<typename T::Scalar> quatProduct(const Eigen::MatrixBase<T>& q1,
  * @return
  */
 template <typename T, typename T2, typename T3>
-Quat<typename T::Scalar> integrateQuat(const Eigen::MatrixBase<T>& quat,
-                                       const Eigen::MatrixBase<T2>& omega,
+Quat<typename T::Scalar> integrateQuat(const Eigen::MatrixBase<T> &quat,
+                                       const Eigen::MatrixBase<T2> &omega,
                                        T3 dt) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
@@ -322,9 +316,9 @@ Quat<typename T::Scalar> integrateQuat(const Eigen::MatrixBase<T>& quat,
  * @return
  */
 template <typename T, typename T2, typename T3>
-Quat<typename T::Scalar> integrateQuatImplicit(
-    const Eigen::MatrixBase<T>& quat, const Eigen::MatrixBase<T2>& omega,
-    T3 dt) {
+Quat<typename T::Scalar>
+integrateQuatImplicit(const Eigen::MatrixBase<T> &quat,
+                      const Eigen::MatrixBase<T2> &omega, T3 dt) {
   static_assert(T::ColsAtCompileTime == 1 && T::RowsAtCompileTime == 4,
                 "Must have 4x1 quat");
   static_assert(T2::ColsAtCompileTime == 1 && T2::RowsAtCompileTime == 3,
@@ -346,8 +340,7 @@ Quat<typename T::Scalar> integrateQuatImplicit(
   return quatNew;
 }
 
-template <typename T>
-void quaternionToso3(const Quat<T> quat, Vec3<T>& so3) {
+template <typename T> void quaternionToso3(const Quat<T> quat, Vec3<T> &so3) {
   so3[0] = quat[1];
   so3[1] = quat[2];
   so3[2] = quat[3];
@@ -362,8 +355,7 @@ void quaternionToso3(const Quat<T> quat, Vec3<T>& so3) {
   so3 /= sin(theta / 2.0);
   so3 *= theta;
 }
-template <typename T>
-Quat<T> so3ToQuat(Vec3<T>& so3) {
+template <typename T> Quat<T> so3ToQuat(Vec3<T> &so3) {
   Quat<T> quat;
 
   T theta = sqrt(so3[0] * so3[0] + so3[1] * so3[1] + so3[2] * so3[2]);
@@ -379,6 +371,6 @@ Quat<T> so3ToQuat(Vec3<T>& so3) {
   quat[3] = so3[2] / theta * sin(theta / 2.);
   return quat;
 }
-}  // namespace ori
+} // namespace ori
 
-#endif  // LIBBIOMIMETICS_ORIENTATION_TOOLS_H
+#endif // LIBBIOMIMETICS_ORIENTATION_TOOLS_H

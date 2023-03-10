@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <strelka_control/BodyTrajectoryPlanner.hpp>
+#include <strelka/control/BodyTrajectoryPlanner.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/constants.hpp>

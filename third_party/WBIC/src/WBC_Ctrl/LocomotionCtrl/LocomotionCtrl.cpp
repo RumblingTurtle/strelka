@@ -1,4 +1,4 @@
-#include <WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
+#include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 
 template <typename T>
 LocomotionCtrl<T>::LocomotionCtrl(FloatingBaseModel<T> model, T *Kp, T *Kd,

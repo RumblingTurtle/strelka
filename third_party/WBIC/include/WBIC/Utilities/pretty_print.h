@@ -1,17 +1,16 @@
 #ifndef PRINT_OUT_H
 #define PRINT_OUT_H
 
+#include <WBIC/cppTypes.h>
+#include <iostream>
 #include <stdarg.h>
 #include <stdio.h>
-#include <iostream>
 #include <string>
-#include "cppTypes.h"
 
 /*!
  * Floating point value to string.
  */
-template <typename T>
-std::string pretty_string(T vv) {
+template <typename T> std::string pretty_string(T vv) {
   static int const buflen(32);
   static char buf[buflen];
   memset(buf, 0, sizeof(buf));
@@ -35,7 +34,8 @@ void pretty_print(DMat<T> const &mm, std::ostream &os, std::string const &title,
     os << prefix << " (empty)" << nlornot;
   } else {
     if (vecmode) {
-      if (!prefix.empty()) os << prefix;
+      if (!prefix.empty())
+        os << prefix;
       for (int ir(0); ir < mm.rows(); ++ir) {
         os << pretty_string(mm.coeff(ir, 0));
       }
@@ -43,7 +43,8 @@ void pretty_print(DMat<T> const &mm, std::ostream &os, std::string const &title,
 
     } else {
       for (int ir(0); ir < mm.rows(); ++ir) {
-        if (!prefix.empty()) os << prefix;
+        if (!prefix.empty())
+          os << prefix;
         for (int ic(0); ic < mm.cols(); ++ic) {
           os << pretty_string(mm.coeff(ir, ic));
         }
@@ -123,6 +124,6 @@ void pretty_print(const T *_vec, const char *title, size_t size) {
 enum class PrintColor { Default, Red, Green, Yellow, Blue, Magenta, Cyan };
 
 void printf_color(PrintColor color, const char *fmt, ...);
-void fprintf_color(PrintColor color, FILE* stream, const char *fmt, ...);
+void fprintf_color(PrintColor color, FILE *stream, const char *fmt, ...);
 
 #endif

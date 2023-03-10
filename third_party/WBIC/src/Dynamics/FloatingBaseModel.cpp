@@ -15,8 +15,7 @@
  * floating base don't do anything.
  */
 
-#include "Dynamics/FloatingBaseModel.h"
-
+#include <WBIC/Dynamics/FloatingBaseModel.h>
 
 using namespace ori;
 using namespace spatial;
@@ -88,9 +87,9 @@ T FloatingBaseModel<T>::applyTestForce(const int gc_index,
  * then what I am calling subqdd = L^{-1} * tau
  * This is an awful explanation. It needs latex.
  */
-template <typename T>
-void FloatingBaseModel<T>::udpateQddEffects() {
-  if (_qddEffectsUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::udpateQddEffects() {
+  if (_qddEffectsUpToDate)
+    return;
   updateForcePropagators();
   _qdd_from_base_accel.setZero();
   _qdd_from_subqdd.setZero();
@@ -119,9 +118,9 @@ void FloatingBaseModel<T>::udpateQddEffects() {
  * Support function for contact inertia algorithms
  * Comptues force propagators across each joint
  */
-template <typename T>
-void FloatingBaseModel<T>::updateForcePropagators() {
-  if (_forcePropagatorsUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::updateForcePropagators() {
+  if (_forcePropagatorsUpToDate)
+    return;
   updateArticulatedBodies();
   for (size_t i = 6; i < _nDof; i++) {
     _ChiUp[i] = _Xup[i] - _S[i] * _Utot[i].transpose() / _d[i];
@@ -132,9 +131,9 @@ void FloatingBaseModel<T>::updateForcePropagators() {
 /*!
  * Support function for the ABA
  */
-template <typename T>
-void FloatingBaseModel<T>::updateArticulatedBodies() {
-  if (_articulatedBodiesUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::updateArticulatedBodies() {
+  if (_articulatedBodiesUpToDate)
+    return;
 
   forwardKinematics();
 
@@ -142,7 +141,7 @@ void FloatingBaseModel<T>::updateArticulatedBodies() {
 
   // loop 1, down the tree
   for (size_t i = 6; i < _nDof; i++) {
-    _IA[i] = _Ibody[i].getMatrix();  // initialize
+    _IA[i] = _Ibody[i].getMatrix(); // initialize
     Mat6<T> XJrot = jointXform(_jointTypes[i], _jointAxes[i],
                                _state.q[i - 6] * _gearRatios[i]);
     _Xuprot[i] = XJrot * _Xrot[i];
@@ -175,8 +174,7 @@ void FloatingBaseModel<T>::updateArticulatedBodies() {
  * Populate member variables when bodies are added
  * @param count (6 for fb, 1 for joint)
  */
-template <typename T>
-void FloatingBaseModel<T>::addDynamicsVars(int count) {
+template <typename T> void FloatingBaseModel<T>::addDynamicsVars(int count) {
   if (count != 1 && count != 6) {
     throw std::runtime_error(
         "addDynamicsVars must be called with count=1 (joint) or count=6 "
@@ -232,8 +230,7 @@ void FloatingBaseModel<T>::addDynamicsVars(int count) {
 /*!
  * Updates the size of H, C, Cqd, G, and Js when bodies are added
  */
-template <typename T>
-void FloatingBaseModel<T>::resizeSystemMatricies() {
+template <typename T> void FloatingBaseModel<T>::resizeSystemMatricies() {
   _H.setZero(_nDof, _nDof);
   _C.setZero(_nDof, _nDof);
   _Cqd.setZero(_nDof);
@@ -272,8 +269,8 @@ void FloatingBaseModel<T>::addBase(const SpatialInertia<T> &inertia) {
   for (size_t i = 0; i < 6; i++) {
     _parents.push_back(0);
     _gearRatios.push_back(0);
-    _jointTypes.push_back(JointType::Nothing);  // doesn't actually matter
-    _jointAxes.push_back(CoordinateAxis::X);    // doesn't actually matter
+    _jointTypes.push_back(JointType::Nothing); // doesn't actually matter
+    _jointAxes.push_back(CoordinateAxis::X);   // doesn't actually matter
     _Xtree.push_back(eye6);
     _Ibody.push_back(zeroInertia);
     _Xrot.push_back(eye6);
@@ -353,15 +350,15 @@ int FloatingBaseModel<T>::addGroundContactPoint(int bodyID,
 template <typename T>
 void FloatingBaseModel<T>::addGroundContactBoxPoints(int bodyId,
                                                      const Vec3<T> &dims) {
-   addGroundContactPoint(bodyId, Vec3<T>( dims(0),  dims(1),  dims(2))/2);
-   addGroundContactPoint(bodyId, Vec3<T>(-dims(0),  dims(1),  dims(2))/2);
-   addGroundContactPoint(bodyId, Vec3<T>( dims(0), -dims(1),  dims(2))/2);
-   addGroundContactPoint(bodyId, Vec3<T>(-dims(0), -dims(1),  dims(2))/2);
+  addGroundContactPoint(bodyId, Vec3<T>(dims(0), dims(1), dims(2)) / 2);
+  addGroundContactPoint(bodyId, Vec3<T>(-dims(0), dims(1), dims(2)) / 2);
+  addGroundContactPoint(bodyId, Vec3<T>(dims(0), -dims(1), dims(2)) / 2);
+  addGroundContactPoint(bodyId, Vec3<T>(-dims(0), -dims(1), dims(2)) / 2);
 
-  //addGroundContactPoint(bodyId, Vec3<T>(dims(0), dims(1), 0.) / 2);
-  //addGroundContactPoint(bodyId, Vec3<T>(-dims(0), dims(1), 0.) / 2);
-  //addGroundContactPoint(bodyId, Vec3<T>(dims(0), -dims(1), 0.) / 2);
-  //addGroundContactPoint(bodyId, Vec3<T>(-dims(0), -dims(1), 0.) / 2);
+  // addGroundContactPoint(bodyId, Vec3<T>(dims(0), dims(1), 0.) / 2);
+  // addGroundContactPoint(bodyId, Vec3<T>(-dims(0), dims(1), 0.) / 2);
+  // addGroundContactPoint(bodyId, Vec3<T>(dims(0), -dims(1), 0.) / 2);
+  // addGroundContactPoint(bodyId, Vec3<T>(-dims(0), -dims(1), 0.) / 2);
 
   addGroundContactPoint(bodyId, Vec3<T>(dims(0), dims(1), -dims(2)) / 2);
   addGroundContactPoint(bodyId, Vec3<T>(-dims(0), dims(1), -dims(2)) / 2);
@@ -432,8 +429,7 @@ int FloatingBaseModel<T>::addBody(const MassProperties<T> &inertia,
                  gearRatio, parent, jointType, jointAxis, Xtree, Xrot);
 }
 
-template <typename T>
-void FloatingBaseModel<T>::check() {
+template <typename T> void FloatingBaseModel<T>::check() {
   if (_nDof != _parents.size())
     throw std::runtime_error("Invalid dof and parents length");
 }
@@ -442,8 +438,7 @@ void FloatingBaseModel<T>::check() {
  * Compute the total mass of bodies which are not rotors.
  * @return
  */
-template <typename T>
-T FloatingBaseModel<T>::totalNonRotorMass() {
+template <typename T> T FloatingBaseModel<T>::totalNonRotorMass() {
   T totalMass = 0;
   for (size_t i = 0; i < _nDof; i++) {
     totalMass += _Ibody[i].getMass();
@@ -455,8 +450,7 @@ T FloatingBaseModel<T>::totalNonRotorMass() {
  * Compute the total mass of bodies which are not rotors
  * @return
  */
-template <typename T>
-T FloatingBaseModel<T>::totalRotorMass() {
+template <typename T> T FloatingBaseModel<T>::totalRotorMass() {
   T totalMass = 0;
   for (size_t i = 0; i < _nDof; i++) {
     totalMass += _Irot[i].getMass();
@@ -469,9 +463,9 @@ T FloatingBaseModel<T>::totalRotorMass() {
  *(from absolute) Also computes _S (motion subspace), _v (spatial velocity in
  *link coordinates), and _c (coriolis acceleration in link coordinates)
  */
-template <typename T>
-void FloatingBaseModel<T>::forwardKinematics() {
-  if (_kinematicsUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::forwardKinematics() {
+  if (_kinematicsUpToDate)
+    return;
 
   // calculate joint transformations
   _Xup[5] = createSXform(quaternionToRotationMatrix(_state.bodyOrientation),
@@ -502,7 +496,7 @@ void FloatingBaseModel<T>::forwardKinematics() {
   // calculate from absolute transformations
   for (size_t i = 5; i < _nDof; i++) {
     if (_parents[i] == 0) {
-      _Xa[i] = _Xup[i];  // float base
+      _Xa[i] = _Xup[i]; // float base
     } else {
       _Xa[i] = _Xup[i] * _Xa[_parents[i]];
     }
@@ -512,9 +506,10 @@ void FloatingBaseModel<T>::forwardKinematics() {
   //  // TODO : we end up inverting the same Xa a few times (like for the 8
   //  points on the body). this isn't super efficient.
   for (size_t j = 0; j < _nGroundContact; j++) {
-    if (!_compute_contact_info[j]) continue;
+    if (!_compute_contact_info[j])
+      continue;
     size_t i = _gcParent.at(j);
-    Mat6<T> Xai = invertSXform(_Xa[i]);  // from link to absolute
+    Mat6<T> Xai = invertSXform(_Xa[i]); // from link to absolute
     SVec<T> vSpatial = Xai * _v[i];
 
     // foot position in world
@@ -538,8 +533,7 @@ void FloatingBaseModel<T>::forwardKinematics() {
  * Compute the contact Jacobians (3xn matrices) for the velocity
  * of each contact point expressed in absolute coordinates
  */
-template <typename T>
-void FloatingBaseModel<T>::contactJacobians() {
+template <typename T> void FloatingBaseModel<T>::contactJacobians() {
   forwardKinematics();
   biasAccelerations();
 
@@ -548,7 +542,8 @@ void FloatingBaseModel<T>::contactJacobians() {
     _Jcdqd[k].setZero();
 
     // Skip it if we don't care about it
-    if (!_compute_contact_info[k]) continue;
+    if (!_compute_contact_info[k])
+      continue;
 
     size_t i = _gcParent.at(k);
 
@@ -580,9 +575,9 @@ void FloatingBaseModel<T>::contactJacobians() {
  * (Support Function) Computes velocity product accelerations of
  * each link and rotor _avp, and _avprot
  */
-template <typename T>
-void FloatingBaseModel<T>::biasAccelerations() {
-  if (_biasAccelerationsUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::biasAccelerations() {
+  if (_biasAccelerationsUpToDate)
+    return;
   forwardKinematics();
   // velocity product acceelration of base
   _avp[5] << 0, 0, 0, 0, 0, 0;
@@ -600,8 +595,7 @@ void FloatingBaseModel<T>::biasAccelerations() {
  * Computes the generalized gravitational force (G) in the inverse dynamics
  * @return G (_nDof x 1 vector)
  */
-template <typename T>
-DVec<T> FloatingBaseModel<T>::generalizedGravityForce() {
+template <typename T> DVec<T> FloatingBaseModel<T>::generalizedGravityForce() {
   compositeInertias();
 
   SVec<T> aGravity;
@@ -626,8 +620,7 @@ DVec<T> FloatingBaseModel<T>::generalizedGravityForce() {
  * Computes the generalized coriolis forces (Cqd) in the inverse dynamics
  * @return Cqd (_nDof x 1 vector)
  */
-template <typename T>
-DVec<T> FloatingBaseModel<T>::generalizedCoriolisForce() {
+template <typename T> DVec<T> FloatingBaseModel<T>::generalizedCoriolisForce() {
   biasAccelerations();
 
   // Floating base force
@@ -669,10 +662,8 @@ Mat3<T> FloatingBaseModel<T>::getOrientation(int link_idx) {
   return Rai;
 }
 
-
 template <typename T>
-Vec3<T> FloatingBaseModel<T>::getPosition(const int link_idx)
-{
+Vec3<T> FloatingBaseModel<T>::getPosition(const int link_idx) {
   forwardKinematics();
   Mat6<T> Xai = invertSXform(_Xa[link_idx]); // from link to absolute
   Vec3<T> link_pos = sXFormPoint(Xai, Vec3<T>::Zero());
@@ -680,8 +671,8 @@ Vec3<T> FloatingBaseModel<T>::getPosition(const int link_idx)
 }
 
 template <typename T>
-Vec3<T> FloatingBaseModel<T>::getPosition(const int link_idx, const Vec3<T> & local_pos)
-{
+Vec3<T> FloatingBaseModel<T>::getPosition(const int link_idx,
+                                          const Vec3<T> &local_pos) {
   forwardKinematics();
   Mat6<T> Xai = invertSXform(_Xa[link_idx]); // from link to absolute
   Vec3<T> link_pos = sXFormPoint(Xai, local_pos);
@@ -700,9 +691,9 @@ template <typename T>
 Vec3<T> FloatingBaseModel<T>::getLinearAcceleration(const int link_idx) {
   forwardAccelerationKinematics();
   Mat3<T> R = getOrientation(link_idx);
-  return R * spatialToLinearAcceleration(_a[link_idx], _v[link_idx], Vec3<T>::Zero());
+  return R * spatialToLinearAcceleration(_a[link_idx], _v[link_idx],
+                                         Vec3<T>::Zero());
 }
-
 
 template <typename T>
 Vec3<T> FloatingBaseModel<T>::getLinearVelocity(const int link_idx,
@@ -718,8 +709,6 @@ Vec3<T> FloatingBaseModel<T>::getLinearVelocity(const int link_idx) {
   Mat3<T> Rai = getOrientation(link_idx);
   return Rai * spatialToLinearVelocity(_v[link_idx], Vec3<T>::Zero());
 }
-
-
 
 template <typename T>
 Vec3<T> FloatingBaseModel<T>::getAngularVelocity(const int link_idx) {
@@ -743,9 +732,9 @@ Vec3<T> FloatingBaseModel<T>::getAngularAcceleration(const int link_idx) {
  * inertias of all successors of body i.
  * (key note: _IC[i] does not contain rotor i)
  */
-template <typename T>
-void FloatingBaseModel<T>::compositeInertias() {
-  if (_compositeInertiasUpToDate) return;
+template <typename T> void FloatingBaseModel<T>::compositeInertias() {
+  if (_compositeInertiasUpToDate)
+    return;
 
   forwardKinematics();
   // initialize
@@ -768,8 +757,7 @@ void FloatingBaseModel<T>::compositeInertias() {
  * Computes the Mass Matrix (H) in the inverse dynamics formulation
  * @return H (_nDof x _nDof matrix)
  */
-template <typename T>
-DMat<T> FloatingBaseModel<T>::massMatrix() {
+template <typename T> DMat<T> FloatingBaseModel<T>::massMatrix() {
   compositeInertias();
   _H.setZero();
 
@@ -836,8 +824,8 @@ void FloatingBaseModel<T>::forwardAccelerationKinematics() {
  * joint torques
  */
 template <typename T>
-DVec<T> FloatingBaseModel<T>::inverseDynamics(
-    const FBModelStateDerivative<T> &dState) {
+DVec<T>
+FloatingBaseModel<T>::inverseDynamics(const FBModelStateDerivative<T> &dState) {
   setDState(dState);
   forwardAccelerationKinematics();
 
@@ -1056,8 +1044,9 @@ T FloatingBaseModel<T>::invContactInertia(const int gc_index,
  * @return the mxm inverse contact inertia J H^{-1} J^T
  */
 template <typename T>
-DMat<T> FloatingBaseModel<T>::invContactInertia(
-    const int gc_index, const D6Mat<T> &force_directions) {
+DMat<T>
+FloatingBaseModel<T>::invContactInertia(const int gc_index,
+                                        const D6Mat<T> &force_directions) {
   forwardKinematics();
   updateArticulatedBodies();
   updateForcePropagators();

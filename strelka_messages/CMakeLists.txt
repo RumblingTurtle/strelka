@@ -2,7 +2,11 @@ message(STATUS "Generating header files strelka_messages package")
 execute_process ( COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generate_msg_headers.sh -a
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ )
 
-define_package(
-    HEADERS
-        strelka_messages
-)
+print_pkg_header(strelka_messages)
+
+add_library(strelka_messages INTERFACE)
+target_include_directories(strelka_messages INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+install(DIRECTORY include/ DESTINATION include)
+
+print_pkg_footer()

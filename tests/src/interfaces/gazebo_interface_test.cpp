@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <strelka_common/macros.hpp>
+#include <strelka/common/macros.hpp>
 #include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
 
 namespace {

@@ -4,8 +4,8 @@
 #include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
-#include <strelka_common/QuadrupedInterface.hpp>
-#include <strelka_common/typedefs.hpp>
+#include <strelka/common/QuadrupedInterface.hpp>
+#include <strelka/common/typedefs.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotLowCommand.hpp>
 #include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
 #include <strelka_robots/A1/constants.hpp>

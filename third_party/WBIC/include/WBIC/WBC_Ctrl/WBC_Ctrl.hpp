@@ -1,11 +1,11 @@
 #ifndef WBC_CONTROLLER_H
 #define WBC_CONTROLLER_H
 
-#include "cppTypes.h"
-#include <Dynamics/FloatingBaseModel.h>
-#include <Dynamics/Quadruped.h>
-#include <WBC/WBIC/KinWBC.hpp>
-#include <WBC/WBIC/WBIC.hpp>
+#include <WBIC/Dynamics/FloatingBaseModel.h>
+#include <WBIC/Dynamics/Quadruped.h>
+#include <WBIC/WBC/WBIC/KinWBC.hpp>
+#include <WBIC/WBC/WBIC/WBIC.hpp>
+#include <WBIC/cppTypes.h>
 #include <vector>
 
 #define WBCtrl WBC_Ctrl<T>

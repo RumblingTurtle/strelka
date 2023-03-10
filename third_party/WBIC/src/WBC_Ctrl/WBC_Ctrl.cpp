@@ -1,6 +1,6 @@
-#include <Math/orientation_tools.h>
-#include <Utilities/pretty_print.h>
-#include <WBC_Ctrl/WBC_Ctrl.hpp>
+#include <WBIC/Math/orientation_tools.h>
+#include <WBIC/Utilities/pretty_print.h>
+#include <WBIC/WBC_Ctrl/WBC_Ctrl.hpp>
 #include <chrono>
 
 template <typename T>

@@ -1,27 +1,26 @@
 #ifndef KINEMATICS_WHOLE_BODY_CONTROL
 #define KINEMATICS_WHOLE_BODY_CONTROL
 
-#include <WBC/ContactSpec.hpp>
-#include <WBC/Task.hpp>
+#include <WBIC/Utilities/pseudoInverse.h>
+#include <WBIC/WBC/ContactSpec.hpp>
+#include <WBIC/WBC/Task.hpp>
 #include <vector>
-#include <Utilities/pseudoInverse.h>
 
-template <typename T>
-class KinWBC {
- public:
+template <typename T> class KinWBC {
+public:
   KinWBC(size_t num_qdot);
   ~KinWBC() {}
 
-  bool FindConfiguration(const DVec<T>& curr_config,
-                         const std::vector<Task<T>*>& task_list,
-                         const std::vector<ContactSpec<T>*>& contact_list,
-                         DVec<T>& jpos_cmd, DVec<T>& jvel_cmd);
+  bool FindConfiguration(const DVec<T> &curr_config,
+                         const std::vector<Task<T> *> &task_list,
+                         const std::vector<ContactSpec<T> *> &contact_list,
+                         DVec<T> &jpos_cmd, DVec<T> &jvel_cmd);
 
   DMat<T> Ainv_;
 
- private:
-  void _PseudoInverse(const DMat<T> J, DMat<T>& Jinv);
-  void _BuildProjectionMatrix(const DMat<T>& J, DMat<T>& N);
+private:
+  void _PseudoInverse(const DMat<T> J, DMat<T> &Jinv);
+  void _BuildProjectionMatrix(const DMat<T> &J, DMat<T> &N);
 
   double threshold_;
   size_t num_qdot_;

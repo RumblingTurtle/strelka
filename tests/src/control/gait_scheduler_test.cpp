@@ -1,8 +1,8 @@
 
 #include <gtest/gtest.h>
-#include <strelka_common/macros.hpp>
-#include <strelka_control/gait/Gait.hpp>
-#include <strelka_control/gait/GaitScheduler.hpp>
+#include <strelka/common/macros.hpp>
+#include <strelka/control/gait/Gait.hpp>
+#include <strelka/control/gait/GaitScheduler.hpp>
 
 namespace {
 using namespace strelka;

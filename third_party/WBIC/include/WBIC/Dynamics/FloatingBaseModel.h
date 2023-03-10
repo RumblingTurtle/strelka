@@ -21,14 +21,13 @@
 #include <string>
 #include <vector>
 
-#include "Math/orientation_tools.h"
-#include "SpatialInertia.h"
-#include "spatial.h"
+#include <WBIC/Dynamics/SpatialInertia.h>
+#include <WBIC/Dynamics/spatial.h>
+#include <WBIC/Math/orientation_tools.h>
 
 #include <eigen3/Eigen/StdVector>
-#include <stdio.h>
 #include <stdexcept>
-
+#include <stdio.h>
 
 using std::vector;
 using namespace ori;
@@ -37,12 +36,11 @@ using namespace spatial;
 /*!
  * The state of a floating base model (base and joints)
  */
-template <typename T>
-struct FBModelState {
+template <typename T> struct FBModelState {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Quat<T> bodyOrientation;
   Vec3<T> bodyPosition;
-  SVec<T> bodyVelocity;  // body coordinates
+  SVec<T> bodyVelocity; // body coordinates
   DVec<T> q;
   DVec<T> qd;
 
@@ -59,8 +57,7 @@ struct FBModelState {
  * The result of running the articulated body algorithm on a rigid-body floating
  * base model
  */
-template <typename T>
-struct FBModelStateDerivative {
+template <typename T> struct FBModelStateDerivative {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Vec3<T> dBodyPosition;
   SVec<T> dBodyVelocity;
@@ -71,28 +68,27 @@ struct FBModelStateDerivative {
  * Class to represent a floating base rigid body model with rotors and ground
  * contacts. No concept of state.
  */
-template <typename T>
-class FloatingBaseModel {
- public:
+template <typename T> class FloatingBaseModel {
+public:
   /*!
    * Initialize a floating base model with default gravity
    */
   FloatingBaseModel() : _gravity(0, 0, -9.81) {}
   ~FloatingBaseModel() {}
 
-  void addBase(const SpatialInertia<T>& inertia);
-  void addBase(T mass, const Vec3<T>& com, const Mat3<T>& I);
-  int addGroundContactPoint(int bodyID, const Vec3<T>& location,
+  void addBase(const SpatialInertia<T> &inertia);
+  void addBase(T mass, const Vec3<T> &com, const Mat3<T> &I);
+  int addGroundContactPoint(int bodyID, const Vec3<T> &location,
                             bool isFoot = false);
-  void addGroundContactBoxPoints(int bodyId, const Vec3<T>& dims);
-  int addBody(const SpatialInertia<T>& inertia,
-              const SpatialInertia<T>& rotorInertia, T gearRatio, int parent,
+  void addGroundContactBoxPoints(int bodyId, const Vec3<T> &dims);
+  int addBody(const SpatialInertia<T> &inertia,
+              const SpatialInertia<T> &rotorInertia, T gearRatio, int parent,
               JointType jointType, CoordinateAxis jointAxis,
-              const Mat6<T>& Xtree, const Mat6<T>& Xrot);
-  int addBody(const MassProperties<T>& inertia,
-              const MassProperties<T>& rotorInertia, T gearRatio, int parent,
+              const Mat6<T> &Xtree, const Mat6<T> &Xrot);
+  int addBody(const MassProperties<T> &inertia,
+              const MassProperties<T> &rotorInertia, T gearRatio, int parent,
               JointType jointType, CoordinateAxis jointAxis,
-              const Mat6<T>& Xtree, const Mat6<T>& Xrot);
+              const Mat6<T> &Xtree, const Mat6<T> &Xrot);
   void check();
   T totalRotorMass();
   T totalNonRotorMass();
@@ -101,14 +97,14 @@ class FloatingBaseModel {
    * Get vector of parents, where parents[i] is the parent body of body i
    * @return Vector of parents
    */
-  const std::vector<int>& getParentVector() { return _parents; }
+  const std::vector<int> &getParentVector() { return _parents; }
 
   /*!
    * Get vector of body spatial inertias
    * @return Vector of body spatial inertias
    */
   const std::vector<SpatialInertia<T>,
-                    Eigen::aligned_allocator<SpatialInertia<T>>>&
+                    Eigen::aligned_allocator<SpatialInertia<T>>> &
   getBodyInertiaVector() {
     return _Ibody;
   }
@@ -118,7 +114,7 @@ class FloatingBaseModel {
    * @return Vector of rotor spatial inertias
    */
   const std::vector<SpatialInertia<T>,
-                    Eigen::aligned_allocator<SpatialInertia<T>>>&
+                    Eigen::aligned_allocator<SpatialInertia<T>>> &
   getRotorInertiaVector() {
     return _Irot;
   }
@@ -126,7 +122,7 @@ class FloatingBaseModel {
   /*!
    * Set the gravity
    */
-  void setGravity(Vec3<T>& g) { _gravity = g; }
+  void setGravity(Vec3<T> &g) { _gravity = g; }
 
   /*!
    * Set the flag to enable computing contact info for a given contact point
@@ -138,14 +134,14 @@ class FloatingBaseModel {
   }
 
   DMat<T> invContactInertia(const int gc_index,
-                            const D6Mat<T>& force_directions);
-  T invContactInertia(const int gc_index, const Vec3<T>& force_ics_at_contact);
+                            const D6Mat<T> &force_directions);
+  T invContactInertia(const int gc_index, const Vec3<T> &force_ics_at_contact);
 
-  T applyTestForce(const int gc_index, const Vec3<T>& force_ics_at_contact,
-                   FBModelStateDerivative<T>& dstate_out);
+  T applyTestForce(const int gc_index, const Vec3<T> &force_ics_at_contact,
+                   FBModelStateDerivative<T> &dstate_out);
 
-  T applyTestForce(const int gc_index, const Vec3<T>& force_ics_at_contact,
-                   DVec<T>& dstate_out);
+  T applyTestForce(const int gc_index, const Vec3<T> &force_ics_at_contact,
+                   DVec<T> &dstate_out);
 
   void addDynamicsVars(int count);
 
@@ -155,7 +151,7 @@ class FloatingBaseModel {
    * Update the state of the simulator, invalidating previous results
    * @param state : the new state
    */
-  void setState(const FBModelState<T>& state) {
+  void setState(const FBModelState<T> &state) {
     _state = state;
 
     _biasAccelerationsUpToDate = false;
@@ -176,23 +172,23 @@ class FloatingBaseModel {
   }
 
   /*!
-   * Update the state derivative of the simulator, invalidating previous results.
+   * Update the state derivative of the simulator, invalidating previous
+   * results.
    * @param dState : the new state derivative
    */
-  void setDState(const FBModelStateDerivative<T>& dState) {
+  void setDState(const FBModelStateDerivative<T> &dState) {
     _dState = dState;
     _accelerationsUpToDate = false;
   }
 
-  Vec3<T> getPosition(const int link_idx, const Vec3<T> & local_pos);
+  Vec3<T> getPosition(const int link_idx, const Vec3<T> &local_pos);
   Vec3<T> getPosition(const int link_idx);
 
-
   Mat3<T> getOrientation(const int link_idx);
-  Vec3<T> getLinearVelocity(const int link_idx, const Vec3<T>& point);
+  Vec3<T> getLinearVelocity(const int link_idx, const Vec3<T> &point);
   Vec3<T> getLinearVelocity(const int link_idx);
 
-  Vec3<T> getLinearAcceleration(const int link_idx, const Vec3<T>& point);
+  Vec3<T> getLinearAcceleration(const int link_idx, const Vec3<T> &point);
   Vec3<T> getLinearAcceleration(const int link_idx);
 
   Vec3<T> getAngularVelocity(const int link_idx);
@@ -207,8 +203,8 @@ class FloatingBaseModel {
   DVec<T> generalizedGravityForce();
   DVec<T> generalizedCoriolisForce();
   DMat<T> massMatrix();
-  DVec<T> inverseDynamics(const FBModelStateDerivative<T>& dState);
-  void runABA(const DVec<T>& tau, FBModelStateDerivative<T>& dstate);
+  DVec<T> inverseDynamics(const FBModelStateDerivative<T> &dState);
+  void runABA(const DVec<T> &tau, FBModelStateDerivative<T> &dstate);
 
   size_t _nDof = 0;
   Vec3<T> _gravity;
@@ -236,18 +232,17 @@ class FloatingBaseModel {
   /*!
    * Get the mass matrix for the system
    */
-  const DMat<T>& getMassMatrix() const { return _H; }
+  const DMat<T> &getMassMatrix() const { return _H; }
 
   /*!
    * Get the gravity term (generalized forces)
    */
-  const DVec<T>& getGravityForce() const { return _G; }
+  const DVec<T> &getGravityForce() const { return _G; }
 
   /*!
    * Get the coriolis term (generalized forces)
    */
-  const DVec<T>& getCoriolisForce() const { return _Cqd; }
-
+  const DVec<T> &getCoriolisForce() const { return _Cqd; }
 
   /// BEGIN ALGORITHM SUPPORT VARIABLES
   FBModelState<T> _state;
@@ -299,4 +294,4 @@ class FloatingBaseModel {
   Eigen::ColPivHouseholderQR<Mat6<T>> _invIA5;
 };
 
-#endif  // LIBBIOMIMETICS_FLOATINGBASEMODEL_H
+#endif // LIBBIOMIMETICS_FLOATINGBASEMODEL_H
