@@ -2,9 +2,21 @@
 namespace strelka {
 namespace control {
 
-FootholdPlanner::FootholdPlanner(GaitScheduler &gaitScheduler)
-    : gaitScheduler(gaitScheduler), updateContinuously(false) {
+FootholdPlanner::FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler)
+    : _gaitScheduler(_gaitScheduler), updateContinuously(false) {
   FOR_EACH_LEG { _footholds[LEG_ID].reserve(5); }
+}
+
+FootholdPlanner::FootholdPlanner(FootholdPlanner &footholdPlanner)
+    : _gaitScheduler(footholdPlanner._gaitScheduler) {
+  FOR_EACH_LEG {
+    _footholds[LEG_ID] = footholdPlanner._footholds[LEG_ID];
+    swingHeight[LEG_ID] = footholdPlanner.swingHeight[LEG_ID];
+    swingBack[LEG_ID] = footholdPlanner.swingBack[LEG_ID];
+  }
+  lastContactPosWorld = footholdPlanner.lastContactPosWorld;
+  firstRun = footholdPlanner.firstRun;
+  updateContinuously = footholdPlanner.updateContinuously;
 }
 
 int FootholdPlanner::footholdCount(int legId) {
@@ -78,11 +90,11 @@ void FootholdPlanner::calculateNextFootholdPositions(
       firstRun = false;
     }
 
-    bool updateAsStance = gaitScheduler.legInStance(LEG_ID) ||
-                          gaitScheduler.legInEarlyContact(LEG_ID) ||
-                          gaitScheduler.legLostContact(LEG_ID);
+    bool updateAsStance = _gaitScheduler->legInStance(LEG_ID) ||
+                          _gaitScheduler->legInEarlyContact(LEG_ID) ||
+                          _gaitScheduler->legLostContact(LEG_ID);
 
-    bool swingStarted = gaitScheduler.swingStarted(LEG_ID);
+    bool swingStarted = _gaitScheduler->swingStarted(LEG_ID);
 
     if (updateAsStance) {
       lastContactPosWorld.block<1, 3>(LEG_ID, 0) =
@@ -165,20 +177,20 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
   case FOOTHOLD_PREDICTION_TYPE::CONTINUOUS:
     predictedFootWorld =
         hipPosWorld +
-        (1 - gaitScheduler.normalizedPhase(legId)) *
-            gaitScheduler.swingDuration(legId) * desiredVelocityWorld +
-        0.5 * gaitScheduler.stanceDuration(legId) * desiredVelocityWorld;
+        (1 - _gaitScheduler->normalizedPhase(legId)) *
+            _gaitScheduler->swingDuration(legId) * desiredVelocityWorld +
+        0.5 * _gaitScheduler->stanceDuration(legId) * desiredVelocityWorld;
     break;
   case FOOTHOLD_PREDICTION_TYPE::RAIBERT:
     predictedFootWorld =
         hipPosWorld +
-        gaitScheduler.swingDuration(legId) * desiredVelocityWorld +
-        0.5 * gaitScheduler.stanceDuration(legId) * desiredVelocityWorld;
+        _gaitScheduler->swingDuration(legId) * desiredVelocityWorld +
+        0.5 * _gaitScheduler->stanceDuration(legId) * desiredVelocityWorld;
     break;
   case FOOTHOLD_PREDICTION_TYPE::SIMPLE:
     predictedFootWorld =
         prevFootPosition +
-        desiredVelocityWorld * gaitScheduler.phaseDuration(legId);
+        desiredVelocityWorld * _gaitScheduler->phaseDuration(legId);
     break;
   }
 
@@ -210,7 +222,7 @@ void FootholdPlanner::getFootDesiredPVA(
     Vec3<float> desiredFootVelocity;
     Vec3<float> desiredFootAcceleration;
 
-    if (gaitScheduler.legInSwing(LEG_ID)) {
+    if (_gaitScheduler->legInSwing(LEG_ID)) {
 
       Vec3<float> pStart = getFoothold(LEG_ID, 0);
       Vec3<float> pEnd = getFoothold(LEG_ID, 1);
@@ -218,18 +230,18 @@ void FootholdPlanner::getFootDesiredPVA(
 
       desiredFootPosition = trajectory::getSwingTrajectoryPosition(
           pStart, pEnd, swingHeight[LEG_ID],
-          gaitScheduler.normalizedPhase(LEG_ID),
-          gaitScheduler.swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->normalizedPhase(LEG_ID),
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
 
       desiredFootVelocity = trajectory::getSwingTrajectoryVelocity(
           pStart, pEnd, swingHeight[LEG_ID],
-          gaitScheduler.normalizedPhase(LEG_ID),
-          gaitScheduler.swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->normalizedPhase(LEG_ID),
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
 
       desiredFootAcceleration = trajectory::getSwingTrajectoryAcceleration(
           pStart, pEnd, swingHeight[LEG_ID],
-          gaitScheduler.normalizedPhase(LEG_ID),
-          gaitScheduler.swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->normalizedPhase(LEG_ID),
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
 
     } else {
       desiredFootPosition = robot.footPositionWorldFrame(LEG_ID);

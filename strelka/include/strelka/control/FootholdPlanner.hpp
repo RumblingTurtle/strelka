@@ -2,6 +2,7 @@
 #define FOOTHOLD_PLANNER_H
 
 #include <exception>
+#include <memory>
 #include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/macros.hpp>
@@ -32,7 +33,7 @@ public:
  *
  */
 class FootholdPlanner {
-  GaitScheduler &gaitScheduler;
+  std::shared_ptr<GaitScheduler> _gaitScheduler;
   /**
    * @brief World frame footholds for each leg.
    *
@@ -54,6 +55,7 @@ class FootholdPlanner {
   bool updateContinuously;
 
 public:
+  std::shared_ptr<GaitScheduler> &gaitScheduler() { return _gaitScheduler; };
   /**
    * @brief Nominal foothold prediction types
    * Simple:
@@ -68,7 +70,8 @@ public:
    */
   enum class FOOTHOLD_PREDICTION_TYPE { SIMPLE, RAIBERT, CONTINUOUS };
 
-  FootholdPlanner(GaitScheduler &gaitScheduler);
+  FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler);
+  FootholdPlanner(FootholdPlanner &footholdPlanner);
 
   /**
    * @brief Get the amount of predicted footholds+1

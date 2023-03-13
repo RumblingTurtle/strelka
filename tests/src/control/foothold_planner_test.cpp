@@ -27,24 +27,19 @@ protected:
 
   HighLevelCommand *command;
 
-  UnitreeA1 *robot;
-  GaitScheduler *scheduler;
-  FootholdPlanner *footPlanner;
+  std::unique_ptr<UnitreeA1> robot;
+  std::shared_ptr<GaitScheduler> scheduler;
+  std::shared_ptr<FootholdPlanner> footPlanner;
 
   void SetUp() override {
-    robot = new UnitreeA1(UnitreeA1::createDummyA1RobotWithStateEstimates());
     command = new HighLevelCommand(
         HighLevelCommand::makeDummyCommandMessage(desiredVelocityX));
-    scheduler = new GaitScheduler(TEST_GAIT);
-    footPlanner = new FootholdPlanner(*scheduler);
+    robot = std::make_unique<UnitreeA1>();
+    scheduler = std::make_shared<GaitScheduler>(TEST_GAIT);
+    footPlanner = std::make_shared<FootholdPlanner>(scheduler);
   }
 
-  void TearDown() override {
-    delete scheduler;
-    delete footPlanner;
-    delete robot;
-    delete command;
-  }
+  void TearDown() override { delete command; }
 };
 
 TEST_F(FootPlannerFixture, FootPositionsOverHorizon) {

@@ -1,12 +1,12 @@
 #ifndef LOCAL_PLANNER_H
 #define LOCAL_PLANNER_H
 
+#include <memory>
+#include <strelka/common/Robot.hpp>
 #include <strelka/common/macros.hpp>
 #include <strelka/control/BodyTrajectoryPlanner.hpp>
 #include <strelka/control/FootholdPlanner.hpp>
 #include <strelka/control/MPC.hpp>
-
-#include <strelka/common/Robot.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 
 namespace strelka {
@@ -18,7 +18,8 @@ namespace control {
  *
  */
 class LocalPlanner {
-  GaitScheduler scheduler;
+  std::shared_ptr<GaitScheduler> scheduler;
+
   BodyTrajectoryPlanner bodyPlanner;
   FootholdPlanner footPlanner;
   MPC mpc;
@@ -43,6 +44,9 @@ public:
   LocalPlanner(Gait gait, float mpcBodyMass, const Vec3<float> bodyInertia,
                float stepDt = 0.02, int horizonSteps = 15);
 
+  LocalPlanner(FootholdPlanner &footPlanner, float mpcBodyMass,
+               const Vec3<float> bodyInertia, float stepDt = 0.02,
+               int horizonSteps = 15);
   /**
    * @brief Update desired trajectories and forces according to high level
    * command and robot state

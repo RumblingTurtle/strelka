@@ -29,6 +29,9 @@ public:
   GaitScheduler(Gait gait);
   GaitScheduler(GaitSequencer sequencer);
 
+  GaitScheduler(const GaitScheduler &gait) = delete;
+  GaitScheduler(GaitScheduler &gait) = delete;
+
   /**
    * @brief Sets a scale for the next supplied step dt's provided to step(...)
    * method

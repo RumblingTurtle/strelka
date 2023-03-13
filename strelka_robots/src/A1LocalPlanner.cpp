@@ -9,6 +9,14 @@ A1LocalPlanner::A1LocalPlanner(Gait initialGait)
   wbicCommand = new a1_lcm_msgs::WbicCommand();
 }
 
+A1LocalPlanner::A1LocalPlanner(FootholdPlanner &footPlanner)
+    : prevTick(-1), localPlanner(footPlanner, A1::constants::MPC_BODY_MASS,
+                                 A1::constants::MPC_BODY_INERTIA) {
+  wbicCommand = new a1_lcm_msgs::WbicCommand();
+
+  setupProcessLoop();
+}
+
 A1LocalPlanner::~A1LocalPlanner() {
   delete wbicCommand;
   lcm.unsubscribe(stateSub);
@@ -74,16 +82,16 @@ void A1LocalPlanner::commandHandle(
   memcpy(highCommand, commandMsg, sizeof(a1_lcm_msgs::HighLevelCommand));
 }
 
-void A1LocalPlanner::processLoop() {
+void A1LocalPlanner::setupProcessLoop() {
   stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
                            &A1LocalPlanner::stateHandle, this);
-  /*
-  commandSub =
-      lcm.subscribe("high_command", &LocalPlanner::commandHandle, this);
-  commandSub->setQueueCapacity(1);
-  */
+
   stateSub->setQueueCapacity(1);
-  while (lcm.handle() == 0)
+}
+
+bool A1LocalPlanner::handle() { return lcm.handle() == 0; }
+void A1LocalPlanner::processLoop() {
+  while (handle())
     ;
 }
 } // namespace control

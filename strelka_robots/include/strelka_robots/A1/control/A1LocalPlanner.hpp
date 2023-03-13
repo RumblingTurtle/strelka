@@ -30,14 +30,17 @@ class A1LocalPlanner {
 public:
   A1LocalPlanner(Gait initialGait);
 
+  A1LocalPlanner(FootholdPlanner &footPlanner);
   ~A1LocalPlanner();
 
+  void setupProcessLoop();
   void stateHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                    const a1_lcm_msgs::RobotState *messageIn);
 
   void commandHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                      const a1_lcm_msgs::HighLevelCommand *commandMsg);
 
+  bool handle();
   void processLoop();
 };
 } // namespace control

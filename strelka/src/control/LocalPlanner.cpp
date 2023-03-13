@@ -6,7 +6,28 @@ namespace control {
 LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
                            const Vec3<float> bodyInertia, float stepDt,
                            int horizonSteps)
-    : scheduler(gait), bodyPlanner(), footPlanner(scheduler), _stepDt(stepDt),
+    : scheduler(std::make_shared<GaitScheduler>(gait)), bodyPlanner(),
+      footPlanner(scheduler), _stepDt(stepDt), _horizonSteps(horizonSteps),
+      _mpcBodyMass(mpcBodyMass),
+      mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
+  FOR_EACH_LEG { _footState[LEG_ID] = 1; }
+  _mpcForces.setZero();
+  _desiredFootP.setZero();
+  _desiredFootV.setZero();
+  _desiredFootA.setZero();
+
+  _desiredRpy.setZero();
+  _desiredPositionBody.setZero();
+  _desiredAngularVelocity.setZero();
+  _desiredVelocityBody.setZero();
+  _desiredAccelerationBody.setZero();
+}
+
+LocalPlanner::LocalPlanner(FootholdPlanner &footholdPlanner, float mpcBodyMass,
+                           const Vec3<float> bodyInertia, float stepDt,
+                           int horizonSteps)
+    : scheduler(footholdPlanner.gaitScheduler()), bodyPlanner(),
+      footPlanner(footholdPlanner), _stepDt(stepDt),
       _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
   FOR_EACH_LEG { _footState[LEG_ID] = 1; }
@@ -27,13 +48,13 @@ LocalPlanner::~LocalPlanner() {}
 void LocalPlanner::update(robots::Robot &robot,
                           messages::HighLevelCommand &command, float dt) {
 
-  command.setIgnoreDesiredBodyVelocity(scheduler.isCurrentGaitStationary());
+  command.setIgnoreDesiredBodyVelocity(scheduler->isCurrentGaitStationary());
 
   Vec4<bool> footContacts = robot.footContacts();
-  scheduler.step(dt, footContacts);
+  scheduler->step(dt, footContacts);
 
   DMat<bool> contactTable =
-      scheduler.getContactTable(_stepDt, _horizonSteps, footContacts);
+      scheduler->getContactTable(_stepDt, _horizonSteps, footContacts);
 
   DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
       robot, command, _stepDt, _horizonSteps);
@@ -55,11 +76,11 @@ void LocalPlanner::update(robots::Robot &robot,
   _desiredAccelerationBody.setZero();
 
   FOR_EACH_LEG {
-    bool useForceTask = scheduler.legInStance(LEG_ID) ||
-                        scheduler.legInEarlyContact(LEG_ID) ||
-                        scheduler.legLostContact(LEG_ID);
+    bool useForceTask = scheduler->legInStance(LEG_ID) ||
+                        scheduler->legInEarlyContact(LEG_ID) ||
+                        scheduler->legLostContact(LEG_ID);
     _footState[LEG_ID] = useForceTask;
-    if (scheduler.legLostContact(LEG_ID)) {
+    if (scheduler->legLostContact(LEG_ID)) {
       _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 5;
     }
   }
