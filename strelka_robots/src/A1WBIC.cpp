@@ -1,4 +1,5 @@
 #include <strelka_robots/A1/control/A1WBIC.hpp>
+#include <strelka_robots/A1/control/A1WbicDynamics.hpp>
 
 namespace strelka {
 namespace control {

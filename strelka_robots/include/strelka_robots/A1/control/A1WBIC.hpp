@@ -10,7 +10,6 @@
 #include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
 #include <strelka_messages/a1_lcm_msgs/WbicCommand.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/control/A1WbicDynamics.hpp>
 #include <strelka_robots/A1/kinematics.hpp>
 
 namespace strelka {
