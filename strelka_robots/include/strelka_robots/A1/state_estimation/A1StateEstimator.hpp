@@ -14,12 +14,15 @@
 #include <strelka_robots/A1/kinematics.hpp>
 namespace strelka {
 namespace state_estimation {
+constexpr float STATE_ESTIMATOR_WARMUP_TIME = 3.0f; // Seconds
 class A1StateEstimator {
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
   a1_lcm_msgs::RobotState *robotStateMsg;
   lcm::Subscription *sub;
 
+  float filterWarmupTime;
+  float prevTick;
   bool firstRun;
   Vec4<float> contactHeightEstimates;
   Vec4<bool> previousContacts;

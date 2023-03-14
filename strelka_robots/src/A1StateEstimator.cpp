@@ -3,7 +3,9 @@
 namespace strelka {
 
 namespace state_estimation {
-A1StateEstimator::A1StateEstimator() : firstRun(true) {
+A1StateEstimator::A1StateEstimator()
+    : firstRun(true), filterWarmupTime(STATE_ESTIMATOR_WARMUP_TIME),
+      prevTick(-1) {
   robotStateMsg = new a1_lcm_msgs::RobotState();
   observer = new KalmanFilterObserver();
 
@@ -96,6 +98,12 @@ void A1StateEstimator::updateFootContactHeights(robots::UnitreeA1 &robot) {
 void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
                               const std::string &chan,
                               const a1_lcm_msgs::RobotRawState *messageIn) {
+  if (prevTick == -1) {
+    prevTick = messageIn->tick;
+  }
+
+  float dt = messageIn->tick - prevTick;
+  prevTick = messageIn->tick;
 
   robots::UnitreeA1 robot(messageIn);
   // TODO: Add external odometry listener
@@ -103,7 +111,12 @@ void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
   updateFootContactHeights(robot);
   propagateRobotRawState(messageIn, robotStateMsg);
   fillStateEstimatorData(robot, observer, robotStateMsg);
-  lcm.publish(A1::constants::ROBOT_STATE_TOPIC_NAME, robotStateMsg);
+
+  if (filterWarmupTime > 0) {
+    filterWarmupTime -= dt;
+  } else {
+    lcm.publish(A1::constants::ROBOT_STATE_TOPIC_NAME, robotStateMsg);
+  }
 }
 } // namespace state_estimation
 } // namespace strelka
