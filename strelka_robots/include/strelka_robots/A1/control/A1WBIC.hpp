@@ -42,6 +42,7 @@ public:
   bool outputSafetyCheck(WholeBodyImpulseController::WBICOutput &wbicOutput);
   A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters);
   ~A1WBIC();
+  bool handle();
   void processLoop();
 };
 } // namespace control

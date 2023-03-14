@@ -34,7 +34,8 @@ protected:
   void SetUp() override {
     command = new HighLevelCommand(
         HighLevelCommand::makeDummyCommandMessage(desiredVelocityX));
-    robot = std::make_unique<UnitreeA1>();
+    robot = std::make_unique<UnitreeA1>(
+        UnitreeA1::createDummyA1RobotWithStateEstimates());
     scheduler = std::make_shared<GaitScheduler>(TEST_GAIT);
     footPlanner = std::make_shared<FootholdPlanner>(scheduler);
   }

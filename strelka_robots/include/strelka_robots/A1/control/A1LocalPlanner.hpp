@@ -30,7 +30,7 @@ class A1LocalPlanner {
 public:
   A1LocalPlanner(Gait initialGait);
 
-  A1LocalPlanner(FootholdPlanner &footPlanner);
+  A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner);
   ~A1LocalPlanner();
 
   void setupProcessLoop();

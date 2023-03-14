@@ -7,9 +7,9 @@ LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
                            const Vec3<float> bodyInertia, float stepDt,
                            int horizonSteps)
     : scheduler(std::make_shared<GaitScheduler>(gait)), bodyPlanner(),
-      footPlanner(scheduler), _stepDt(stepDt), _horizonSteps(horizonSteps),
-      _mpcBodyMass(mpcBodyMass),
+      _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
+  footPlanner = std::make_shared<FootholdPlanner>(scheduler);
   FOR_EACH_LEG { _footState[LEG_ID] = 1; }
   _mpcForces.setZero();
   _desiredFootP.setZero();
@@ -23,10 +23,10 @@ LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
   _desiredAccelerationBody.setZero();
 }
 
-LocalPlanner::LocalPlanner(FootholdPlanner &footholdPlanner, float mpcBodyMass,
-                           const Vec3<float> bodyInertia, float stepDt,
-                           int horizonSteps)
-    : scheduler(footholdPlanner.gaitScheduler()), bodyPlanner(),
+LocalPlanner::LocalPlanner(std::shared_ptr<FootholdPlanner> footholdPlanner,
+                           float mpcBodyMass, const Vec3<float> bodyInertia,
+                           float stepDt, int horizonSteps)
+    : scheduler(footholdPlanner->gaitScheduler()), bodyPlanner(),
       footPlanner(footholdPlanner), _stepDt(stepDt),
       _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
@@ -59,9 +59,9 @@ void LocalPlanner::update(robots::Robot &robot,
   DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
       robot, command, _stepDt, _horizonSteps);
 
-  footPlanner.calculateNextFootholdPositions(robot, command);
+  footPlanner->calculateNextFootholdPositions(robot, command);
 
-  DMat<float> footholdTable = footPlanner.calculateWorldFrameRotatedFootholds(
+  DMat<float> footholdTable = footPlanner->calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
   DVec<float> forces = mpc.computeContactForces(robot, contactTable,
@@ -85,8 +85,8 @@ void LocalPlanner::update(robots::Robot &robot,
     }
   }
 
-  footPlanner.getFootDesiredPVA(robot, command, _desiredFootP, _desiredFootV,
-                                _desiredFootA);
+  footPlanner->getFootDesiredPVA(robot, command, _desiredFootP, _desiredFootV,
+                                 _desiredFootA);
 }
 
 bool LocalPlanner::footState(int legId) { return _footState[legId]; }

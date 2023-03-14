@@ -19,9 +19,8 @@ namespace control {
  */
 class LocalPlanner {
   std::shared_ptr<GaitScheduler> scheduler;
-
+  std::shared_ptr<FootholdPlanner> footPlanner;
   BodyTrajectoryPlanner bodyPlanner;
-  FootholdPlanner footPlanner;
   MPC mpc;
 
   float _stepDt;
@@ -44,7 +43,7 @@ public:
   LocalPlanner(Gait gait, float mpcBodyMass, const Vec3<float> bodyInertia,
                float stepDt = 0.02, int horizonSteps = 15);
 
-  LocalPlanner(FootholdPlanner &footPlanner, float mpcBodyMass,
+  LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner, float mpcBodyMass,
                const Vec3<float> bodyInertia, float stepDt = 0.02,
                int horizonSteps = 15);
   /**

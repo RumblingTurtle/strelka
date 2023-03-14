@@ -12,6 +12,12 @@ A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
   lowCommandMessage = new a1_lcm_msgs::RobotLowCommand();
   currentCommandMessage = new a1_lcm_msgs::WbicCommand();
   currentRobotStateMessage = new a1_lcm_msgs::RobotState();
+
+  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
+                           &A1WBIC::stateHandle, this);
+  commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
+  stateSub->setQueueCapacity(1);
+  commandSub->setQueueCapacity(1);
 }
 
 void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
@@ -63,60 +69,57 @@ bool A1WBIC::outputSafetyCheck(
   return false;
 }
 
-void A1WBIC::processLoop() {
+bool A1WBIC::handle() {
   static WholeBodyImpulseController::WBICOutput wbicOutput;
+  if (0 != lcm.handle()) {
+    return false;
+  }
 
-  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
-                           &A1WBIC::stateHandle, this);
-  commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
-  stateSub->setQueueCapacity(1);
-  commandSub->setQueueCapacity(1);
-  while (true) {
-    if (0 != lcm.handle()) {
-      break;
+  float commandDeltaTime =
+      timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
+
+  if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
+    std::cout << "WBIC: Command topic timeout. Last message recieved "
+              << commandDeltaTime << " seconds ago." << std::endl;
+    return false;
+  }
+
+  if (firstCommandRecieved && firstStateMessageRecieved) {
+    messages::WBICCommand currentCommand{currentCommandMessage};
+    strelka::robots::UnitreeA1 robot(currentRobotStateMessage);
+
+    if (rolloverProtection(robot)) {
+      return false;
     }
 
-    float commandDeltaTime =
-        timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
-
-    if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
-      std::cout << "WBIC: Command topic timeout. Last message recieved "
-                << commandDeltaTime << " seconds ago." << std::endl;
-      break;
+    if (currentCommandMessage->stop) {
+      std::cout << "WBIC: Recieved stop flag in command message." << std::endl;
+      return false;
     }
 
-    if (firstCommandRecieved && firstStateMessageRecieved) {
-      messages::WBICCommand currentCommand{currentCommandMessage};
-      strelka::robots::UnitreeA1 robot(currentRobotStateMessage);
+    controller.update(robot, currentCommand, wbicOutput);
 
-      if (rolloverProtection(robot)) {
-        break;
-      }
-
-      if (currentCommandMessage->stop) {
-        std::cout << "WBIC: Recieved stop flag in command message."
-                  << std::endl;
-        break;
-      }
-
-      controller.update(robot, currentCommand, wbicOutput);
-
-      if (outputSafetyCheck(wbicOutput)) {
-        break;
-      }
-
-      for (int motorId = 0; motorId < 12; motorId++) {
-        lowCommandMessage->q[motorId] = wbicOutput.q[motorId];
-        lowCommandMessage->dq[motorId] = wbicOutput.dq[motorId];
-        lowCommandMessage->kp[motorId] =
-            A1::constants::POSITION_GAINS[motorId % 3];
-        lowCommandMessage->kd[motorId] =
-            A1::constants::DAMPING_GAINS[motorId % 3];
-        lowCommandMessage->tau[motorId] = wbicOutput.tau[motorId];
-      }
-
-      lcm.publish("robot_low_command", lowCommandMessage);
+    if (outputSafetyCheck(wbicOutput)) {
+      return false;
     }
+
+    for (int motorId = 0; motorId < 12; motorId++) {
+      lowCommandMessage->q[motorId] = wbicOutput.q[motorId];
+      lowCommandMessage->dq[motorId] = wbicOutput.dq[motorId];
+      lowCommandMessage->kp[motorId] =
+          A1::constants::POSITION_GAINS[motorId % 3];
+      lowCommandMessage->kd[motorId] =
+          A1::constants::DAMPING_GAINS[motorId % 3];
+      lowCommandMessage->tau[motorId] = wbicOutput.tau[motorId];
+    }
+
+    lcm.publish("robot_low_command", lowCommandMessage);
+  }
+  return true;
+}
+
+void A1WBIC::processLoop() {
+  while (handle()) {
   }
 }
 

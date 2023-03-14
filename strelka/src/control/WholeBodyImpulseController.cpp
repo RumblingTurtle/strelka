@@ -7,12 +7,12 @@ namespace control {
 
 WholeBodyImpulseController::WholeBodyImpulseController(
     FloatingBaseModel<float> robotModel, WBICParams &parameters) {
-  wbic = new LocomotionCtrl<float>(
+  wbic = std::make_unique<LocomotionCtrl<float>>(
       robotModel, parameters.Kp, parameters.Kd, parameters.Kp_kin,
       parameters.floating_W, parameters.rf_W, parameters.mu, parameters.max_fz);
 }
 
-WholeBodyImpulseController::~WholeBodyImpulseController() { delete wbic; }
+WholeBodyImpulseController::~WholeBodyImpulseController() {}
 
 void WholeBodyImpulseController::update(robots::Robot &robot,
                                         messages::WBICCommand &command,

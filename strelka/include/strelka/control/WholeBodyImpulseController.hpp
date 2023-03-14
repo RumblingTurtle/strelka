@@ -1,6 +1,7 @@
 #ifndef WHOLEBODYIMPEDANCE_CTRL_H
 #define WHOLEBODYIMPEDANCE_CTRL_H
 
+#include <memory>
 #include <strelka/common/Robot.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka_messages/WBICCommand.hpp>
@@ -15,7 +16,7 @@ namespace control {
  * https://arxiv.org/abs/1909.06586
  */
 class WholeBodyImpulseController {
-  LocomotionCtrl<float> *wbic;
+  std::unique_ptr<LocomotionCtrl<float>> wbic;
 
 public:
   struct WBICParams {

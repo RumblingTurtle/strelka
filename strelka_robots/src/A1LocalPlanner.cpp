@@ -7,9 +7,10 @@ A1LocalPlanner::A1LocalPlanner(Gait initialGait)
     : prevTick(-1), localPlanner(initialGait, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();
+  setupProcessLoop();
 }
 
-A1LocalPlanner::A1LocalPlanner(FootholdPlanner &footPlanner)
+A1LocalPlanner::A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner)
     : prevTick(-1), localPlanner(footPlanner, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();

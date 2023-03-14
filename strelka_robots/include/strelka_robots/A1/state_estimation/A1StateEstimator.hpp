@@ -40,7 +40,7 @@ class A1StateEstimator {
 public:
   A1StateEstimator();
   void processLoop();
-
+  bool handle();
   ~A1StateEstimator();
 };
 } // namespace state_estimation

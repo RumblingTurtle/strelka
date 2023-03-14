@@ -6,9 +6,7 @@ namespace state_estimation {
 A1StateEstimator::A1StateEstimator() : firstRun(true) {
   robotStateMsg = new a1_lcm_msgs::RobotState();
   observer = new KalmanFilterObserver();
-}
 
-void A1StateEstimator::processLoop() {
   SlowdownEstimator slowdownEstimator(lcm, A1::constants::RAW_STATE_TOPIC_NAME);
   slowdownEstimator.estimateDts();
 
@@ -17,15 +15,21 @@ void A1StateEstimator::processLoop() {
   sub = lcm.subscribe(A1::constants::RAW_STATE_TOPIC_NAME,
                       &A1StateEstimator::update, this);
   sub->setQueueCapacity(1);
-  while (lcm.handle() == 0) {
+}
+
+void A1StateEstimator::processLoop() {
+  while (handle()) {
   }
 }
+
+bool A1StateEstimator::handle() { return 0 == lcm.handle(); }
 
 A1StateEstimator::~A1StateEstimator() {
   delete robotStateMsg;
   delete observer;
-  if (sub)
+  if (sub) {
     lcm.unsubscribe(sub);
+  }
 }
 
 void A1StateEstimator::propagateRobotRawState(
