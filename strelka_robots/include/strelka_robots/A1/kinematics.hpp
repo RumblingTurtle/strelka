@@ -118,6 +118,74 @@ inline Mat3<float> analyticalLegJacobian(const Vec3<float> &angles, int legId) {
             legDistance * effSwingSin * cosT1 / 2;
   return J;
 }
+
+/**
+ * @brief Computes kinematic reachability of the foot position in the trunk
+ * frame by trying to find corresponding angle configuration. LegIds are passed
+ * in the following order:
+ *
+ * 0 Front right (FR)
+ * 1 Front left (FL)
+ * 2 Rear right (RR)
+ * 3 Rear left (RL)
+ *
+ * @param footPositionTrunkFrame Eigen::Matrix<float,3,1> foot position in trunk
+ * frame
+ * @param legId number from 0 to 3 determining direction of the hip link
+ *
+ * FR = -1
+ * FL = +1
+ * RR = -1
+ * RL = +1
+ *
+ * @return bool true if the foot position is kinematically reachable
+ */
+inline bool trunkFrameIKCheck(Vec3<float> footPositionTrunkFrame, int legId) {
+  Vec3<float> footPosHipFrame =
+      footPositionTrunkFrame -
+      Eigen::Map<const Vec3<float>>(
+          A1::constants::TRUNK_TO_HIP_OFFSETS + 3 * legId, 3);
+
+  Vec3<float> legLengths{A1::constants::LEG_LENGTH};
+  if (legId % 2 == 0) {
+    legLengths(0) = -legLengths(0);
+  }
+
+  float cos_val =
+      (footPosHipFrame.dot(footPosHipFrame) - legLengths.dot(legLengths)) /
+      (2 * legLengths(1) * legLengths(2));
+
+  if (cos_val < -1 || cos_val > 1) {
+    return false;
+  }
+
+  float theta_knee = -std::acos(cos_val);
+
+  float l =
+      std::sqrt(legLengths(1) * legLengths(1) + legLengths(2) * legLengths(2) +
+                2 * legLengths(1) * legLengths(2) * std::cos(theta_knee));
+
+  float sin_val = -footPosHipFrame(0) / l;
+
+  if (sin_val < -1 || sin_val > 1) {
+    return false;
+  }
+
+  float theta_hip = std::asin(sin_val) - theta_knee / 2;
+
+  float c1 = legLengths(0) * footPosHipFrame(1) -
+             l * std::cos(theta_hip + theta_knee / 2) * footPosHipFrame(2);
+
+  float s1 = l * std::cos(theta_hip + theta_knee / 2) * footPosHipFrame(1) +
+             legLengths(0) * footPosHipFrame(2);
+
+  if (s1 == 0 && c1 == 0) {
+    return false;
+  }
+
+  return true;
+}
+
 } // namespace kinematics
 } // namespace A1
 } // namespace strelka

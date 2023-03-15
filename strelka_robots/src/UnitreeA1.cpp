@@ -173,5 +173,12 @@ UnitreeA1 UnitreeA1::createDummyA1RobotWithStateEstimates() {
   return UnitreeA1(&dummyState);
 }
 
+bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
+                                  int legId) {
+  Vec3<float> trunkFrameFootPosition =
+      rotateWorldToBodyFrame(footPositionWorldFrame - positionWorldFrame());
+  return A1::kinematics::trunkFrameIKCheck(trunkFrameFootPosition, legId);
+}
+
 } // namespace robots
 } // namespace strelka

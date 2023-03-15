@@ -202,8 +202,14 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
 
   if (footholdCount(legId) == 1) {
     // Predicting all footholds on the horizon is too expensive
-    return adjustFoothold(predictedFootWorld, currentPosition, bodyToWorldRot,
-                          legId, robot);
+    Vec3<float> adjustedFoothold = adjustFoothold(
+        predictedFootWorld, currentPosition, bodyToWorldRot, legId, robot);
+
+    if (robot.worldFrameIKCheck(adjustedFoothold, legId)) {
+      return adjustedFoothold;
+    } else {
+      return getFoothold(legId, 0);
+    }
   } else {
     // Assume the height of the last foothold
     predictedFootWorld(2) = getFoothold(legId, footholdCount(legId) - 1)(2);

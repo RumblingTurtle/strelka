@@ -54,36 +54,39 @@ public:
   void initRawStateEntries(const MessageType *message);
   void initStateEstimateEntries(const a1_lcm_msgs::RobotState *message);
 
-  virtual Vec12<float> q();
-  virtual Vec12<float> dq();
+  Vec12<float> q() override;
+  Vec12<float> dq() override;
 
-  virtual bool footContact(int legId);
-  virtual Vec4<bool> footContacts();
+  bool footContact(int legId) override;
+  Vec4<bool> footContacts() override;
 
-  virtual Vec3<float> gyroscopeBodyFrame();
-  virtual Vec3<float> accelerometerWorldFrame();
+  Vec3<float> gyroscopeBodyFrame() override;
+  Vec3<float> accelerometerWorldFrame() override;
 
-  virtual Vec3<float> positionWorldFrame();
-  virtual Vec3<float> linearVelocityBodyFrame();
+  Vec3<float> positionWorldFrame() override;
+  Vec3<float> linearVelocityBodyFrame() override;
 
-  virtual Vec3<float> footPositionTrunkFrame(int legId);
-  virtual Vec3<float> footVelocityTrunkFrame(int legId);
+  Vec3<float> footPositionTrunkFrame(int legId) override;
+  Vec3<float> footVelocityTrunkFrame(int legId) override;
 
-  virtual Vec3<float> footPositionWorldFrame(int legId);
+  Vec3<float> footPositionWorldFrame(int legId) override;
 
-  virtual Quat<float> bodyToWorldQuat();
-  virtual Mat3<float> bodyToWorldMat();
+  Quat<float> bodyToWorldQuat() override;
+  Mat3<float> bodyToWorldMat() override;
 
-  virtual Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector);
-  virtual Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector);
+  Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector) override;
+  Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector) override;
 
-  virtual Vec3<float> transformBodyToWorldFrame(Vec3<float> vector);
-  virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector);
+  Vec3<float> transformBodyToWorldFrame(Vec3<float> vector) override;
+  Vec3<float> transformWorldToBodyFrame(Vec3<float> vector) override;
 
-  virtual Vec3<float> trunkToThighOffset(int legId);
-  virtual float footRadius();
+  Vec3<float> trunkToThighOffset(int legId) override;
+  float footRadius() override;
 
-  virtual Vec3<float> currentRPY();
+  Vec3<float> currentRPY() override;
+
+  bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
+                         int legId) override;
 
   Eigen::Matrix<float, 12, 3> footJacobians();
 

@@ -81,6 +81,12 @@ public:
   virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector) = 0;
 
   /**
+   * @brief Checks if the foot is kinematically reachable in the world frame.
+   * Make sure that the state estimates are available to the robot object!
+   */
+  virtual bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
+                                 int legId) = 0;
+  /**
    * @brief Offset from the center of the robot body to it's thigh link.
    *
    * Needed for estimation of the next nominal position when planning footholds
