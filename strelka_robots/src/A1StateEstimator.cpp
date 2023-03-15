@@ -24,7 +24,21 @@ void A1StateEstimator::processLoop() {
   }
 }
 
-bool A1StateEstimator::handle() { return 0 == lcm.handle(); }
+bool A1StateEstimator::handle() {
+  Vec3<float> currentPosition = observer->position();
+  float positionNorm = currentPosition.dot(currentPosition);
+
+  if (0 != lcm.handle()) {
+    return false;
+  }
+
+  // Check if state estimate is nan
+  if (positionNorm != positionNorm) {
+    return false;
+  }
+
+  return true;
+}
 
 A1StateEstimator::~A1StateEstimator() {
   delete robotStateMsg;
