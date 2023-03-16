@@ -5,21 +5,24 @@ namespace control {
 
 A1LocalPlanner::A1LocalPlanner(Gait initialGait)
     : prevTick(-1), localPlanner(initialGait, A1::constants::MPC_BODY_MASS,
-                                 A1::constants::MPC_BODY_INERTIA) {
+                                 A1::constants::MPC_BODY_INERTIA),
+      firstCommandRecieved(false) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();
+  highCommand = new a1_lcm_msgs::HighLevelCommand();
   setupProcessLoop();
 }
 
 A1LocalPlanner::A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner)
     : prevTick(-1), localPlanner(footPlanner, A1::constants::MPC_BODY_MASS,
-                                 A1::constants::MPC_BODY_INERTIA) {
+                                 A1::constants::MPC_BODY_INERTIA),
+      firstCommandRecieved(false) {
   wbicCommand = new a1_lcm_msgs::WbicCommand();
-
   setupProcessLoop();
 }
 
 A1LocalPlanner::~A1LocalPlanner() {
   delete wbicCommand;
+  delete highCommand;
   lcm.unsubscribe(stateSub);
   lcm.unsubscribe(commandSub);
 }
@@ -28,8 +31,10 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
                                  const std::string &chan,
                                  const a1_lcm_msgs::RobotState *messageIn) {
 
-  messages::HighLevelCommand command =
-      messages::HighLevelCommand::makeDummyCommandMessage(0.1, 0.0);
+  if (!firstCommandRecieved) {
+    return;
+  }
+  messages::HighLevelCommand command{highCommand};
   robots::UnitreeA1 robot{messageIn};
 
   float dt = messageIn->tick;
@@ -74,23 +79,45 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
 
   wbicCommand->stop = 0;
 
-  lcm.publish("wbic_command", wbicCommand);
+  lcm.publish(A1::constants::WBIC_COMMAND_TOPIC_NAME, wbicCommand);
 }
 
 void A1LocalPlanner::commandHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const a1_lcm_msgs::HighLevelCommand *commandMsg) {
   memcpy(highCommand, commandMsg, sizeof(a1_lcm_msgs::HighLevelCommand));
+  if (!firstCommandRecieved) {
+    firstCommandRecieved = true;
+  }
+
+  lastCommandTimestamp = getWallTime();
 }
 
 void A1LocalPlanner::setupProcessLoop() {
   stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
                            &A1LocalPlanner::stateHandle, this);
 
+  commandSub = lcm.subscribe(A1::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME,
+                             &A1LocalPlanner::commandHandle, this);
+
   stateSub->setQueueCapacity(1);
+  commandSub->setQueueCapacity(1);
 }
 
-bool A1LocalPlanner::handle() { return lcm.handle() == 0; }
+bool A1LocalPlanner::handle() {
+  float commandDeltaTime =
+      timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
+
+  if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
+    std::cout << "A1LocalPlanner: "
+              << A1::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME
+              << " topic timeout. Last message recieved " << commandDeltaTime
+              << " seconds ago." << std::endl;
+    return false;
+  }
+  return lcm.handle() == 0;
+}
+
 void A1LocalPlanner::processLoop() {
   while (handle())
     ;

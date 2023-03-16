@@ -27,7 +27,12 @@ class A1LocalPlanner {
   LocalPlanner localPlanner;
   float prevTick;
 
+  ChronoTimePoint lastCommandTimestamp;
+  bool firstCommandRecieved;
+
 public:
+  static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
+
   A1LocalPlanner(Gait initialGait);
 
   A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner);

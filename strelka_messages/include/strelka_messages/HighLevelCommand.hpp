@@ -1,7 +1,7 @@
 #ifndef HIGH_CMD_H
 #define HIGH_CMD_H
-#include <messages/a1_lcm_msgs/HighLevelCommand.hpp>
-
+#include <strelka/common/typedefs.hpp>
+#include <strelka_messages/a1_lcm_msgs/HighLevelCommand.hpp>
 namespace strelka {
 namespace messages {
 

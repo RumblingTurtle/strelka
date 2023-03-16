@@ -50,6 +50,7 @@ float SlowdownEstimator::getSimDt() {
 
 void SlowdownEstimator::estimateDts() {
   reset();
+  // NOTE: move to strelka_robots?
   lcm::Subscription *estimateSub =
       lcm.subscribe("raw_state", &SlowdownEstimator::updateDt, this);
 

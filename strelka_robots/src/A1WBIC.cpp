@@ -15,7 +15,8 @@ A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
 
   stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
                            &A1WBIC::stateHandle, this);
-  commandSub = lcm.subscribe("wbic_command", &A1WBIC::commandHandle, this);
+  commandSub = lcm.subscribe(A1::constants::WBIC_COMMAND_TOPIC_NAME,
+                             &A1WBIC::commandHandle, this);
   stateSub->setQueueCapacity(1);
   commandSub->setQueueCapacity(1);
 }
@@ -31,7 +32,9 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
                            const std::string &chan,
                            const a1_lcm_msgs::WbicCommand *commandMsg) {
   memcpy(currentCommandMessage, commandMsg, sizeof(a1_lcm_msgs::WbicCommand));
-  firstCommandRecieved = true;
+  if (!firstCommandRecieved) {
+    firstCommandRecieved = true;
+  }
   lastCommandTimestamp = getWallTime();
 }
 
@@ -79,8 +82,9 @@ bool A1WBIC::handle() {
       timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
 
   if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
-    std::cout << "WBIC: Command topic timeout. Last message recieved "
-              << commandDeltaTime << " seconds ago." << std::endl;
+    std::cout << "WBIC: " << A1::constants::WBIC_COMMAND_TOPIC_NAME
+              << " topic timeout. Last message recieved " << commandDeltaTime
+              << " seconds ago." << std::endl;
     return false;
   }
 

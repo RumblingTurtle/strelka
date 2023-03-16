@@ -29,11 +29,14 @@ bool A1StateEstimator::handle() {
   float positionNorm = currentPosition.dot(currentPosition);
 
   if (0 != lcm.handle()) {
+    std::cout << "A1StateEstimator: lcm.handle() nonzero return value"
+              << std::endl;
     return false;
   }
 
   // Check if state estimate is nan
   if (positionNorm != positionNorm) {
+    std::cout << "A1StateEstimator: NANs in position estimates" << std::endl;
     return false;
   }
 
