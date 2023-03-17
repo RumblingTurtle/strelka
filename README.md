@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/header.gif" alt="animated" />
+</p>
+
 # Overview
 
 *strelka* is an open source modular library for quadruped locomotion, designed to provide researchers and developers with a flexible and extensible framework for implementing and testing a range of quadrupedal locomotion algorithms and controllers. *strelka* provides a seamless integration of planning, control, estimation, and communication modules, enabling users to develop and test complex locomotion strategies in simulation and on real hardware platforms.
