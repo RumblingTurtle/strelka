@@ -132,6 +132,9 @@ void FootholdPlanner::calculateNextFootholdPositions(
       bool steppingUp = heightDiff > command.desiredFootHeight();
       bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
 
+      swingBack[LEG_ID] = false;
+      swingHeight[LEG_ID] = command.desiredFootHeight();
+
       if (steppingUp) {
         swingHeight[LEG_ID] = heightDiff + 0.02;
         swingBack[LEG_ID] = true;
@@ -139,16 +142,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
       if (steppingDown) {
         swingHeight[LEG_ID] = 0.02;
-        swingBack[LEG_ID] = false;
       }
-
-      if (!steppingUp && !steppingDown) {
-        swingHeight[LEG_ID] = command.desiredFootHeight();
-        swingBack[LEG_ID] = false;
-      }
-
-      swingHeight[LEG_ID] = command.desiredFootHeight();
-      swingBack[LEG_ID] = false;
     }
   }
 }
@@ -241,20 +235,20 @@ void FootholdPlanner::getFootDesiredPVA(
       Vec3<float> pEnd = getFoothold(LEG_ID, 1);
       pEnd(2) += command.footClearance();
 
-      desiredFootPosition = trajectory::getSwingTrajectoryPosition(
+      desiredFootPosition = trajectory::getSwingTrajectory(
           pStart, pEnd, swingHeight[LEG_ID],
           _gaitScheduler->normalizedPhase(LEG_ID),
-          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 0);
 
-      desiredFootVelocity = trajectory::getSwingTrajectoryVelocity(
+      desiredFootVelocity = trajectory::getSwingTrajectory(
           pStart, pEnd, swingHeight[LEG_ID],
           _gaitScheduler->normalizedPhase(LEG_ID),
-          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 1);
 
-      desiredFootAcceleration = trajectory::getSwingTrajectoryAcceleration(
+      desiredFootAcceleration = trajectory::getSwingTrajectory(
           pStart, pEnd, swingHeight[LEG_ID],
           _gaitScheduler->normalizedPhase(LEG_ID),
-          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID]);
+          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 2);
 
     } else {
       desiredFootPosition = robot.footPositionWorldFrame(LEG_ID);

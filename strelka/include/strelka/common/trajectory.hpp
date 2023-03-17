@@ -51,84 +51,69 @@ inline float speedupPhase(float t, float phaseAmount = 0.5,
   }
 }
 
-inline Vec3<float> getSwingTrajectoryPosition(Vec3<float> pStart,
-                                              Vec3<float> pEnd,
-                                              float swingHeight, float t,
-                                              float swingDuration,
-                                              bool swingBack) {
+/**
+ * @brief Cubic Bezier trajectory generator
+ *
+ * @param order Bezier derivative order
+ * @return Vec3<float> 3D point on a trajectory
+ */
+inline Vec3<float> getSwingTrajectory(Vec3<float> pStart, Vec3<float> pEnd,
+                                      float swingHeight, float t,
+                                      float swingDuration, bool swingBack,
+                                      int order) {
+  assert(order >= 0 && order < 3);
+
+  float xyCoefficient, zCoefficient;
+  float (*bezierFunc)(float, float, float);
+
+  if (order == 0) {
+    xyCoefficient = 1.0f;
+    zCoefficient = 1.0f;
+    bezierFunc = &cubicBezier;
+  }
+
+  if (order == 1) {
+    xyCoefficient = swingDuration;
+    zCoefficient = xyCoefficient / 2.0f;
+    bezierFunc = &cubicBezierDerivative;
+  }
+
+  if (order == 2) {
+    xyCoefficient = (swingDuration * swingDuration);
+    zCoefficient = xyCoefficient / 4.0f;
+    bezierFunc = &cubicBezierSecondDerivative;
+  }
+
   Vec3<float> desiredPosition;
   float tSpedUp = speedupPhase(t);
 
-  desiredPosition(0) = cubicBezier(pStart(0), pEnd(0), tSpedUp);
-  desiredPosition(1) = cubicBezier(pStart(1), pEnd(1), tSpedUp);
+  Vec3<float> swingMidpoint = pStart + (pEnd - pStart) / 2;
+
+  if (swingBack) {
+    Vec3<float> offset = (pEnd - pStart);
+    offset(2) = 0;
+    swingMidpoint = pStart - 0.04 * offset.normalized();
+  }
+
+  swingMidpoint(2) = pStart(2) + swingHeight;
 
   if (tSpedUp < 0.5) {
+    desiredPosition(0) =
+        bezierFunc(pStart(0), swingMidpoint(0), tSpedUp * 2) / xyCoefficient;
+    desiredPosition(1) =
+        bezierFunc(pStart(1), swingMidpoint(1), tSpedUp * 2) / xyCoefficient;
     desiredPosition(2) =
-        cubicBezier(pStart(2), pStart(2) + swingHeight, tSpedUp * 2);
+        bezierFunc(pStart(2), swingMidpoint(2), tSpedUp * 2) / zCoefficient;
   } else {
+    desiredPosition(0) =
+        bezierFunc(swingMidpoint(0), pEnd(0), tSpedUp * 2 - 1) / xyCoefficient;
+    desiredPosition(1) =
+        bezierFunc(swingMidpoint(1), pEnd(1), tSpedUp * 2 - 1) / xyCoefficient;
     desiredPosition(2) =
-        cubicBezier(pStart(2) + swingHeight, pEnd(2), tSpedUp * 2 - 1);
+        bezierFunc(swingMidpoint(2), pEnd(2), tSpedUp * 2 - 1) / zCoefficient;
   }
 
   return desiredPosition;
-}
-
-inline Vec3<float> getSwingTrajectoryVelocity(Vec3<float> pStart,
-                                              Vec3<float> pEnd,
-                                              float swingHeight, float t,
-                                              float swingDuration,
-                                              bool swingBack) {
-
-  Vec3<float> desiredVelocity;
-  float tSpedUp = speedupPhase(t);
-
-  desiredVelocity(0) =
-      cubicBezierDerivative(pStart(0), pEnd(0), tSpedUp) / swingDuration;
-  desiredVelocity(1) =
-      cubicBezierDerivative(pStart(1), pEnd(1), tSpedUp) / swingDuration;
-
-  if (tSpedUp < 0.5) {
-    desiredVelocity(2) =
-        cubicBezierDerivative(pStart(2), pStart(2) + swingHeight, tSpedUp * 2) *
-        2 / swingDuration;
-  } else {
-    desiredVelocity(2) = cubicBezierDerivative(pStart(2) + swingHeight, pEnd(2),
-                                               tSpedUp * 2 - 1) *
-                         2 / swingDuration;
-  }
-
-  return desiredVelocity;
-}
-
-inline Vec3<float> getSwingTrajectoryAcceleration(Vec3<float> pStart,
-                                                  Vec3<float> pEnd,
-                                                  float swingHeight, float t,
-                                                  float swingDuration,
-                                                  bool swingBack) {
-  Vec3<float> desiredAcceleration;
-  float tSpedUp = speedupPhase(t);
-
-  desiredAcceleration(0) =
-      cubicBezierSecondDerivative(pStart(0), pEnd(0), tSpedUp) /
-      (swingDuration * swingDuration);
-
-  desiredAcceleration(1) =
-      cubicBezierSecondDerivative(pStart(1), pEnd(1), tSpedUp) /
-      (swingDuration * swingDuration);
-
-  if (tSpedUp < 0.5) {
-    desiredAcceleration(2) =
-        cubicBezierSecondDerivative(pStart(2), pStart(2) + swingHeight,
-                                    tSpedUp * 2) *
-        4 / (swingDuration * swingDuration);
-  } else {
-    desiredAcceleration(2) =
-        cubicBezierSecondDerivative(pStart(2) + swingHeight, pEnd(2),
-                                    tSpedUp * 2 - 1) *
-        4 / (swingDuration * swingDuration);
-  }
-
-  return desiredAcceleration;
 }
 
 } // namespace trajectory
