@@ -13,7 +13,8 @@ Overall, *strelka* is an ideal framework for researchers and developers who are 
 ## [Implementing your robot](https://github.com/RumblingTurtle/strelka/wiki/Implementing-your-robot)
 # Requirements
 - Ubuntu (=18.04,20.04)
-- Eigen (tested and built on 3.3.7)
+- [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) (tested and built on 3.3.7)
+- [LCM](https://github.com/lcm-proj/lcm) 
 # Installation
 ## Build using CMake
 ```
