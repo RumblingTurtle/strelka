@@ -7,8 +7,6 @@ A1LocalPlanner::A1LocalPlanner(Gait initialGait)
     : prevTick(-1), localPlanner(initialGait, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
-  wbicCommand = new a1_lcm_msgs::WbicCommand();
-  highCommand = new a1_lcm_msgs::HighLevelCommand();
   setupProcessLoop();
 }
 
@@ -16,8 +14,6 @@ A1LocalPlanner::A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner)
     : prevTick(-1), localPlanner(footPlanner, A1::constants::MPC_BODY_MASS,
                                  A1::constants::MPC_BODY_INERTIA),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
-  wbicCommand = new a1_lcm_msgs::WbicCommand();
-  highCommand = new a1_lcm_msgs::HighLevelCommand();
   setupProcessLoop();
 }
 
@@ -95,6 +91,8 @@ void A1LocalPlanner::commandHandle(
 }
 
 void A1LocalPlanner::setupProcessLoop() {
+  wbicCommand = new a1_lcm_msgs::WbicCommand();
+  highCommand = new a1_lcm_msgs::HighLevelCommand();
   stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
                            &A1LocalPlanner::stateHandle, this);
   stateSub->setQueueCapacity(1);

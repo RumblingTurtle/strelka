@@ -12,7 +12,8 @@
 #ifndef GAIT_H
 #define GAIT_H
 #include <cassert>
-
+#include <string>
+#include <unordered_map>
 namespace strelka {
 
 enum class LegState { SWING, STANCE, EARLY_CONTACT, LOST_CONTACT };
@@ -98,6 +99,12 @@ static Gait BOUND = {.name = "bound",
 */
 } // namespace GAITS
 
+const std::unordered_map<std::string, Gait &> GAITS_MAP = {
+    {"stand", GAITS::STAND},
+    {"step", GAITS::STEP},
+    {"trot", GAITS::TROT},
+    {"flytrot", GAITS::FLYTROT},
+    {"pronk", GAITS::PRONK}};
 } // namespace strelka
 
 #endif // GAIT_H
