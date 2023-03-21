@@ -239,6 +239,4 @@ std::vector<ActuatorModel<T>> Quadruped<T>::buildActuatorModels() {
                       _jointDamping, _jointDryFriction, _motorTauMax);
   return models;
 }
-
-template class Quadruped<double>;
 template class Quadruped<float>;

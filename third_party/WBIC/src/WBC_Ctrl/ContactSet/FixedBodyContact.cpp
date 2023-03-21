@@ -25,6 +25,4 @@ template <typename T> bool FixedBodyContact<T>::_UpdateUf() { return true; }
 template <typename T> bool FixedBodyContact<T>::_UpdateInequalityVector() {
   return true;
 }
-
-template class FixedBodyContact<double>;
 template class FixedBodyContact<float>;

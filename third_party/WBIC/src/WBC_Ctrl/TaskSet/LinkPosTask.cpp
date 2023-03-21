@@ -65,6 +65,4 @@ template <typename T> bool LinkPosTask<T>::_UpdateTaskJDotQdot() {
   TK::JtDotQdot_ = robot_sys_->_Jcdqd[link_idx_];
   return true;
 }
-
-template class LinkPosTask<double>;
 template class LinkPosTask<float>;

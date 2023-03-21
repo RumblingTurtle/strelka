@@ -1086,6 +1086,4 @@ FloatingBaseModel<T>::invContactInertia(const int gc_index,
 
   return LambdaInv;
 }
-
-template class FloatingBaseModel<double>;
 template class FloatingBaseModel<float>;

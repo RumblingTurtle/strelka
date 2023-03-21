@@ -85,6 +85,4 @@ template <typename T>
 void KinWBC<T>::_PseudoInverse(const DMat<T> J, DMat<T> &Jinv) {
   pseudoInverse(J, threshold_, Jinv);
 }
-
 template class KinWBC<float>;
-template class KinWBC<double>;

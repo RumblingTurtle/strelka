@@ -79,6 +79,4 @@ template <typename T> bool BodyOriTask<T>::_UpdateTaskJacobian() {
 template <typename T> bool BodyOriTask<T>::_UpdateTaskJDotQdot() {
   return true;
 }
-
-template class BodyOriTask<double>;
 template class BodyOriTask<float>;

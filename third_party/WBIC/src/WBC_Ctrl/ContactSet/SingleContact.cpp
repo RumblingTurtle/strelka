@@ -55,6 +55,4 @@ template <typename T> bool SingleContact<T>::_UpdateInequalityVector() {
   Contact::ieq_vec_[5] = -_max_Fz;
   return true;
 }
-
-template class SingleContact<double>;
 template class SingleContact<float>;

@@ -313,6 +313,4 @@ template <typename T> void WBIC<T>::_SetOptimizationSize() {
     ci0.resize(0., 1);
   }
 }
-
-template class WBIC<double>;
 template class WBIC<float>;

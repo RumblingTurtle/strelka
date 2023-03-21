@@ -138,6 +138,4 @@ void WBC_Ctrl<T>::getFootPosWorldFrame(Eigen::Matrix<T, 4, 3> footPositions) {
     footPositions(legId, 2) = _model._pGC[9 + 2 * legId][2];
   }
 }
-
 template class WBC_Ctrl<float>;
-template class WBC_Ctrl<double>;

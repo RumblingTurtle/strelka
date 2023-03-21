@@ -1,7 +1,6 @@
 #include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <strelka/control/WholeBodyImpulseController.hpp>
 
-typedef LocomotionCtrl<float> FloatLocomotionCtrl;
 namespace strelka {
 
 namespace control {

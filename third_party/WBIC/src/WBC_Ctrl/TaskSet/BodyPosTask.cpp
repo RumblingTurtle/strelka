@@ -73,6 +73,4 @@ template <typename T> bool BodyPosTask<T>::_UpdateTaskJacobian() {
 template <typename T> bool BodyPosTask<T>::_UpdateTaskJDotQdot() {
   return true;
 }
-
-template class BodyPosTask<double>;
 template class BodyPosTask<float>;
