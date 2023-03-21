@@ -198,7 +198,7 @@ Vec3<float> UnitreeA1::bodyDimensions() {
  */
 Vec3<float> UnitreeA1::legDimensions() { return A1::constants::LEG_LENGTH; }
 
-float UnitreeA1::bodyMass() { return A1::constants::BODY_MASS; }
+float UnitreeA1::trunkMass() { return A1::constants::TRUNK_MASS; }
 
 Mat3<float> UnitreeA1::rotationalInertia() {
   Mat3<float> inertia;

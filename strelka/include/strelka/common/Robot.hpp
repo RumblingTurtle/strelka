@@ -115,7 +115,7 @@ public:
    */
   virtual Vec3<float> legDimensions() = 0;
 
-  virtual float bodyMass() = 0;
+  virtual float trunkMass() = 0;
 
   virtual Mat3<float> rotationalInertia() = 0;
 };

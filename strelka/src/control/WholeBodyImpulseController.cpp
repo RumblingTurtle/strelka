@@ -13,7 +13,7 @@ WholeBodyImpulseController::WholeBodyImpulseController(robots::Robot &robot,
   Vec3<float> bodyDimensions = robot.bodyDimensions();
   Vec3<float> legDimensions = robot.legDimensions();
 
-  quadruped._bodyMass = robot.bodyMass();
+  quadruped._bodyMass = robot.trunkMass();
   quadruped._bodyLength = bodyDimensions(0);
   quadruped._bodyWidth = bodyDimensions(1);
   quadruped._bodyHeight = bodyDimensions(2);

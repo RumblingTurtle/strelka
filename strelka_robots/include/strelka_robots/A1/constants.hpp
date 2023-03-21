@@ -39,7 +39,8 @@ const float FOOT_FORCE_THRESHOLD = 10.0;
 
 const Vec3<float> BODY_INERTIA{0.015853, 0.037799, 0.045654};
 
-const float BODY_MASS = 12.8;
+const float ROBOT_MASS = 12.0;
+const float TRUNK_MASS = 5.0;
 
 const char *const RAW_STATE_TOPIC_NAME = "raw_state";
 const char *const ROBOT_STATE_TOPIC_NAME = "robot_state";

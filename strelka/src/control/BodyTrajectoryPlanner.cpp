@@ -3,7 +3,9 @@
 namespace strelka {
 namespace control {
 BodyTrajectoryPlanner::BodyTrajectoryPlanner()
-    : firstRun(true), heightFilter(0.001, 2.0), pitchFilter(0.001, 0.9) {
+    // 30.0 10.0 stairs
+    // 0.9 0.9 sparse stepping stones
+    : firstRun(true), heightFilter(0.001, 30.0), pitchFilter(0.001, 10.0) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }
@@ -34,11 +36,11 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   A.setOnes();
   A.block<4, 2>(0, 0) = prevContactPosBody.block<4, 2>(0, 0);
 
-  Vec4<float> b = prevContactPosBody.block<4, 1>(0, 2);
+  Vec4<float> b = prevContactPosWorld.block<4, 1>(0, 2);
   Vec3<float> slopeCoefficients = A.colPivHouseholderQr().solve(b);
 
   float slopePitch = -slopeCoefficients(0);
-  slopePitch = clamp<float>(slopePitch, -M_PI_4 / 2, M_PI_4 / 2);
+  slopePitch = clamp<float>(slopePitch, -M_PI_2 * 0.6, M_PI_2 * 0.1);
   float estimatedTerrainPitch = pitchFilter.filter(slopePitch);
   float estimatedContactHeight =
       heightFilter.filter(prevContactPosWorld.col(2).mean());

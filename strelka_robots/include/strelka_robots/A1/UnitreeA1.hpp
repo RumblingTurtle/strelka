@@ -94,7 +94,7 @@ public:
 
   Vec3<float> legDimensions() override;
 
-  float bodyMass() override;
+  float trunkMass() override;
 
   Mat3<float> rotationalInertia() override;
 
