@@ -114,5 +114,8 @@ Vec3<float> &LocalPlanner::desiredAccelerationBody() {
   return _desiredAccelerationBody;
 }
 
+std::shared_ptr<FootholdPlanner> LocalPlanner::getFootPlanner() {
+  return footPlanner;
+}
 } // namespace control
 } // namespace strelka

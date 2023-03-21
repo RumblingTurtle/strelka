@@ -54,6 +54,8 @@ class FootholdPlanner {
   bool firstRun;
   bool updateContinuously;
 
+  Vec3<float> _currentFootPosition[4];
+
 public:
   std::shared_ptr<GaitScheduler> &gaitScheduler() { return _gaitScheduler; };
   /**
@@ -120,6 +122,14 @@ public:
    */
   void calculateNextFootholdPositions(robots::Robot &robot,
                                       messages::HighLevelCommand &command);
+  /**
+   * @brief Returns foot world in odometry frame after
+   * calculateWorldFrameRotatedFootholds update
+   *
+   * @param LEG_ID leg id
+   * @return Vec3<float> foot position in world frame
+   */
+  Vec3<float> currentFootPosition(int legId);
 
   Vec3<float>
   predictNextFootPos(Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
@@ -145,10 +155,23 @@ public:
                          Vec12<float> &desiredFootAccelerations);
 
   /**
+   * @brief Get the desired trajectory positon for visualization.
+   * Swing height, duration and swingBack parameters are used from the first
+   * foothold pair
+   *
+   * @param pStart Start position
+   * @param pEnd  End position
+   * @param t Swing normal phase value
+   * @return Vec3<float> Bezier curve position in pStart and pEnd coordinate
+   * frame
+   */
+  Vec3<float> getDesiredTrajectoryPosition(Vec3<float> pStart, Vec3<float> pEnd,
+                                           float t, int legId);
+  /**
    * @brief Adjusts foothold according to some criterion
    *
-   * Default implementation assumes that the next foothold's height is on the
-   * same level as the starting position.
+   * Default implementation assumes that the next foothold's height is on
+   * the same level as the starting position.
    *
    * @returns Vec3<float> Adjusted foothold position in world frame
    */

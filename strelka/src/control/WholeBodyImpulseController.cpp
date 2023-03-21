@@ -1,5 +1,7 @@
+#include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <strelka/control/WholeBodyImpulseController.hpp>
 
+typedef LocomotionCtrl<float> FloatLocomotionCtrl;
 namespace strelka {
 
 namespace control {
@@ -90,7 +92,7 @@ WholeBodyImpulseController::WholeBodyImpulseController(robots::Robot &robot,
   quadruped._kneeLocation = Vec3<float>(0, 0, -quadruped._hipLinkLength);
   quadruped._kneeRotorLocation = Vec3<float>(0, 0, 0);
 
-  wbic = std::make_unique<LocomotionCtrl<float>>(
+  wbic = new LocomotionCtrl<float>(
       quadruped.buildModel(), parameters.Kp, parameters.Kd, parameters.Kp_kin,
       parameters.floating_W, parameters.rf_W, parameters.mu, parameters.max_fz);
 }
@@ -113,5 +115,7 @@ void WholeBodyImpulseController::update(robots::Robot &robot,
   wbic->compute_tau();
   output.tau = wbic->getTau();
 }
+
+WholeBodyImpulseController::~WholeBodyImpulseController() { delete wbic; }
 } // namespace control
 } // namespace strelka

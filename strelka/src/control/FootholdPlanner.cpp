@@ -4,7 +4,10 @@ namespace control {
 
 FootholdPlanner::FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler)
     : _gaitScheduler(_gaitScheduler), updateContinuously(false) {
-  FOR_EACH_LEG { _footholds[LEG_ID].reserve(5); }
+  FOR_EACH_LEG {
+    _footholds[LEG_ID].reserve(5);
+    _currentFootPosition[LEG_ID] = Vec3<float>::Zero();
+  }
 }
 
 FootholdPlanner::FootholdPlanner(FootholdPlanner &footholdPlanner)
@@ -13,6 +16,7 @@ FootholdPlanner::FootholdPlanner(FootholdPlanner &footholdPlanner)
     _footholds[LEG_ID] = footholdPlanner._footholds[LEG_ID];
     swingHeight[LEG_ID] = footholdPlanner.swingHeight[LEG_ID];
     swingBack[LEG_ID] = footholdPlanner.swingBack[LEG_ID];
+    _currentFootPosition[LEG_ID] = Vec3<float>::Zero();
   }
   lastContactPosWorld = footholdPlanner.lastContactPosWorld;
   firstRun = footholdPlanner.firstRun;
@@ -83,6 +87,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
   Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
   FOR_EACH_LEG {
+    _currentFootPosition[LEG_ID] = robot.footPositionWorldFrame(LEG_ID);
     if (firstRun) {
       Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
       _footholds[LEG_ID].push_back(startPos);
@@ -219,6 +224,14 @@ Vec3<float> FootholdPlanner::adjustFoothold(Vec3<float> nominalFootPosition,
   return nominalFootPosition;
 };
 
+Vec3<float> FootholdPlanner::getDesiredTrajectoryPosition(Vec3<float> pStart,
+                                                          Vec3<float> pEnd,
+                                                          float t, int legId) {
+  return trajectory::getSwingTrajectory(pStart, pEnd, swingHeight[legId], t,
+                                        _gaitScheduler->swingDuration(legId),
+                                        swingBack[legId], 0);
+}
+
 void FootholdPlanner::getFootDesiredPVA(
     robots::Robot &robot, messages::HighLevelCommand &command,
     Vec12<float> &desiredFootPositions, Vec12<float> &desiredFootVelocities,
@@ -233,21 +246,18 @@ void FootholdPlanner::getFootDesiredPVA(
 
       Vec3<float> pStart = getFoothold(LEG_ID, 0);
       Vec3<float> pEnd = getFoothold(LEG_ID, 1);
+      float t = _gaitScheduler->normalizedPhase(LEG_ID);
       pEnd(2) += command.footClearance();
 
-      desiredFootPosition = trajectory::getSwingTrajectory(
-          pStart, pEnd, swingHeight[LEG_ID],
-          _gaitScheduler->normalizedPhase(LEG_ID),
-          _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 0);
+      desiredFootPosition =
+          getDesiredTrajectoryPosition(pStart, pEnd, t, LEG_ID);
 
       desiredFootVelocity = trajectory::getSwingTrajectory(
-          pStart, pEnd, swingHeight[LEG_ID],
-          _gaitScheduler->normalizedPhase(LEG_ID),
+          pStart, pEnd, swingHeight[LEG_ID], t,
           _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 1);
 
       desiredFootAcceleration = trajectory::getSwingTrajectory(
-          pStart, pEnd, swingHeight[LEG_ID],
-          _gaitScheduler->normalizedPhase(LEG_ID),
+          pStart, pEnd, swingHeight[LEG_ID], t,
           _gaitScheduler->swingDuration(LEG_ID), swingBack[LEG_ID], 2);
 
     } else {
@@ -262,6 +272,9 @@ void FootholdPlanner::getFootDesiredPVA(
         desiredFootAcceleration;
   }
 }
-
+Vec3<float> FootholdPlanner::currentFootPosition(int legId) {
+  assert(legId >= 0 && legId < 4);
+  return _currentFootPosition[legId];
+}
 } // namespace control
 } // namespace strelka

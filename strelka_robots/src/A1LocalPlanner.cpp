@@ -120,5 +120,7 @@ void A1LocalPlanner::processLoop() {
   while (handle())
     ;
 }
+
+LocalPlanner &A1LocalPlanner::getLocalPlanner() { return localPlanner; }
 } // namespace control
 } // namespace strelka

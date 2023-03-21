@@ -74,6 +74,7 @@ public:
   Vec3<float> &desiredVelocityBody();
   Vec3<float> &desiredAccelerationBody();
 
+  std::shared_ptr<FootholdPlanner> getFootPlanner();
   ~LocalPlanner();
 };
 } // namespace control
