@@ -5,18 +5,19 @@
 namespace strelka {
 namespace control {
 
-template <class T>
-LocalPlannerNode<T>::LocalPlannerNode(Gait initialGait, float robotMass,
-                                      Mat3<float> rotationalInertia,
-                                      float stepDt, int horizonSteps)
+template <class RobotClass>
+LocalPlannerNode<RobotClass>::LocalPlannerNode(Gait initialGait,
+                                               float robotMass,
+                                               Mat3<float> rotationalInertia,
+                                               float stepDt, int horizonSteps)
     : prevTick(-1), localPlanner(initialGait, robotMass, rotationalInertia,
                                  stepDt, horizonSteps),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
 
-template <class T>
-LocalPlannerNode<T>::LocalPlannerNode(
+template <class RobotClass>
+LocalPlannerNode<RobotClass>::LocalPlannerNode(
     std::shared_ptr<FootholdPlanner> footPlanner, float robotMass,
     Mat3<float> rotationalInertia, float stepDt, int horizonSteps)
     : prevTick(-1), localPlanner(footPlanner, robotMass, rotationalInertia,
@@ -25,15 +26,15 @@ LocalPlannerNode<T>::LocalPlannerNode(
   setupProcessLoop();
 }
 
-template <class T> LocalPlannerNode<T>::~LocalPlannerNode() {
+template <class RobotClass> LocalPlannerNode<RobotClass>::~LocalPlannerNode() {
   delete wbicCommand;
   delete highCommand;
   lcm.unsubscribe(stateSub);
   lcm.unsubscribe(commandSub);
 }
 
-template <class T>
-void LocalPlannerNode<T>::stateHandle(
+template <class RobotClass>
+void LocalPlannerNode<RobotClass>::stateHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const strelka_lcm_headers::RobotState *messageIn) {
 
@@ -42,7 +43,7 @@ void LocalPlannerNode<T>::stateHandle(
   }
 
   messages::HighLevelCommand command{highCommand};
-  T robot{messageIn};
+  RobotClass robot{messageIn};
 
   float dt = messageIn->tick;
 
@@ -87,8 +88,8 @@ void LocalPlannerNode<T>::stateHandle(
   lcm.publish(constants::WBIC_COMMAND_TOPIC_NAME, wbicCommand);
 }
 
-template <class T>
-void LocalPlannerNode<T>::commandHandle(
+template <class RobotClass>
+void LocalPlannerNode<RobotClass>::commandHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const strelka_lcm_headers::HighLevelCommand *commandMsg) {
   memcpy(highCommand, commandMsg,
@@ -100,7 +101,8 @@ void LocalPlannerNode<T>::commandHandle(
   lastCommandTimestamp = getWallTime();
 }
 
-template <class T> void LocalPlannerNode<T>::setupProcessLoop() {
+template <class RobotClass>
+void LocalPlannerNode<RobotClass>::setupProcessLoop() {
   wbicCommand = new strelka_lcm_headers::WbicCommand();
   highCommand = new strelka_lcm_headers::HighLevelCommand();
   stateSub = lcm.subscribe(constants::ROBOT_STATE_TOPIC_NAME,
@@ -112,7 +114,7 @@ template <class T> void LocalPlannerNode<T>::setupProcessLoop() {
   commandSub->setQueueCapacity(1);
 }
 
-template <class T> bool LocalPlannerNode<T>::handle() {
+template <class RobotClass> bool LocalPlannerNode<RobotClass>::handle() {
   float commandDeltaTime =
       timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
 
@@ -126,12 +128,13 @@ template <class T> bool LocalPlannerNode<T>::handle() {
   return lcm.handle() == 0;
 }
 
-template <class T> void LocalPlannerNode<T>::processLoop() {
+template <class RobotClass> void LocalPlannerNode<RobotClass>::processLoop() {
   while (handle())
     ;
 }
 
-template <class T> LocalPlanner &LocalPlannerNode<T>::getLocalPlanner() {
+template <class RobotClass>
+LocalPlanner &LocalPlannerNode<RobotClass>::getLocalPlanner() {
   return localPlanner;
 }
 

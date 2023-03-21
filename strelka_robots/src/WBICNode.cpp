@@ -1,37 +1,42 @@
-#include <strelka_robots/A1/control/A1WBIC.hpp>
+#include <strelka_robots/WBICNode.hpp>
+
+#include <strelka_robots/A1/UnitreeA1.hpp>
 namespace strelka {
 namespace control {
 
-A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
+template <class RobotClass>
+WBICNode<RobotClass>::WBICNode(
+    robots::Robot &robot,
+    control::WholeBodyImpulseController::WBICParams &parameters)
     // Dummy static robot instance is used here only to fetch some constants
-    : controller(robots::UnitreeA1::createDummyA1RobotWithRawState(),
-                 parameters),
-      firstCommandRecieved(false), lastCommandTimestamp(getWallTime()),
-      firstStateMessageRecieved(false) {
+    : controller(robot, parameters), firstCommandRecieved(false),
+      lastCommandTimestamp(getWallTime()), firstStateMessageRecieved(false) {
 
   lowCommandMessage = new strelka_lcm_headers::RobotLowCommand();
   currentCommandMessage = new strelka_lcm_headers::WbicCommand();
   currentRobotStateMessage = new strelka_lcm_headers::RobotState();
 
   stateSub = lcm.subscribe(constants::ROBOT_STATE_TOPIC_NAME,
-                           &A1WBIC::stateHandle, this);
+                           &WBICNode::stateHandle, this);
   commandSub = lcm.subscribe(constants::WBIC_COMMAND_TOPIC_NAME,
-                             &A1WBIC::commandHandle, this);
+                             &WBICNode::commandHandle, this);
   stateSub->setQueueCapacity(1);
   commandSub->setQueueCapacity(1);
 }
 
-void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
-                         const std::string &chan,
-                         const strelka_lcm_headers::RobotState *messageIn) {
+template <class RobotClass>
+void WBICNode<RobotClass>::stateHandle(
+    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+    const strelka_lcm_headers::RobotState *messageIn) {
   memcpy(currentRobotStateMessage, messageIn,
          sizeof(strelka_lcm_headers::RobotState));
   firstStateMessageRecieved = true;
 }
 
-void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
-                           const std::string &chan,
-                           const strelka_lcm_headers::WbicCommand *commandMsg) {
+template <class RobotClass>
+void WBICNode<RobotClass>::commandHandle(
+    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+    const strelka_lcm_headers::WbicCommand *commandMsg) {
   memcpy(currentCommandMessage, commandMsg,
          sizeof(strelka_lcm_headers::WbicCommand));
   if (!firstCommandRecieved) {
@@ -40,7 +45,8 @@ void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
   lastCommandTimestamp = getWallTime();
 }
 
-bool A1WBIC::rolloverProtection(robots::Robot &robot) {
+template <class RobotClass>
+bool WBICNode<RobotClass>::rolloverProtection(robots::Robot &robot) {
   Vec3<float> currentRPY = robot.currentRPY();
 
   bool robotRolledOver = currentRPY(0) > M_PI_2 || currentRPY(1) > M_PI_2;
@@ -52,7 +58,8 @@ bool A1WBIC::rolloverProtection(robots::Robot &robot) {
   return false;
 }
 
-bool A1WBIC::outputSafetyCheck(
+template <class RobotClass>
+bool WBICNode<RobotClass>::outputSafetyCheck(
     WholeBodyImpulseController::WBICOutput &wbicOutput) {
   if (wbicOutput.q.hasNaN()) {
     std::cout << "WBIC: Encountered nan value in desired angles:\n"
@@ -74,7 +81,7 @@ bool A1WBIC::outputSafetyCheck(
   return false;
 }
 
-bool A1WBIC::handle() {
+template <class RobotClass> bool WBICNode<RobotClass>::handle() {
   static WholeBodyImpulseController::WBICOutput wbicOutput;
   if (0 != lcm.handle()) {
     return false;
@@ -92,7 +99,7 @@ bool A1WBIC::handle() {
 
   if (firstCommandRecieved && firstStateMessageRecieved) {
     messages::WBICCommand currentCommand{currentCommandMessage};
-    strelka::robots::UnitreeA1 robot(currentRobotStateMessage);
+    RobotClass robot(currentRobotStateMessage);
 
     if (rolloverProtection(robot)) {
       return false;
@@ -109,14 +116,15 @@ bool A1WBIC::handle() {
       return false;
     }
 
+    Vec3<float> KP = robot.positionGains();
+    Vec3<float> KD = robot.dampingGains();
+
     for (int motorId = 0; motorId < 12; motorId++) {
       lowCommandMessage->q[motorId] = wbicOutput.q[motorId];
       lowCommandMessage->dq[motorId] = wbicOutput.dq[motorId];
-      lowCommandMessage->kp[motorId] =
-          A1::constants::POSITION_GAINS[motorId % 3];
-      lowCommandMessage->kd[motorId] =
-          A1::constants::DAMPING_GAINS[motorId % 3];
       lowCommandMessage->tau[motorId] = wbicOutput.tau[motorId];
+      lowCommandMessage->kp[motorId] = KP[motorId % 3];
+      lowCommandMessage->kd[motorId] = KD[motorId % 3];
     }
 
     lcm.publish("robot_low_command", lowCommandMessage);
@@ -124,12 +132,12 @@ bool A1WBIC::handle() {
   return true;
 }
 
-void A1WBIC::processLoop() {
+template <class RobotClass> void WBICNode<RobotClass>::processLoop() {
   while (handle()) {
   }
 }
 
-A1WBIC::~A1WBIC() {
+template <class RobotClass> WBICNode<RobotClass>::~WBICNode() {
   delete lowCommandMessage;
   delete currentRobotStateMessage;
   delete currentCommandMessage;
@@ -143,4 +151,6 @@ A1WBIC::~A1WBIC() {
   }
 }
 } // namespace control
+
+template class control::WBICNode<robots::UnitreeA1>;
 } // namespace strelka

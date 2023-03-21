@@ -1,7 +1,8 @@
-#ifndef A1WBIC_H
-#define A1WBIC_H
+#ifndef WBICNode_H
+#define WBICNode_H
 
 #include <iostream>
+#include <strelka/common/constants.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka/common/utilities.hpp>
 #include <strelka/control/WholeBodyImpulseController.hpp>
@@ -9,12 +10,10 @@
 #include <strelka_lcm_headers/RobotLowCommand.hpp>
 #include <strelka_lcm_headers/RobotState.hpp>
 #include <strelka_lcm_headers/WbicCommand.hpp>
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/kinematics.hpp>
 
 namespace strelka {
 namespace control {
-class A1WBIC {
+template <class RobotClass> class WBICNode {
   lcm::LCM lcm;
   control::WholeBodyImpulseController controller;
 
@@ -40,8 +39,9 @@ public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
   bool rolloverProtection(robots::Robot &robot);
   bool outputSafetyCheck(WholeBodyImpulseController::WBICOutput &wbicOutput);
-  A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters);
-  ~A1WBIC();
+  WBICNode(robots::Robot &robot,
+           control::WholeBodyImpulseController::WBICParams &parameters);
+  ~WBICNode();
   bool handle();
   void processLoop();
 };

@@ -184,6 +184,7 @@ bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
 }
 
 Vec3<float> UnitreeA1::bodyCOMPosition() { return A1::constants::COM_OFFSET; }
+
 /**
  * @brief X Y Z dimensions of the body link
  *
@@ -192,6 +193,7 @@ Vec3<float> UnitreeA1::bodyCOMPosition() { return A1::constants::COM_OFFSET; }
 Vec3<float> UnitreeA1::bodyDimensions() {
   return A1::constants::BODY_DIMENSIONS;
 }
+
 /**
  * @brief Thigh hip knee
  *
@@ -208,6 +210,10 @@ Mat3<float> UnitreeA1::rotationalInertia() {
       A1::constants::BODY_INERTIA(1), 0, 0, 0, A1::constants::BODY_INERTIA(2);
   return inertia;
 }
+
+Vec3<float> UnitreeA1::positionGains() { return A1::constants::POSITION_GAINS; }
+
+Vec3<float> UnitreeA1::dampingGains() { return A1::constants::DAMPING_GAINS; }
 
 } // namespace robots
 } // namespace strelka

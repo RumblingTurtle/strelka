@@ -15,7 +15,7 @@
 namespace strelka {
 namespace control {
 
-template <class T> class LocalPlannerNode {
+template <class RobotClass> class LocalPlannerNode {
   lcm::LCM lcm;
 
   strelka_lcm_headers::HighLevelCommand *highCommand;

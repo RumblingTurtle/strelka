@@ -1,10 +1,12 @@
-#include <strelka_robots/A1/control/A1WBIC.hpp>
+#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka_robots/WBICNode.hpp>
 
 int main() {
-  using namespace strelka;
+  using namespace strelka::robots;
   using namespace strelka::control;
 
-  A1WBIC wbicController{DEFAULT_WBIC_PARAMS};
+  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithStateEstimates();
+  WBICNode<UnitreeA1> wbicController{robot, DEFAULT_WBIC_PARAMS};
   wbicController.processLoop();
   return 0;
 }

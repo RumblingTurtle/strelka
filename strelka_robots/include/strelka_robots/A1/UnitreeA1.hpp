@@ -95,6 +95,9 @@ public:
   Vec3<float> legDimensions() override;
 
   float trunkMass() override;
+
+  Vec3<float> positionGains();
+  Vec3<float> dampingGains();
   float robotMass();
 
   Mat3<float> rotationalInertia() override;
