@@ -132,10 +132,16 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
       _footholds[LEG_ID].push_back(predictedFootPosition);
 
-      float heightDiff = getFoothold(LEG_ID, 0)(2) - getFoothold(LEG_ID, 1)(2);
+      float heightStart = getFoothold(LEG_ID, 0)(2);
+      float heightEnd = getFoothold(LEG_ID, 1)(2);
 
-      bool steppingUp = heightDiff > command.desiredFootHeight();
-      bool steppingDown = heightDiff < -command.desiredFootHeight() / 4;
+      float heightDiff = std::abs(heightStart - heightEnd);
+
+      bool steppingUp =
+          heightDiff > command.desiredFootHeight() && heightStart < heightEnd;
+
+      bool steppingDown = heightDiff > command.desiredFootHeight() / 4 &&
+                          heightStart > heightEnd;
 
       swingBack[LEG_ID] = false;
       swingHeight[LEG_ID] = command.desiredFootHeight();
