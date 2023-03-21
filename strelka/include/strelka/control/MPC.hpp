@@ -89,7 +89,7 @@ public:
   static constexpr float MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
                                             0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
-  MPC(float mass, const Vec3<float> &inertia, int planning_horizon,
+  MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
       float timestep);
 
   ~MPC();

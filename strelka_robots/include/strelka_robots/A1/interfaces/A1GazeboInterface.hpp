@@ -5,9 +5,10 @@
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
 #include <strelka/common/QuadrupedInterface.hpp>
+#include <strelka/common/constants.hpp>
 #include <strelka/common/typedefs.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotLowCommand.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
+#include <strelka_lcm_headers/RobotLowCommand.hpp>
+#include <strelka_lcm_headers/RobotRawState.hpp>
 #include <strelka_robots/A1/constants.hpp>
 
 #define GAZEBO_BASE_TIME_STEP 0.001
@@ -24,7 +25,7 @@ public:
 };
 
 class A1GazeboInterface : public QuadrupedInterface {
-  a1_lcm_msgs::RobotLowCommand commandMessage;
+  strelka_lcm_headers::RobotLowCommand commandMessage;
   lcm::LCM lcm;
 
   class MoveToHandle {
@@ -44,11 +45,11 @@ class A1GazeboInterface : public QuadrupedInterface {
 
     void run(float moveTime, const Vec12<float> &desiredAngles);
     void moveHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                    const a1_lcm_msgs::RobotRawState *data);
+                    const strelka_lcm_headers::RobotRawState *data);
 
     void initStartAnglesHandle(const lcm::ReceiveBuffer *rbuf,
                                const std::string &chan,
-                               const a1_lcm_msgs::RobotRawState *data);
+                               const strelka_lcm_headers::RobotRawState *data);
 
     Vec12<float> getInitAngles();
   };

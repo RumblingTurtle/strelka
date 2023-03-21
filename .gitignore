@@ -1,5 +1,5 @@
 .vscode
 .cmake
 build
-messages/include/**
+strelka_messages/include/strelka_lcm_headers
 Testing

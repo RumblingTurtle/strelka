@@ -1,6 +1,6 @@
 #ifndef WBIC_CMD_H
 #define WBIC_CMD_H
-#include <messages/a1_lcm_msgs/WbicCommand.hpp>
+#include <strelka_lcm_headers/WbicCommand.hpp>
 
 namespace strelka {
 namespace messages {
@@ -22,7 +22,7 @@ class WBICCommand {
   Vec12<float> _desiredFootForceWorld;
 
 public:
-  WBICCommand(const a1_lcm_msgs::WbicCommand *commandMsg) {
+  WBICCommand(const strelka_lcm_headers::WbicCommand *commandMsg) {
     _desiredContactState =
         Eigen::Map<const Vec4<float>>(commandMsg->footState, 4);
     _desiredBodyRPY = Eigen::Map<const Vec3<float>>(commandMsg->rpy, 3);

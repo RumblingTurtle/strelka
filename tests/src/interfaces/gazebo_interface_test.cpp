@@ -19,7 +19,7 @@ TEST_P(A1GazeboInterfaceParametrizedTestFixture, SetDesiredAngles) {
     GTEST_SKIP()
         << "A1 Gazebo topic is not publishing. Default value of the topic name "
            "is "
-        << strelka::A1::constants::RAW_STATE_TOPIC_NAME;
+        << strelka::constants::RAW_STATE_TOPIC_NAME;
   }
 
   sleep(1);

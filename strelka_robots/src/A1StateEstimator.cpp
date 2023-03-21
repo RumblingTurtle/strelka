@@ -6,15 +6,15 @@ namespace state_estimation {
 A1StateEstimator::A1StateEstimator()
     : firstRun(true), filterWarmupTime(STATE_ESTIMATOR_WARMUP_TIME),
       prevTick(-1) {
-  robotStateMsg = new a1_lcm_msgs::RobotState();
+  robotStateMsg = new strelka_lcm_headers::RobotState();
   observer = new KalmanFilterObserver();
 
-  SlowdownEstimator slowdownEstimator(lcm, A1::constants::RAW_STATE_TOPIC_NAME);
+  SlowdownEstimator slowdownEstimator(lcm, constants::RAW_STATE_TOPIC_NAME);
   slowdownEstimator.estimateDts();
 
   DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
   observer->setParameters(DEFAULT_KALMAN_FILTER_PARAMS);
-  sub = lcm.subscribe(A1::constants::RAW_STATE_TOPIC_NAME,
+  sub = lcm.subscribe(constants::RAW_STATE_TOPIC_NAME,
                       &A1StateEstimator::update, this);
   sub->setQueueCapacity(1);
 }
@@ -52,8 +52,8 @@ A1StateEstimator::~A1StateEstimator() {
 }
 
 void A1StateEstimator::propagateRobotRawState(
-    const a1_lcm_msgs::RobotRawState *messageIn,
-    a1_lcm_msgs::RobotState *messageOut) {
+    const strelka_lcm_headers::RobotRawState *messageIn,
+    strelka_lcm_headers::RobotState *messageOut) {
   memcpy(messageOut->quaternion, messageIn->quaternion, sizeof(float) * 4);
   memcpy(messageOut->gyro, messageIn->gyro, sizeof(float) * 3);
   memcpy(messageOut->accel, messageIn->accel, sizeof(float) * 3);
@@ -65,7 +65,7 @@ void A1StateEstimator::propagateRobotRawState(
 
 void A1StateEstimator::fillStateEstimatorData(
     robots::UnitreeA1 &robot, const KalmanFilterObserver *observer,
-    a1_lcm_msgs::RobotState *messageOut) {
+    strelka_lcm_headers::RobotState *messageOut) {
 
   Vec3<float> filteredVelocity =
       velocityFilter.getAverage(observer->velocityBody());
@@ -112,9 +112,9 @@ void A1StateEstimator::updateFootContactHeights(robots::UnitreeA1 &robot) {
   previousContacts = robot.footContacts();
 }
 
-void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
-                              const std::string &chan,
-                              const a1_lcm_msgs::RobotRawState *messageIn) {
+void A1StateEstimator::update(
+    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+    const strelka_lcm_headers::RobotRawState *messageIn) {
   if (prevTick == -1) {
     prevTick = messageIn->tick;
   }
@@ -132,7 +132,7 @@ void A1StateEstimator::update(const lcm::ReceiveBuffer *rbuf,
   if (filterWarmupTime > 0) {
     filterWarmupTime -= dt;
   } else {
-    lcm.publish(A1::constants::ROBOT_STATE_TOPIC_NAME, robotStateMsg);
+    lcm.publish(constants::ROBOT_STATE_TOPIC_NAME, robotStateMsg);
   }
 }
 } // namespace state_estimation

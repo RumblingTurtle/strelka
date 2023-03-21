@@ -5,7 +5,7 @@
 #include <lcm/lcm-cpp.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka/common/utilities.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
+#include <strelka_lcm_headers/RobotRawState.hpp>
 
 namespace strelka {
 
@@ -38,7 +38,7 @@ class SlowdownEstimator {
   const char *topicName;
 
   void updateDt(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                const a1_lcm_msgs::RobotRawState *messageIn);
+                const strelka_lcm_headers::RobotRawState *messageIn);
 
   void reset();
 

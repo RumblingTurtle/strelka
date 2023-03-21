@@ -6,13 +6,13 @@ namespace robots {
 
 UnitreeA1::~UnitreeA1(){};
 
-UnitreeA1::UnitreeA1(const a1_lcm_msgs::RobotState *robotStateMessage)
+UnitreeA1::UnitreeA1(const strelka_lcm_headers::RobotState *robotStateMessage)
     : hasStateEstimates(true) {
   initRawStateEntries(robotStateMessage);
   initStateEstimateEntries(robotStateMessage);
 }
 
-UnitreeA1::UnitreeA1(const a1_lcm_msgs::RobotRawState *rawStateMessage)
+UnitreeA1::UnitreeA1(const strelka_lcm_headers::RobotRawState *rawStateMessage)
     : hasStateEstimates(false) {
   initRawStateEntries(rawStateMessage);
 }
@@ -58,7 +58,7 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
 }
 
 void UnitreeA1::initStateEstimateEntries(
-    const a1_lcm_msgs::RobotState *message) {
+    const strelka_lcm_headers::RobotState *message) {
   _positionWorldFrame = Eigen::Map<const Vec3<float>>(message->position, 3);
   _linearVelocityBodyFrame =
       Eigen::Map<const Vec3<float>>(message->velocityBody, 3);
@@ -143,7 +143,7 @@ float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
 
 UnitreeA1 &
 UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
-  a1_lcm_msgs::RobotRawState dummyState{
+  strelka_lcm_headers::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
       .gyro = {0, 0, 0},
       .accel = {0, 0, 0},
@@ -161,14 +161,15 @@ UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
 }
 
 UnitreeA1 &UnitreeA1::createDummyA1RobotWithStateEstimates() {
-  a1_lcm_msgs::RobotState dummyState{.quaternion = {1, 0, 0, 0},
-                                     .gyro = {0, 0, 0},
-                                     .accel = {0, 0, 0},
-                                     .footForces = {30, 30, 30, 30},
-                                     .dq = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                     .tick = 0.0,
-                                     .position = {0, 0, 0.25},
-                                     .velocityBody = {0, 0, 0}};
+  strelka_lcm_headers::RobotState dummyState{
+      .quaternion = {1, 0, 0, 0},
+      .gyro = {0, 0, 0},
+      .accel = {0, 0, 0},
+      .footForces = {30, 30, 30, 30},
+      .dq = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      .tick = 0.0,
+      .position = {0, 0, 0.25},
+      .velocityBody = {0, 0, 0}};
 
   memcpy(dummyState.q, A1::constants::STAND_ANGLES.data(), sizeof(float) * 12);
   static UnitreeA1 robot(&dummyState);
@@ -199,6 +200,7 @@ Vec3<float> UnitreeA1::bodyDimensions() {
 Vec3<float> UnitreeA1::legDimensions() { return A1::constants::LEG_LENGTH; }
 
 float UnitreeA1::trunkMass() { return A1::constants::TRUNK_MASS; }
+float UnitreeA1::robotMass() { return A1::constants::TRUNK_MASS; }
 
 Mat3<float> UnitreeA1::rotationalInertia() {
   Mat3<float> inertia;

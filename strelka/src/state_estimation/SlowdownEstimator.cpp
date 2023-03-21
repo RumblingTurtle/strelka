@@ -3,9 +3,9 @@
 namespace strelka {
 
 namespace state_estimation {
-void SlowdownEstimator::updateDt(const lcm::ReceiveBuffer *rbuf,
-                                 const std::string &chan,
-                                 const a1_lcm_msgs::RobotRawState *messageIn) {
+void SlowdownEstimator::updateDt(
+    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+    const strelka_lcm_headers::RobotRawState *messageIn) {
   if (prevTickSim == -1) {
     prevTickSim = messageIn->tick;
     prevTickReal = getWallTime();

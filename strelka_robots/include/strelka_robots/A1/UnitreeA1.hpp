@@ -9,8 +9,8 @@
 #include <strelka/common/macros.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
+#include <strelka_lcm_headers/RobotRawState.hpp>
+#include <strelka_lcm_headers/RobotState.hpp>
 
 namespace strelka {
 namespace robots {
@@ -18,7 +18,7 @@ class NoStateEstimateException : public std::exception {
 public:
   const char *what() {
     return "UnitreeA1 robot has no state estimate. Build a UnitreeA1 class "
-           "using a1_lcm_msgs::RobotState";
+           "using strelka_lcm_headers::RobotState";
   }
 };
 /**
@@ -47,12 +47,12 @@ class UnitreeA1 : public Robot {
 
 public:
   ~UnitreeA1();
-  UnitreeA1(const a1_lcm_msgs::RobotRawState *rawStateMessage);
-  UnitreeA1(const a1_lcm_msgs::RobotState *robotStateMessage);
+  UnitreeA1(const strelka_lcm_headers::RobotRawState *rawStateMessage);
+  UnitreeA1(const strelka_lcm_headers::RobotState *robotStateMessage);
 
   template <class MessageType>
   void initRawStateEntries(const MessageType *message);
-  void initStateEstimateEntries(const a1_lcm_msgs::RobotState *message);
+  void initStateEstimateEntries(const strelka_lcm_headers::RobotState *message);
 
   Vec12<float> q() override;
   Vec12<float> dq() override;
@@ -95,6 +95,7 @@ public:
   Vec3<float> legDimensions() override;
 
   float trunkMass() override;
+  float robotMass();
 
   Mat3<float> rotationalInertia() override;
 

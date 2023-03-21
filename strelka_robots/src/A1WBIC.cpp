@@ -9,13 +9,13 @@ A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
       firstCommandRecieved(false), lastCommandTimestamp(getWallTime()),
       firstStateMessageRecieved(false) {
 
-  lowCommandMessage = new a1_lcm_msgs::RobotLowCommand();
-  currentCommandMessage = new a1_lcm_msgs::WbicCommand();
-  currentRobotStateMessage = new a1_lcm_msgs::RobotState();
+  lowCommandMessage = new strelka_lcm_headers::RobotLowCommand();
+  currentCommandMessage = new strelka_lcm_headers::WbicCommand();
+  currentRobotStateMessage = new strelka_lcm_headers::RobotState();
 
-  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
+  stateSub = lcm.subscribe(constants::ROBOT_STATE_TOPIC_NAME,
                            &A1WBIC::stateHandle, this);
-  commandSub = lcm.subscribe(A1::constants::WBIC_COMMAND_TOPIC_NAME,
+  commandSub = lcm.subscribe(constants::WBIC_COMMAND_TOPIC_NAME,
                              &A1WBIC::commandHandle, this);
   stateSub->setQueueCapacity(1);
   commandSub->setQueueCapacity(1);
@@ -23,15 +23,17 @@ A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
 
 void A1WBIC::stateHandle(const lcm::ReceiveBuffer *rbuf,
                          const std::string &chan,
-                         const a1_lcm_msgs::RobotState *messageIn) {
-  memcpy(currentRobotStateMessage, messageIn, sizeof(a1_lcm_msgs::RobotState));
+                         const strelka_lcm_headers::RobotState *messageIn) {
+  memcpy(currentRobotStateMessage, messageIn,
+         sizeof(strelka_lcm_headers::RobotState));
   firstStateMessageRecieved = true;
 }
 
 void A1WBIC::commandHandle(const lcm::ReceiveBuffer *rbuf,
                            const std::string &chan,
-                           const a1_lcm_msgs::WbicCommand *commandMsg) {
-  memcpy(currentCommandMessage, commandMsg, sizeof(a1_lcm_msgs::WbicCommand));
+                           const strelka_lcm_headers::WbicCommand *commandMsg) {
+  memcpy(currentCommandMessage, commandMsg,
+         sizeof(strelka_lcm_headers::WbicCommand));
   if (!firstCommandRecieved) {
     firstCommandRecieved = true;
   }
@@ -82,7 +84,7 @@ bool A1WBIC::handle() {
       timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
 
   if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
-    std::cout << "WBIC: " << A1::constants::WBIC_COMMAND_TOPIC_NAME
+    std::cout << "WBIC: " << constants::WBIC_COMMAND_TOPIC_NAME
               << " topic timeout. Last message recieved " << commandDeltaTime
               << " seconds ago." << std::endl;
     return false;

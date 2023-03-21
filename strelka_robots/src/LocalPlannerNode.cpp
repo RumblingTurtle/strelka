@@ -1,41 +1,48 @@
-#include <strelka_robots/A1/control/A1LocalPlanner.hpp>
+#include <strelka_robots/LocalPlannerNode.hpp>
+
+#include <strelka_robots/A1/UnitreeA1.hpp>
 
 namespace strelka {
 namespace control {
 
-A1LocalPlanner::A1LocalPlanner(Gait initialGait, float stepDt, int horizonSteps)
-    : prevTick(-1),
-      localPlanner(initialGait, A1::constants::ROBOT_MASS,
-                   A1::constants::BODY_INERTIA, stepDt, horizonSteps),
+template <class T>
+LocalPlannerNode<T>::LocalPlannerNode(Gait initialGait, float robotMass,
+                                      Mat3<float> rotationalInertia,
+                                      float stepDt, int horizonSteps)
+    : prevTick(-1), localPlanner(initialGait, robotMass, rotationalInertia,
+                                 stepDt, horizonSteps),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
 
-A1LocalPlanner::A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner,
-                               float stepDt, int horizonSteps)
-    : prevTick(-1),
-      localPlanner(footPlanner, A1::constants::ROBOT_MASS,
-                   A1::constants::BODY_INERTIA, stepDt, horizonSteps),
+template <class T>
+LocalPlannerNode<T>::LocalPlannerNode(
+    std::shared_ptr<FootholdPlanner> footPlanner, float robotMass,
+    Mat3<float> rotationalInertia, float stepDt, int horizonSteps)
+    : prevTick(-1), localPlanner(footPlanner, robotMass, rotationalInertia,
+                                 stepDt, horizonSteps),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
 
-A1LocalPlanner::~A1LocalPlanner() {
+template <class T> LocalPlannerNode<T>::~LocalPlannerNode() {
   delete wbicCommand;
   delete highCommand;
   lcm.unsubscribe(stateSub);
   lcm.unsubscribe(commandSub);
 }
 
-void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
-                                 const std::string &chan,
-                                 const a1_lcm_msgs::RobotState *messageIn) {
+template <class T>
+void LocalPlannerNode<T>::stateHandle(
+    const lcm::ReceiveBuffer *rbuf, const std::string &chan,
+    const strelka_lcm_headers::RobotState *messageIn) {
 
   if (!firstCommandRecieved) {
     return;
   }
+
   messages::HighLevelCommand command{highCommand};
-  robots::UnitreeA1 robot{messageIn};
+  T robot{messageIn};
 
   float dt = messageIn->tick;
 
@@ -47,8 +54,6 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
 
   prevTick = messageIn->tick;
   if (dt == 0) {
-    // NOTE: happens a couple times at the start for no reason. Might be a
-    // gazebo broadcaster issue
     return;
   }
 
@@ -79,13 +84,15 @@ void A1LocalPlanner::stateHandle(const lcm::ReceiveBuffer *rbuf,
 
   wbicCommand->stop = 0;
 
-  lcm.publish(A1::constants::WBIC_COMMAND_TOPIC_NAME, wbicCommand);
+  lcm.publish(constants::WBIC_COMMAND_TOPIC_NAME, wbicCommand);
 }
 
-void A1LocalPlanner::commandHandle(
+template <class T>
+void LocalPlannerNode<T>::commandHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-    const a1_lcm_msgs::HighLevelCommand *commandMsg) {
-  memcpy(highCommand, commandMsg, sizeof(a1_lcm_msgs::HighLevelCommand));
+    const strelka_lcm_headers::HighLevelCommand *commandMsg) {
+  memcpy(highCommand, commandMsg,
+         sizeof(strelka_lcm_headers::HighLevelCommand));
   if (!firstCommandRecieved) {
     firstCommandRecieved = true;
   }
@@ -93,25 +100,25 @@ void A1LocalPlanner::commandHandle(
   lastCommandTimestamp = getWallTime();
 }
 
-void A1LocalPlanner::setupProcessLoop() {
-  wbicCommand = new a1_lcm_msgs::WbicCommand();
-  highCommand = new a1_lcm_msgs::HighLevelCommand();
-  stateSub = lcm.subscribe(A1::constants::ROBOT_STATE_TOPIC_NAME,
-                           &A1LocalPlanner::stateHandle, this);
+template <class T> void LocalPlannerNode<T>::setupProcessLoop() {
+  wbicCommand = new strelka_lcm_headers::WbicCommand();
+  highCommand = new strelka_lcm_headers::HighLevelCommand();
+  stateSub = lcm.subscribe(constants::ROBOT_STATE_TOPIC_NAME,
+                           &LocalPlannerNode::stateHandle, this);
   stateSub->setQueueCapacity(1);
 
-  commandSub = lcm.subscribe(A1::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME,
-                             &A1LocalPlanner::commandHandle, this);
+  commandSub = lcm.subscribe(constants::HIGH_LEVEL_COMMAND_TOPIC_NAME,
+                             &LocalPlannerNode::commandHandle, this);
   commandSub->setQueueCapacity(1);
 }
 
-bool A1LocalPlanner::handle() {
+template <class T> bool LocalPlannerNode<T>::handle() {
   float commandDeltaTime =
       timePointDiffInSeconds(getWallTime(), lastCommandTimestamp);
 
   if (firstCommandRecieved && commandDeltaTime > COMMAND_TIMEOUT_SECONDS) {
-    std::cout << "A1LocalPlanner: "
-              << A1::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME
+    std::cout << "LocalPlannerNode: "
+              << constants::HIGH_LEVEL_COMMAND_TOPIC_NAME
               << " topic timeout. Last message recieved " << commandDeltaTime
               << " seconds ago." << std::endl;
     return false;
@@ -119,11 +126,16 @@ bool A1LocalPlanner::handle() {
   return lcm.handle() == 0;
 }
 
-void A1LocalPlanner::processLoop() {
+template <class T> void LocalPlannerNode<T>::processLoop() {
   while (handle())
     ;
 }
 
-LocalPlanner &A1LocalPlanner::getLocalPlanner() { return localPlanner; }
+template <class T> LocalPlanner &LocalPlannerNode<T>::getLocalPlanner() {
+  return localPlanner;
+}
+
 } // namespace control
+
+template class control::LocalPlannerNode<robots::UnitreeA1>;
 } // namespace strelka

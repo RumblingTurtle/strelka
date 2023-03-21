@@ -42,13 +42,6 @@ const Vec3<float> BODY_INERTIA{0.015853, 0.037799, 0.045654};
 const float ROBOT_MASS = 12.0;
 const float TRUNK_MASS = 5.0;
 
-const char *const RAW_STATE_TOPIC_NAME = "raw_state";
-const char *const ROBOT_STATE_TOPIC_NAME = "robot_state";
-const char *const GAZEBO_STATE_TOPIC_NAME = "gazebo_state";
-const char *const WBIC_COMMAND_TOPIC_NAME = "wbic_command";
-
-const char *const HIGH_LEVEL_COMMAND_TOPIC_NAME = "high_level_command";
-
 } // namespace constants
 } // namespace A1
 } // namespace strelka

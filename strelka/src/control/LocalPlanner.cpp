@@ -4,7 +4,7 @@ namespace strelka {
 namespace control {
 
 LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
-                           const Vec3<float> bodyInertia, float stepDt,
+                           const Mat3<float> bodyInertia, float stepDt,
                            int horizonSteps)
     : scheduler(std::make_shared<GaitScheduler>(gait)), bodyPlanner(),
       _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
@@ -26,7 +26,7 @@ LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
 }
 
 LocalPlanner::LocalPlanner(std::shared_ptr<FootholdPlanner> footholdPlanner,
-                           float mpcBodyMass, const Vec3<float> bodyInertia,
+                           float mpcBodyMass, const Mat3<float> bodyInertia,
                            float stepDt, int horizonSteps)
     : scheduler(footholdPlanner->gaitScheduler()), bodyPlanner(),
       footPlanner(footholdPlanner), _stepDt(stepDt),

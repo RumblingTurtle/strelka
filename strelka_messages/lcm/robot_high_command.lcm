@@ -1,4 +1,4 @@
-package a1_lcm_msgs;
+package strelka_lcm_headers;
 
 struct RobotHighCommand
 {

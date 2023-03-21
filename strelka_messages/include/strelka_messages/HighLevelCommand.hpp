@@ -1,12 +1,12 @@
 #ifndef HIGH_CMD_H
 #define HIGH_CMD_H
 #include <strelka/common/typedefs.hpp>
-#include <strelka_messages/a1_lcm_msgs/HighLevelCommand.hpp>
+#include <strelka_lcm_headers/HighLevelCommand.hpp>
 namespace strelka {
 namespace messages {
 
 /**
- * @brief Class representing a High level command to a Quadruped robot. Possible
+ * @brief Eigen wrapper for a high level command to a Quadruped robot. Possible
  * command parameters are as follows:
  *
  *  - Desired angular/linear velocites in body frame
@@ -36,7 +36,7 @@ class HighLevelCommand {
   */
 
 public:
-  HighLevelCommand(const a1_lcm_msgs::HighLevelCommand *commandMsg)
+  HighLevelCommand(const strelka_lcm_headers::HighLevelCommand *commandMsg)
       : _ignoreVelocity(false) {
     _desiredAngularVelocityBodyFrame =
         Eigen::Map<const Vec3<float>>(commandMsg->angularVelocity, 3);
@@ -76,7 +76,7 @@ public:
   static HighLevelCommand
   makeDummyCommandMessage(float desiredVelocityX = 0.0,
                           float desiredVelocityYaw = 0.0) {
-    a1_lcm_msgs::HighLevelCommand highCommandMsg{
+    strelka_lcm_headers::HighLevelCommand highCommandMsg{
         .linearSpeed = {desiredVelocityX, 0, 0},
         .angularVelocity = {0, 0, desiredVelocityYaw},
         .footHeight = 0.08,

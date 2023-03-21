@@ -1,9 +1,9 @@
 #include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <signal.h>
+#include <strelka/common/constants.hpp>
+#include <strelka_lcm_headers/HighLevelCommand.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
-#include <strelka_messages/a1_lcm_msgs/HighLevelCommand.hpp>
-#include <strelka_robots/A1/constants.hpp>
 #include <unistd.h>
 
 void sigHandler(int s) {
@@ -27,19 +27,20 @@ int main() {
   if (!lcm.good()) {
     return 1;
   }
-  a1_lcm_msgs::HighLevelCommand highCommandMsg{.linearSpeed = {0.2, 0, 0},
-                                               .angularVelocity = {0, 0, 0},
-                                               .footHeight = 0.08,
-                                               .footClearance = 0.002,
-                                               .hipOffsets = {0, 0},
-                                               .rpy = {0, 0, 0},
-                                               .comOffset = {0, 0},
-                                               .bodyHeight = 0.26,
-                                               .stop = false};
+  strelka_lcm_headers::HighLevelCommand highCommandMsg{
+      .linearSpeed = {0.2, 0, 0},
+      .angularVelocity = {0, 0, 0},
+      .footHeight = 0.08,
+      .footClearance = 0.002,
+      .hipOffsets = {0, 0},
+      .rpy = {0, 0, 0},
+      .comOffset = {0, 0},
+      .bodyHeight = 0.26,
+      .stop = false};
 
   setupKeyboardInterrupt();
   while (true) {
-    lcm.publish(strelka::A1::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME,
+    lcm.publish(strelka::constants::HIGH_LEVEL_COMMAND_TOPIC_NAME,
                 &highCommandMsg);
     usleep(10000);
   }

@@ -18,11 +18,11 @@ constexpr float MPC::MPC_ALPHA;
 constexpr float MPC::FRICTION_COEFFS[4];
 constexpr float MPC::MPC_WEIGHTS[13];
 
-MPC::MPC(float mass, const Vec3<float> &inertia, int planning_horizon,
+MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
          float timestep)
-    : _bodyMass(mass), inertia_(inertia.asDiagonal()),
-      inv_inertia_(inertia_.inverse()), planning_horizon_(planning_horizon),
-      timestep_(timestep), alpha_(MPC_ALPHA), _a_mat(STATE_DIM, STATE_DIM),
+    : _bodyMass(mass), inertia_(inertia), inv_inertia_(inertia_.inverse()),
+      planning_horizon_(planning_horizon), timestep_(timestep),
+      alpha_(MPC_ALPHA), _a_mat(STATE_DIM, STATE_DIM),
       _b_mat(STATE_DIM, ACTION_DIM),
       qp_weights_(STATE_DIM * planning_horizon, STATE_DIM * planning_horizon),
       ab_concatenated_(STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM),

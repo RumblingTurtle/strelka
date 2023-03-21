@@ -40,11 +40,11 @@ class LocalPlanner {
   Vec3<float> _desiredAccelerationBody;
 
 public:
-  LocalPlanner(Gait gait, float mpcBodyMass, const Vec3<float> bodyInertia,
+  LocalPlanner(Gait gait, float mpcBodyMass, const Mat3<float> bodyInertia,
                float stepDt = 0.02, int horizonSteps = 15);
 
   LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner, float mpcBodyMass,
-               const Vec3<float> bodyInertia, float stepDt = 0.02,
+               const Mat3<float> bodyInertia, float stepDt = 0.02,
                int horizonSteps = 15);
   /**
    * @brief Update desired trajectories and forces according to high level

@@ -6,9 +6,9 @@
 #include <strelka/common/utilities.hpp>
 #include <strelka/control/WholeBodyImpulseController.hpp>
 #include <strelka/state_estimation/SlowdownEstimator.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotLowCommand.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
-#include <strelka_messages/a1_lcm_msgs/WbicCommand.hpp>
+#include <strelka_lcm_headers/RobotLowCommand.hpp>
+#include <strelka_lcm_headers/RobotState.hpp>
+#include <strelka_lcm_headers/WbicCommand.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/kinematics.hpp>
 
@@ -18,9 +18,9 @@ class A1WBIC {
   lcm::LCM lcm;
   control::WholeBodyImpulseController controller;
 
-  a1_lcm_msgs::RobotLowCommand *lowCommandMessage;
-  a1_lcm_msgs::WbicCommand *currentCommandMessage;
-  a1_lcm_msgs::RobotState *currentRobotStateMessage;
+  strelka_lcm_headers::RobotLowCommand *lowCommandMessage;
+  strelka_lcm_headers::WbicCommand *currentCommandMessage;
+  strelka_lcm_headers::RobotState *currentRobotStateMessage;
 
   bool firstCommandRecieved;
   bool firstStateMessageRecieved;
@@ -31,10 +31,10 @@ class A1WBIC {
   lcm::Subscription *commandSub;
 
   void stateHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                   const a1_lcm_msgs::RobotState *messageIn);
+                   const strelka_lcm_headers::RobotState *messageIn);
 
   void commandHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-                     const a1_lcm_msgs::WbicCommand *commandMsg);
+                     const strelka_lcm_headers::WbicCommand *commandMsg);
 
 public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;

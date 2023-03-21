@@ -7,8 +7,8 @@
 #include <strelka/filters/MovingWindowFilter3D.hpp>
 #include <strelka/state_estimation/KalmanFilterObserver.hpp>
 #include <strelka/state_estimation/SlowdownEstimator.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotRawState.hpp>
-#include <strelka_messages/a1_lcm_msgs/RobotState.hpp>
+#include <strelka_lcm_headers/RobotRawState.hpp>
+#include <strelka_lcm_headers/RobotState.hpp>
 #include <strelka_robots/A1/UnitreeA1.hpp>
 #include <strelka_robots/A1/constants.hpp>
 #include <strelka_robots/A1/kinematics.hpp>
@@ -18,7 +18,7 @@ constexpr float STATE_ESTIMATOR_WARMUP_TIME = 3.0f; // Seconds
 class A1StateEstimator {
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
-  a1_lcm_msgs::RobotState *robotStateMsg;
+  strelka_lcm_headers::RobotState *robotStateMsg;
   lcm::Subscription *sub;
 
   float filterWarmupTime;
@@ -31,14 +31,15 @@ class A1StateEstimator {
   filters::MovingWindowFilter3D<float> velocityFilter{};
 
   void update(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
-              const a1_lcm_msgs::RobotRawState *messageIn);
+              const strelka_lcm_headers::RobotRawState *messageIn);
 
-  void propagateRobotRawState(const a1_lcm_msgs::RobotRawState *messageIn,
-                              a1_lcm_msgs::RobotState *messageOut);
+  void
+  propagateRobotRawState(const strelka_lcm_headers::RobotRawState *messageIn,
+                         strelka_lcm_headers::RobotState *messageOut);
   void updateFootContactHeights(robots::UnitreeA1 &robot);
   void fillStateEstimatorData(robots::UnitreeA1 &robot,
                               const KalmanFilterObserver *observer,
-                              a1_lcm_msgs::RobotState *messageOut);
+                              strelka_lcm_headers::RobotState *messageOut);
 
 public:
   A1StateEstimator();
