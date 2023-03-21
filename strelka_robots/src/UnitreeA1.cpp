@@ -141,7 +141,7 @@ Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
 
 float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
 
-UnitreeA1
+UnitreeA1 &
 UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
   a1_lcm_msgs::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
@@ -156,10 +156,11 @@ UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
   };
 
   memcpy(dummyState.q, motorAngles.data(), sizeof(float) * 12);
-  return UnitreeA1(&dummyState);
+  static UnitreeA1 robot(&dummyState);
+  return robot;
 }
 
-UnitreeA1 UnitreeA1::createDummyA1RobotWithStateEstimates() {
+UnitreeA1 &UnitreeA1::createDummyA1RobotWithStateEstimates() {
   a1_lcm_msgs::RobotState dummyState{.quaternion = {1, 0, 0, 0},
                                      .gyro = {0, 0, 0},
                                      .accel = {0, 0, 0},
@@ -170,7 +171,8 @@ UnitreeA1 UnitreeA1::createDummyA1RobotWithStateEstimates() {
                                      .velocityBody = {0, 0, 0}};
 
   memcpy(dummyState.q, A1::constants::STAND_ANGLES.data(), sizeof(float) * 12);
-  return UnitreeA1(&dummyState);
+  static UnitreeA1 robot(&dummyState);
+  return robot;
 }
 
 bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
@@ -178,6 +180,31 @@ bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
   Vec3<float> trunkFrameFootPosition =
       rotateWorldToBodyFrame(footPositionWorldFrame - positionWorldFrame());
   return A1::kinematics::trunkFrameIKCheck(trunkFrameFootPosition, legId);
+}
+
+Vec3<float> UnitreeA1::bodyCOMPosition() { return A1::constants::COM_OFFSET; }
+/**
+ * @brief X Y Z dimensions of the body link
+ *
+ * @return Vec3<float>
+ */
+Vec3<float> UnitreeA1::bodyDimensions() {
+  return A1::constants::BODY_DIMENSIONS;
+}
+/**
+ * @brief Thigh hip knee
+ *
+ * @return Vec3<float>
+ */
+Vec3<float> UnitreeA1::legDimensions() { return A1::constants::LEG_LENGTH; }
+
+float UnitreeA1::bodyMass() { return A1::constants::BODY_MASS; }
+
+Mat3<float> UnitreeA1::rotationalInertia() {
+  Mat3<float> inertia;
+  inertia << A1::constants::BODY_INERTIA(0), 0, 0, 0,
+      A1::constants::BODY_INERTIA(1), 0, 0, 0, A1::constants::BODY_INERTIA(2);
+  return inertia;
 }
 
 } // namespace robots

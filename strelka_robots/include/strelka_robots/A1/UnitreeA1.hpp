@@ -88,10 +88,20 @@ public:
   bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
                          int legId) override;
 
+  Vec3<float> bodyCOMPosition() override;
+
+  Vec3<float> bodyDimensions() override;
+
+  Vec3<float> legDimensions() override;
+
+  float bodyMass() override;
+
+  Mat3<float> rotationalInertia() override;
+
   Eigen::Matrix<float, 12, 3> footJacobians();
 
-  static UnitreeA1 createDummyA1RobotWithStateEstimates();
-  static UnitreeA1 createDummyA1RobotWithRawState(
+  static UnitreeA1 &createDummyA1RobotWithStateEstimates();
+  static UnitreeA1 &createDummyA1RobotWithRawState(
       const Vec3<float> &motorAngles = A1::constants::STAND_ANGLES);
 };
 

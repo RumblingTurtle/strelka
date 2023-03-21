@@ -1,11 +1,11 @@
 #include <strelka_robots/A1/control/A1WBIC.hpp>
-#include <strelka_robots/A1/control/A1WbicDynamics.hpp>
-
 namespace strelka {
 namespace control {
 
 A1WBIC::A1WBIC(control::WholeBodyImpulseController::WBICParams &parameters)
-    : controller(buildA1<float>().buildModel(), parameters),
+    // Dummy static robot instance is used here only to fetch some constants
+    : controller(robots::UnitreeA1::createDummyA1RobotWithRawState(),
+                 parameters),
       firstCommandRecieved(false), lastCommandTimestamp(getWallTime()),
       firstStateMessageRecieved(false) {
 

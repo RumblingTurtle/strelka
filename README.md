@@ -24,7 +24,7 @@ Overall, *strelka* is an ideal framework for researchers and developers who are 
 ```
 mkdir ~/strelka/build
 cd ~/strelka/build
-cmake -DCMAKE_BUILD_TYPE=[Debug|Release] ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 sudo make install
 sudo ldconfig
 ```

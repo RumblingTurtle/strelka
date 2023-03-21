@@ -102,6 +102,22 @@ public:
   virtual float footRadius() = 0;
 
   virtual Vec3<float> currentRPY() = 0;
+  /**
+   * @brief Center of mass offset of the robot
+   */
+  virtual Vec3<float> bodyCOMPosition() = 0;
+  /**
+   * @brief X Y Z dimensions of the body link
+   */
+  virtual Vec3<float> bodyDimensions() = 0;
+  /**
+   * @brief Link lengths in the order: Thigh hip knee
+   */
+  virtual Vec3<float> legDimensions() = 0;
+
+  virtual float bodyMass() = 0;
+
+  virtual Mat3<float> rotationalInertia() = 0;
 };
 } // namespace robots
 } // namespace strelka

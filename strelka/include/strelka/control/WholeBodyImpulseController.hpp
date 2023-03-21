@@ -1,13 +1,11 @@
 #ifndef WHOLEBODYIMPEDANCE_CTRL_H
 #define WHOLEBODYIMPEDANCE_CTRL_H
 
+#include <WBIC/WBC_Ctrl/LocomotionCtrl/LocomotionCtrl.hpp>
 #include <memory>
 #include <strelka/common/Robot.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka_messages/WBICCommand.hpp>
-
-template <class T = float> class LocomotionCtrl;
-template <class T = float> class FloatingBaseModel;
 
 namespace strelka {
 namespace control {
@@ -40,10 +38,7 @@ public:
     Vec12<float> tau;
   };
 
-  WholeBodyImpulseController(FloatingBaseModel<float> robotModel,
-                             WBICParams &parameters);
-
-  ~WholeBodyImpulseController();
+  WholeBodyImpulseController(robots::Robot &robot, WBICParams &parameters);
 
   void update(robots::Robot &robot, messages::WBICCommand &command,
               WBICOutput &output);
