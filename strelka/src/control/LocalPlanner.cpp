@@ -9,6 +9,8 @@ LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
     : scheduler(std::make_shared<GaitScheduler>(gait)), bodyPlanner(),
       _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
+  assert(stepDt > 0.0f);
+  assert(horizonSteps >= 1);
   footPlanner = std::make_shared<FootholdPlanner>(scheduler);
   FOR_EACH_LEG { _footState[LEG_ID] = 1; }
   _mpcForces.setZero();
@@ -30,6 +32,9 @@ LocalPlanner::LocalPlanner(std::shared_ptr<FootholdPlanner> footholdPlanner,
       footPlanner(footholdPlanner), _stepDt(stepDt),
       _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
+  assert(stepDt > 0.0f);
+  assert(horizonSteps >= 1);
+
   FOR_EACH_LEG { _footState[LEG_ID] = 1; }
   _mpcForces.setZero();
   _desiredFootP.setZero();

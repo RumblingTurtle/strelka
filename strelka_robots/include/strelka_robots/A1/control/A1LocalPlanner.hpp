@@ -33,12 +33,12 @@ class A1LocalPlanner {
 public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
 
-  A1LocalPlanner(Gait initialGait);
-  LocalPlanner &getLocalPlanner();
-
-  A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner);
+  A1LocalPlanner(Gait initialGait, float stepDt = 0.02, int horizonSteps = 15);
+  A1LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner,
+                 float stepDt = 0.02, int horizonSteps = 15);
   ~A1LocalPlanner();
 
+  LocalPlanner &getLocalPlanner();
   void setupProcessLoop();
   void stateHandle(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                    const a1_lcm_msgs::RobotState *messageIn);
