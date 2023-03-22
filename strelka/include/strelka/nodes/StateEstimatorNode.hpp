@@ -1,5 +1,5 @@
-#ifndef A1_STATE_ESITMATOR_H
-#define A1_STATE_ESITMATOR_H
+#ifndef STATE_ESITMATOR_NODE_H
+#define STATE_ESITMATOR_NODE_H
 
 #include <lcm/lcm-cpp.hpp>
 #include <strelka/common/constants.hpp>
@@ -9,13 +9,12 @@
 #include <strelka/state_estimation/SlowdownEstimator.hpp>
 #include <strelka_lcm_headers/RobotRawState.hpp>
 #include <strelka_lcm_headers/RobotState.hpp>
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/constants.hpp>
-#include <strelka_robots/A1/kinematics.hpp>
+
+#include <strelka/robots/Robots.hpp>
 namespace strelka {
 namespace state_estimation {
 constexpr float STATE_ESTIMATOR_WARMUP_TIME = 3.0f; // Seconds
-class A1StateEstimator {
+template <class RobotClass> class StateEstimatorNode {
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
   strelka_lcm_headers::RobotState *robotStateMsg;
@@ -36,18 +35,19 @@ class A1StateEstimator {
   void
   propagateRobotRawState(const strelka_lcm_headers::RobotRawState *messageIn,
                          strelka_lcm_headers::RobotState *messageOut);
-  void updateFootContactHeights(robots::UnitreeA1 &robot);
-  void fillStateEstimatorData(robots::UnitreeA1 &robot,
+
+  void updateFootContactHeights(robots::Robot &robot);
+  void fillStateEstimatorData(robots::Robot &robot,
                               const KalmanFilterObserver *observer,
                               strelka_lcm_headers::RobotState *messageOut);
 
 public:
-  A1StateEstimator();
+  StateEstimatorNode();
   void processLoop();
   bool handle();
-  ~A1StateEstimator();
+  ~StateEstimatorNode();
 };
 } // namespace state_estimation
 } // namespace strelka
 
-#endif // A1_STATE_ESITMATOR_H
+#endif // STATE_ESITMATOR_NODE_H

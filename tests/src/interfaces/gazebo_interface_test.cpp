@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
 #include <strelka/common/macros.hpp>
-#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
+#include <strelka/nodes/MoveToInterface.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 
 namespace {
 using namespace strelka::interfaces;
 
-class A1GazeboInterfaceParametrizedTestFixture
+class A1MoveToInterfaceParametrizedTestFixture
     : public ::testing::TestWithParam<Vec3<float>> {
 protected:
-  A1GazeboInterface interface;
 };
 
-TEST_P(A1GazeboInterfaceParametrizedTestFixture, SetDesiredAngles) {
-
+TEST_P(A1MoveToInterfaceParametrizedTestFixture, SetDesiredAngles) {
+  strelka::robots::UnitreeA1 robot =
+      strelka::robots::UnitreeA1::createDummyA1RobotWithRawState();
+  MoveToInterface<strelka::robots::UnitreeA1> interface(robot);
   try {
     interface.moveToInit();
   } catch (const RobotStateTopicDoesNotExist &ex) {
@@ -40,7 +42,7 @@ TEST_P(A1GazeboInterfaceParametrizedTestFixture, SetDesiredAngles) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    A1GazeboInterfaceTests, A1GazeboInterfaceParametrizedTestFixture,
+    A1MoveToInterfaceTests, A1MoveToInterfaceParametrizedTestFixture,
     ::testing::Values(strelka::A1::constants::STAND_ANGLES,
                       strelka::A1::constants::INIT_ANGLES));
 } // namespace

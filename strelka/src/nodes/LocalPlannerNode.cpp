@@ -1,17 +1,17 @@
-#include <strelka_robots/LocalPlannerNode.hpp>
-
-#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka/nodes/LocalPlannerNode.hpp>
 
 namespace strelka {
 namespace control {
 
 template <class RobotClass>
-LocalPlannerNode<RobotClass>::LocalPlannerNode(Gait initialGait,
-                                               float robotMass,
-                                               Mat3<float> rotationalInertia,
-                                               float stepDt, int horizonSteps)
-    : prevTick(-1), localPlanner(initialGait, robotMass, rotationalInertia,
-                                 stepDt, horizonSteps),
+LocalPlannerNode<RobotClass>::LocalPlannerNode(
+    Gait initialGait, float robotMass, Mat3<float> rotationalInertia,
+    float stepDt, int horizonSteps, float heightFilterCutoffFrequency,
+    float pitchFilterCutoffFrequency)
+    : prevTick(-1),
+      localPlanner(initialGait, robotMass, rotationalInertia, stepDt,
+                   horizonSteps, heightFilterCutoffFrequency,
+                   pitchFilterCutoffFrequency),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
@@ -19,9 +19,12 @@ LocalPlannerNode<RobotClass>::LocalPlannerNode(Gait initialGait,
 template <class RobotClass>
 LocalPlannerNode<RobotClass>::LocalPlannerNode(
     std::shared_ptr<FootholdPlanner> footPlanner, float robotMass,
-    Mat3<float> rotationalInertia, float stepDt, int horizonSteps)
-    : prevTick(-1), localPlanner(footPlanner, robotMass, rotationalInertia,
-                                 stepDt, horizonSteps),
+    Mat3<float> rotationalInertia, float stepDt, int horizonSteps,
+    float heightFilterCutoffFrequency, float pitchFilterCutoffFrequency)
+    : prevTick(-1),
+      localPlanner(footPlanner, robotMass, rotationalInertia, stepDt,
+                   horizonSteps, heightFilterCutoffFrequency,
+                   pitchFilterCutoffFrequency),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
@@ -140,5 +143,7 @@ LocalPlanner &LocalPlannerNode<RobotClass>::getLocalPlanner() {
 
 } // namespace control
 
-template class control::LocalPlannerNode<robots::UnitreeA1>;
+#define LOCAL_PLANNER_NODE_HEADER
+#include <strelka/robots/RobotRegistry.hpp>
+
 } // namespace strelka

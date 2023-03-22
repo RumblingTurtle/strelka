@@ -1,9 +1,11 @@
-#include <strelka_robots/A1/state_estimation/A1StateEstimator.hpp>
+#include <strelka/nodes/StateEstimatorNode.hpp>
 
 namespace strelka {
 
 namespace state_estimation {
-A1StateEstimator::A1StateEstimator()
+
+template <class RobotClass>
+StateEstimatorNode<RobotClass>::StateEstimatorNode()
     : firstRun(true), filterWarmupTime(STATE_ESTIMATOR_WARMUP_TIME),
       prevTick(-1) {
   robotStateMsg = new strelka_lcm_headers::RobotState();
@@ -15,35 +17,36 @@ A1StateEstimator::A1StateEstimator()
   DEFAULT_KALMAN_FILTER_PARAMS.dt = slowdownEstimator.getSimDt();
   observer->setParameters(DEFAULT_KALMAN_FILTER_PARAMS);
   sub = lcm.subscribe(constants::RAW_STATE_TOPIC_NAME,
-                      &A1StateEstimator::update, this);
+                      &StateEstimatorNode::update, this);
   sub->setQueueCapacity(1);
 }
 
-void A1StateEstimator::processLoop() {
+template <class RobotClass> void StateEstimatorNode<RobotClass>::processLoop() {
   while (handle()) {
   }
 }
 
-bool A1StateEstimator::handle() {
+template <class RobotClass> bool StateEstimatorNode<RobotClass>::handle() {
   Vec3<float> currentPosition = observer->position();
   float positionNorm = currentPosition.dot(currentPosition);
 
   if (0 != lcm.handle()) {
-    std::cout << "A1StateEstimator: lcm.handle() nonzero return value"
+    std::cout << "StateEstimatorNode: lcm.handle() nonzero return value"
               << std::endl;
     return false;
   }
 
   // Check if state estimate is nan
   if (positionNorm != positionNorm) {
-    std::cout << "A1StateEstimator: NANs in position estimates" << std::endl;
+    std::cout << "StateEstimatorNode: NANs in position estimates" << std::endl;
     return false;
   }
 
   return true;
 }
 
-A1StateEstimator::~A1StateEstimator() {
+template <class RobotClass>
+StateEstimatorNode<RobotClass>::~StateEstimatorNode() {
   delete robotStateMsg;
   delete observer;
   if (sub) {
@@ -51,7 +54,8 @@ A1StateEstimator::~A1StateEstimator() {
   }
 }
 
-void A1StateEstimator::propagateRobotRawState(
+template <class RobotClass>
+void StateEstimatorNode<RobotClass>::propagateRobotRawState(
     const strelka_lcm_headers::RobotRawState *messageIn,
     strelka_lcm_headers::RobotState *messageOut) {
   memcpy(messageOut->quaternion, messageIn->quaternion, sizeof(float) * 4);
@@ -63,8 +67,9 @@ void A1StateEstimator::propagateRobotRawState(
   messageOut->tick = messageIn->tick;
 }
 
-void A1StateEstimator::fillStateEstimatorData(
-    robots::UnitreeA1 &robot, const KalmanFilterObserver *observer,
+template <class RobotClass>
+void StateEstimatorNode<RobotClass>::fillStateEstimatorData(
+    robots::Robot &robot, const KalmanFilterObserver *observer,
     strelka_lcm_headers::RobotState *messageOut) {
 
   Vec3<float> filteredVelocity =
@@ -85,7 +90,9 @@ void A1StateEstimator::fillStateEstimatorData(
          sizeof(float) * 36);
 }
 
-void A1StateEstimator::updateFootContactHeights(robots::UnitreeA1 &robot) {
+template <class RobotClass>
+void StateEstimatorNode<RobotClass>::updateFootContactHeights(
+    robots::Robot &robot) {
   if (firstRun) {
     FOR_EACH_LEG { contactHeightEstimates(LEG_ID) = robot.footRadius(); }
     previousContacts = robot.footContacts();
@@ -112,7 +119,8 @@ void A1StateEstimator::updateFootContactHeights(robots::UnitreeA1 &robot) {
   previousContacts = robot.footContacts();
 }
 
-void A1StateEstimator::update(
+template <class RobotClass>
+void StateEstimatorNode<RobotClass>::update(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const strelka_lcm_headers::RobotRawState *messageIn) {
   if (prevTick == -1) {
@@ -122,7 +130,7 @@ void A1StateEstimator::update(
   float dt = messageIn->tick - prevTick;
   prevTick = messageIn->tick;
 
-  robots::UnitreeA1 robot(messageIn);
+  RobotClass robot(messageIn);
   // TODO: Add external odometry listener
   observer->update(robot, false, Vec3<float>::Zero(), contactHeightEstimates);
   updateFootContactHeights(robot);
@@ -136,4 +144,6 @@ void A1StateEstimator::update(
   }
 }
 } // namespace state_estimation
+#define STATE_ESTIMATOR_NODE_HEADER
+#include <strelka/robots/RobotRegistry.hpp>
 } // namespace strelka

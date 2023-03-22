@@ -2,10 +2,12 @@
 
 namespace strelka {
 namespace control {
-BodyTrajectoryPlanner::BodyTrajectoryPlanner()
+BodyTrajectoryPlanner::BodyTrajectoryPlanner(float heightFilterCutoffFrequency,
+                                             float pitchFilterCutoffFrequency)
     // 30.0 10.0 stairs
     // 0.9 0.9 sparse stepping stones
-    : firstRun(true), heightFilter(0.001, 30.0), pitchFilter(0.001, 10.0) {
+    : firstRun(true), heightFilter(0.001, heightFilterCutoffFrequency),
+      pitchFilter(0.001, pitchFilterCutoffFrequency) {
   prevContactPosWorld.setZero();
   prevContactPosBody.setZero();
 }

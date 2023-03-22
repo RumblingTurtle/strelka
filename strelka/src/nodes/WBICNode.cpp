@@ -1,6 +1,6 @@
-#include <strelka_robots/WBICNode.hpp>
+#include <strelka/nodes/WBICNode.hpp>
 
-#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 namespace strelka {
 namespace control {
 
@@ -151,6 +151,6 @@ template <class RobotClass> WBICNode<RobotClass>::~WBICNode() {
   }
 }
 } // namespace control
-
-template class control::WBICNode<robots::UnitreeA1>;
+#define WBIC_NODE_HEADER
+#include <strelka/robots/RobotRegistry.hpp>
 } // namespace strelka

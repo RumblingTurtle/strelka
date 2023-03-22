@@ -1,4 +1,4 @@
-#include <strelka_robots/A1/UnitreeA1.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 
 namespace strelka {
 
@@ -211,9 +211,18 @@ Mat3<float> UnitreeA1::rotationalInertia() {
   return inertia;
 }
 
-Vec3<float> UnitreeA1::positionGains() { return A1::constants::POSITION_GAINS; }
-
-Vec3<float> UnitreeA1::dampingGains() { return A1::constants::DAMPING_GAINS; }
+const Vec3<float> &UnitreeA1::positionGains() {
+  return A1::constants::POSITION_GAINS;
+}
+const Vec3<float> &UnitreeA1::dampingGains() {
+  return A1::constants::DAMPING_GAINS;
+}
+const Vec3<float> &UnitreeA1::initAngles() {
+  return A1::constants::INIT_ANGLES;
+};
+const Vec3<float> &UnitreeA1::standAngles() {
+  return A1::constants::STAND_ANGLES;
+};
 
 } // namespace robots
 } // namespace strelka

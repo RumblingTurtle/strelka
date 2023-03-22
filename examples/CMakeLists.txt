@@ -1,7 +1,6 @@
 print_pkg_header(examples)
 
 SET(DEPENDENCY_LIBRARIES 
-    strelka_robots
     strelka
 )
 

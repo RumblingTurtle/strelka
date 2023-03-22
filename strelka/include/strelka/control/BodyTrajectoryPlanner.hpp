@@ -26,7 +26,14 @@ class BodyTrajectoryPlanner {
   bool firstRun;
 
 public:
-  BodyTrajectoryPlanner();
+  /**
+   * @param heightFilterCutoffFrequency Height lowpass filter cutoff frequency
+   * in HZ
+   * @param pitchFilterCutoffFrequency Pitch lowpass filter cutoff frequency in
+   * HZ
+   */
+  BodyTrajectoryPlanner(float heightFilterCutoffFrequency,
+                        float pitchFilterCutoffFrequency);
 
   /**
    * @brief Generate desired body trajectory on the given horizon and step

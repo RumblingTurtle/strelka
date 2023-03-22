@@ -13,7 +13,7 @@ target_include_directories(
     strelka PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(strelka osqp wbic strelka_messages)
+target_link_libraries(strelka osqp wbic strelka_messages lcm)
 
 install(TARGETS strelka osqp wbic goldfarb
     LIBRARY DESTINATION lib

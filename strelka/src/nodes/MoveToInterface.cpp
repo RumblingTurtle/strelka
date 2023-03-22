@@ -1,13 +1,16 @@
-#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
+#include <strelka/nodes/MoveToInterface.hpp>
+
 namespace strelka {
 namespace interfaces {
 
-A1GazeboInterface::MoveToHandle::MoveToHandle(A1GazeboInterface &interface,
-                                              const char *stateTopicName)
+template <class RobotClass>
+MoveToInterface<RobotClass>::MoveToHandle::MoveToHandle(
+    MoveToInterface &interface, const char *stateTopicName)
     : interface(interface), prevTick(-1), stateTopicName(stateTopicName) {}
 
-void A1GazeboInterface::MoveToHandle::run(float moveTime,
-                                          const Vec12<float> &desiredAngles) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::MoveToHandle::run(
+    float moveTime, const Vec12<float> &desiredAngles) {
   assert(desiredAngles.size() == 12);
   assert(moveTime > 0);
 
@@ -15,7 +18,7 @@ void A1GazeboInterface::MoveToHandle::run(float moveTime,
   this->timeLeft = moveTime;
 
   this->desiredAngles = desiredAngles;
-  getInitAngles();
+  getStartAngles();
 
   lcm::Subscription *sub =
       lcm.subscribe(stateTopicName, &MoveToHandle::moveHandle, this);
@@ -26,7 +29,8 @@ void A1GazeboInterface::MoveToHandle::run(float moveTime,
   lcm.unsubscribe(sub);
 }
 
-Vec12<float> A1GazeboInterface::MoveToHandle::getInitAngles() {
+template <class RobotClass>
+Vec12<float> MoveToInterface<RobotClass>::MoveToHandle::getStartAngles() {
   lcm::Subscription *sub =
       lcm.subscribe(stateTopicName, &MoveToHandle::initStartAnglesHandle, this);
   sub->setQueueCapacity(1);
@@ -43,13 +47,15 @@ Vec12<float> A1GazeboInterface::MoveToHandle::getInitAngles() {
   return startAngles;
 }
 
-void A1GazeboInterface::MoveToHandle::initStartAnglesHandle(
+template <class RobotClass>
+void MoveToInterface<RobotClass>::MoveToHandle::initStartAnglesHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const strelka_lcm_headers::RobotRawState *data) {
   startAngles = Eigen::Map<const Vec12<float>>(data->q, 12);
 }
 
-void A1GazeboInterface::MoveToHandle::moveHandle(
+template <class RobotClass>
+void MoveToInterface<RobotClass>::MoveToHandle::moveHandle(
     const lcm::ReceiveBuffer *rbuf, const std::string &chan,
     const strelka_lcm_headers::RobotRawState *data) {
   Vec12<float> q, dq;
@@ -83,7 +89,13 @@ void A1GazeboInterface::MoveToHandle::moveHandle(
   interface.setAngles(q, dq);
 }
 
-void A1GazeboInterface::sendCommandMessage(const Vec12<float> &command) {
+template <class RobotClass>
+MoveToInterface<RobotClass>::MoveToInterface(robots::Robot &robot)
+    : robotInstance(robot) {}
+
+template <class RobotClass>
+void MoveToInterface<RobotClass>::sendCommandMessage(
+    const Vec12<float> &command) {
   assert(command.size() == 60);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = command[5 * motorId];
@@ -96,7 +108,8 @@ void A1GazeboInterface::sendCommandMessage(const Vec12<float> &command) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setTorques(const Vec12<float> &torques) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::setTorques(const Vec12<float> &torques) {
   assert(torques.size() == 12);
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = 0;
@@ -109,47 +122,58 @@ void A1GazeboInterface::setTorques(const Vec12<float> &torques) {
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setAngles(const Vec12<float> &q) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::setAngles(const Vec12<float> &q) {
   assert(q.size() == 12);
+  Vec3<float> KP = robotInstance.positionGains();
+  Vec3<float> KD = robotInstance.dampingGains();
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
-    commandMessage.kp[motorId] = A1::constants::POSITION_GAINS[motorId % 3];
+    commandMessage.kp[motorId] = KP[motorId % 3];
     commandMessage.dq[motorId] = 0;
-    commandMessage.kd[motorId] = A1::constants::DAMPING_GAINS[motorId % 3];
+    commandMessage.kd[motorId] = KD[motorId % 3];
     commandMessage.tau[motorId] = 0;
   }
 
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-void A1GazeboInterface::setAngles(const Vec12<float> &q,
-                                  const Vec12<float> &dq) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::setAngles(const Vec12<float> &q,
+                                            const Vec12<float> &dq) {
   assert(q.size() == 12);
   assert(dq.size() == 12);
+  Vec3<float> KP = robotInstance.positionGains();
+  Vec3<float> KD = robotInstance.dampingGains();
   for (int motorId = 0; motorId < 12; motorId++) {
     commandMessage.q[motorId] = q[motorId];
-    commandMessage.kp[motorId] = A1::constants::POSITION_GAINS[motorId % 3];
+    commandMessage.kp[motorId] = KP[motorId % 3];
     commandMessage.dq[motorId] = dq[motorId];
-    commandMessage.kd[motorId] = A1::constants::DAMPING_GAINS[motorId % 3];
+    commandMessage.kd[motorId] = KD[motorId % 3];
     commandMessage.tau[motorId] = 0;
   }
 
   lcm.publish("robot_low_command", &commandMessage);
 }
 
-Vec12<float> A1GazeboInterface::getAngles() {
+template <class RobotClass>
+Vec12<float> MoveToInterface<RobotClass>::getAngles() {
   const Vec12<float> dummyAngles;
   MoveToHandle handle{*this, constants::RAW_STATE_TOPIC_NAME};
-  return handle.getInitAngles();
+  return handle.getStartAngles();
 }
 
-void A1GazeboInterface::moveTo(const Vec12<float> &angles, float moveTime) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::moveTo(const Vec12<float> &angles,
+                                         float moveTime) {
   assert(moveTime > 0);
   MoveToHandle moveHandle{*this, constants::RAW_STATE_TOPIC_NAME};
   moveHandle.run(moveTime, angles);
 }
 
-void A1GazeboInterface::moveTo(const Vec3<float> &angles, float moveTime) {
+template <class RobotClass>
+void MoveToInterface<RobotClass>::moveTo(const Vec3<float> &angles,
+                                         float moveTime) {
   assert(moveTime > 0);
   Vec12<float> moveAngles;
   moveAngles.resize(12);
@@ -161,13 +185,16 @@ void A1GazeboInterface::moveTo(const Vec3<float> &angles, float moveTime) {
   moveTo(moveAngles, moveTime);
 }
 
-void A1GazeboInterface::moveToInit(float moveTime) {
-  moveTo(A1::constants::INIT_ANGLES, moveTime);
+template <class RobotClass>
+void MoveToInterface<RobotClass>::moveToInit(float moveTime) {
+  moveTo(robotInstance.initAngles(), moveTime);
 }
 
-void A1GazeboInterface::moveToStand(float moveTime) {
-  moveTo(A1::constants::STAND_ANGLES, moveTime);
+template <class RobotClass>
+void MoveToInterface<RobotClass>::moveToStand(float moveTime) {
+  moveTo(robotInstance.standAngles(), moveTime);
 }
 } // namespace interfaces
-
+#define MOVE_TO_INTERFACE_HEADER
+#include <strelka/robots/RobotRegistry.hpp>
 } // namespace strelka

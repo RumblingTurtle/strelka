@@ -5,8 +5,10 @@ namespace control {
 
 LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
                            const Mat3<float> bodyInertia, float stepDt,
-                           int horizonSteps)
-    : scheduler(std::make_shared<GaitScheduler>(gait)), bodyPlanner(),
+                           int horizonSteps, float heightFilterCutoffFrequency,
+                           float pitchFilterCutoffFrequency)
+    : scheduler(std::make_shared<GaitScheduler>(gait)),
+      bodyPlanner(heightFilterCutoffFrequency, pitchFilterCutoffFrequency),
       _stepDt(stepDt), _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {
   assert(stepDt > 0.0f);
@@ -27,8 +29,11 @@ LocalPlanner::LocalPlanner(Gait gait, float mpcBodyMass,
 
 LocalPlanner::LocalPlanner(std::shared_ptr<FootholdPlanner> footholdPlanner,
                            float mpcBodyMass, const Mat3<float> bodyInertia,
-                           float stepDt, int horizonSteps)
-    : scheduler(footholdPlanner->gaitScheduler()), bodyPlanner(),
+                           float stepDt, int horizonSteps,
+                           float heightFilterCutoffFrequency,
+                           float pitchFilterCutoffFrequency)
+    : scheduler(footholdPlanner->gaitScheduler()),
+      bodyPlanner(heightFilterCutoffFrequency, pitchFilterCutoffFrequency),
       footPlanner(footholdPlanner), _stepDt(stepDt),
       _horizonSteps(horizonSteps), _mpcBodyMass(mpcBodyMass),
       mpc(mpcBodyMass, bodyInertia, horizonSteps, stepDt) {

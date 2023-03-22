@@ -1,7 +1,8 @@
 #ifndef UNITREE_A1_H
 #define UNITREE_A1_H
 
-#include <strelka_robots/A1/kinematics.hpp>
+#include <strelka/robots/A1/constants.hpp>
+#include <strelka/robots/A1/kinematics.hpp>
 
 #include <exception>
 #include <strelka/common/Robot.hpp>
@@ -9,6 +10,7 @@
 #include <strelka/common/macros.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
+
 #include <strelka_lcm_headers/RobotRawState.hpp>
 #include <strelka_lcm_headers/RobotState.hpp>
 
@@ -96,13 +98,16 @@ public:
 
   float trunkMass() override;
 
-  Vec3<float> positionGains();
-  Vec3<float> dampingGains();
+  const Vec3<float> &positionGains() override;
+  const Vec3<float> &dampingGains() override;
+  const Vec3<float> &initAngles() override;
+  const Vec3<float> &standAngles() override;
+
   float robotMass();
 
   Mat3<float> rotationalInertia() override;
 
-  Eigen::Matrix<float, 12, 3> footJacobians();
+  Eigen::Matrix<float, 12, 3> footJacobians() override;
 
   static UnitreeA1 &createDummyA1RobotWithStateEstimates();
   static UnitreeA1 &createDummyA1RobotWithRawState(

@@ -2,9 +2,8 @@
 #include <strelka/common/macros.hpp>
 #include <strelka/control/BodyTrajectoryPlanner.hpp>
 #include <strelka/control/FootholdPlanner.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/constants.hpp>
 
 namespace {
 

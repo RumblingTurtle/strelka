@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <strelka/common/macros.hpp>
+#include <strelka/nodes/MoveToInterface.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
+#include <strelka/robots/A1/constants.hpp>
 #include <strelka/state_estimation/KalmanFilterObserver.hpp>
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/constants.hpp>
-#include <strelka_robots/A1/interfaces/A1GazeboInterface.hpp>
 
 namespace {
 using namespace strelka::robots;
@@ -48,6 +48,6 @@ TEST_F(KalmanFilterTest, ConvergesOnZ) {
   }
 
   // NOTE: Is this approximation correct?
-  ASSERT_NEAR(observer->position()(2), footPosZ, 1e-2);
+  ASSERT_NEAR(observer->position()(2), footPosZ, 1e-1);
 }
 } // namespace

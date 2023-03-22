@@ -1,5 +1,5 @@
-#ifndef WBICNode_H
-#define WBICNode_H
+#ifndef WBIC_NODE_H
+#define WBIC_NODE_H
 
 #include <iostream>
 #include <strelka/common/constants.hpp>
@@ -7,9 +7,12 @@
 #include <strelka/common/utilities.hpp>
 #include <strelka/control/WholeBodyImpulseController.hpp>
 #include <strelka/state_estimation/SlowdownEstimator.hpp>
+
 #include <strelka_lcm_headers/RobotLowCommand.hpp>
 #include <strelka_lcm_headers/RobotState.hpp>
 #include <strelka_lcm_headers/WbicCommand.hpp>
+
+#include <strelka/robots/Robots.hpp>
 
 namespace strelka {
 namespace control {
@@ -47,4 +50,4 @@ public:
 };
 } // namespace control
 } // namespace strelka
-#endif
+#endif // WBIC_NODE_H

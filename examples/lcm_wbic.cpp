@@ -1,5 +1,5 @@
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/WBICNode.hpp>
+#include <strelka/nodes/WBICNode.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 
 int main() {
   using namespace strelka::robots;

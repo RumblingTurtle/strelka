@@ -41,11 +41,14 @@ class LocalPlanner {
 
 public:
   LocalPlanner(Gait gait, float mpcBodyMass, const Mat3<float> bodyInertia,
-               float stepDt = 0.02, int horizonSteps = 15);
+               float stepDt = 0.02, int horizonSteps = 15,
+               float heightFilterCutoffFrequency = 30.0,
+               float pitchFilterCutoffFrequency = 10);
 
   LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner, float mpcBodyMass,
                const Mat3<float> bodyInertia, float stepDt = 0.02,
-               int horizonSteps = 15);
+               int horizonSteps = 15, float heightFilterCutoffFrequency = 30.0,
+               float pitchFilterCutoffFrequency = 10);
   /**
    * @brief Update desired trajectories and forces according to high level
    * command and robot state

@@ -115,9 +115,16 @@ public:
    */
   virtual Vec3<float> legDimensions() = 0;
 
+  virtual Eigen::Matrix<float, 12, 3> footJacobians() = 0;
+
   virtual float trunkMass() = 0;
 
   virtual Mat3<float> rotationalInertia() = 0;
+
+  virtual const Vec3<float> &positionGains() = 0;
+  virtual const Vec3<float> &dampingGains() = 0;
+  virtual const Vec3<float> &initAngles() = 0;
+  virtual const Vec3<float> &standAngles() = 0;
 };
 } // namespace robots
 } // namespace strelka

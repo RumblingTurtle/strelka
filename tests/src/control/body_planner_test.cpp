@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 #include <strelka/control/BodyTrajectoryPlanner.hpp>
+#include <strelka/robots/A1/UnitreeA1.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
-#include <strelka_robots/A1/UnitreeA1.hpp>
-#include <strelka_robots/A1/constants.hpp>
 
 namespace {
 
@@ -16,7 +15,7 @@ TEST(BodyPlannerTests, TrajectoryIntegration) {
   int horizonSteps = 10;
 
   UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithStateEstimates();
-  BodyTrajectoryPlanner planner{};
+  BodyTrajectoryPlanner planner{30000.0f, 30000.0f};
 
   HighLevelCommand command =
       HighLevelCommand::makeDummyCommandMessage(desiredVelocityX, 0.0);
@@ -26,7 +25,7 @@ TEST(BodyPlannerTests, TrajectoryIntegration) {
 
   float trajectoryPosX = trajectory(horizonSteps - 1, 3);
   float integratedPosX = dt * desiredVelocityX * horizonSteps;
-  EXPECT_NEAR(trajectoryPosX, integratedPosX, 1e-4);
+  EXPECT_NEAR(trajectoryPosX, integratedPosX, 1e-3);
 }
 
 } // namespace

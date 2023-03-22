@@ -7,7 +7,7 @@
 
 #include <math.h>
 #include <strelka/common/typedefs.hpp>
-#include <strelka_robots/A1/constants.hpp>
+#include <strelka/robots/A1/constants.hpp>
 
 namespace strelka {
 namespace A1 {

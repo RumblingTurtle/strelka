@@ -17,7 +17,6 @@ enable_testing()
 include(GoogleTest)
 
 SET(DEPENDENCY_LIBRARIES 
-    strelka_robots
     strelka
 )
 

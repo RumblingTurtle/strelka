@@ -12,6 +12,8 @@
 #include <strelka_lcm_headers/WbicCommand.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 
+#include <strelka/robots/Robots.hpp>
+
 namespace strelka {
 namespace control {
 
@@ -32,11 +34,14 @@ public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
 
   LocalPlannerNode(Gait initialGait, float robotMass,
-                   Mat3<float> rotationalInertia, float stepDt = 0.02,
-                   int horizonSteps = 15);
+                   Mat3<float> rotationalInertia, float stepDt,
+                   int horizonSteps, float heightFilterCutoffFrequency,
+                   float pitchFilterCutoffFrequency);
+
   LocalPlannerNode(std::shared_ptr<FootholdPlanner> footPlanner,
-                   float robotMass, Mat3<float> rotationalInertia,
-                   float stepDt = 0.02, int horizonSteps = 15);
+                   float robotMass, Mat3<float> rotationalInertia, float stepDt,
+                   int horizonSteps, float heightFilterCutoffFrequency,
+                   float pitchFilterCutoffFrequency);
 
   ~LocalPlannerNode();
 
