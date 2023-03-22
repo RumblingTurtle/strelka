@@ -5,8 +5,8 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/LU>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/macros.hpp>
+#include <strelka/robots/Robot.hpp>
 
 namespace strelka {
 namespace state_estimation {

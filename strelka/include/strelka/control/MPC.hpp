@@ -4,10 +4,10 @@
 #include <eigen3/Eigen/LU>
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixExponential.h>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
+#include <strelka/robots/Robot.hpp>
 
 struct OSQPWorkspace;
 

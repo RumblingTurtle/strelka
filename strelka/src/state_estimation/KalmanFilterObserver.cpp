@@ -122,6 +122,8 @@ void KalmanFilterObserver::update(robots::Robot &robot,
 
   Eigen::Matrix<float, 4, 1> trusts = Eigen::Matrix<float, 4, 1>::Zero();
   float h_i = 0.0f;
+
+  Vec4<bool> footContacts = robot.footContacts();
   FOR_EACH_LEG {
     int i1 = 3 * LEG_ID;
     Vec3<float> p_rel = robot.footPositionTrunkFrame(LEG_ID);
@@ -135,7 +137,7 @@ void KalmanFilterObserver::update(robots::Robot &robot,
     rindex2 = 12 + i1;
     rindex3 = 24 + LEG_ID;
 
-    float trust = robot.footContact(LEG_ID);
+    float trust = footContacts(LEG_ID);
 
     float high_suspect_number(100);
 

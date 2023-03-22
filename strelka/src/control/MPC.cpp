@@ -75,7 +75,7 @@ void MPC::computeABExponentials(robots::Robot &robot,
   // order in the intrinsic frame.
   const float cos_yaw = cos(avg_yaw);
   const float sin_yaw = sin(avg_yaw);
-  const float pitch = robot.currentRPY()(1);
+  const float pitch = robot.bodyToWorldRPY()(1);
   const float cos_pitch = cos(pitch);
   const float tan_pitch = tan(pitch);
   Mat3<float> angular_velocity_to_rpy_rate;
@@ -302,7 +302,7 @@ DVec<float> &MPC::solveQP() {
 void MPC::updateObjectiveVector(robots::Robot &robot,
                                 DMat<float> &bodyTrajectory) {
   DVec<float> currentState(13);
-  currentState.block<3, 1>(0, 0) = robot.currentRPY();
+  currentState.block<3, 1>(0, 0) = robot.bodyToWorldRPY();
   currentState.block<3, 1>(3, 0) = robot.positionWorldFrame();
 
   currentState.block<3, 1>(6, 0) =

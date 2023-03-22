@@ -90,10 +90,6 @@ void MoveToInterface<RobotClass>::MoveToHandle::moveHandle(
 }
 
 template <class RobotClass>
-MoveToInterface<RobotClass>::MoveToInterface(robots::Robot &robot)
-    : robotInstance(robot) {}
-
-template <class RobotClass>
 void MoveToInterface<RobotClass>::sendCommandMessage(
     const Vec12<float> &command) {
   assert(command.size() == 60);

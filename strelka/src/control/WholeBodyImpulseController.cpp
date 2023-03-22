@@ -9,7 +9,7 @@ WholeBodyImpulseController::WholeBodyImpulseController(robots::Robot &robot,
                                                        WBICParams &parameters) {
   Quadruped<float> quadruped;
 
-  Vec3<float> bodyCOM = robot.bodyCOMPosition();
+  Vec3<float> bodyCOM = robot.bodyToComOffset();
   Vec3<float> bodyDimensions = robot.bodyDimensions();
   Vec3<float> legDimensions = robot.legDimensions();
 

@@ -3,13 +3,13 @@
 
 #include <exception>
 #include <memory>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/macros.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/trajectory.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka/control/gait/GaitScheduler.hpp>
+#include <strelka/robots/Robot.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 #include <vector>
 

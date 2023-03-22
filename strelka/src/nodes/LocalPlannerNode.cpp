@@ -5,26 +5,25 @@ namespace control {
 
 template <class RobotClass>
 LocalPlannerNode<RobotClass>::LocalPlannerNode(
-    Gait initialGait, float robotMass, Mat3<float> rotationalInertia,
-    float stepDt, int horizonSteps, float heightFilterCutoffFrequency,
-    float pitchFilterCutoffFrequency)
-    : prevTick(-1),
-      localPlanner(initialGait, robotMass, rotationalInertia, stepDt,
-                   horizonSteps, heightFilterCutoffFrequency,
-                   pitchFilterCutoffFrequency),
+    Gait initialGait, float stepDt, int horizonSteps,
+    float heightFilterCutoffFrequency, float pitchFilterCutoffFrequency)
+    : prevTick(-1), robotInstance(),
+      localPlanner(initialGait, robotInstance.robotMass(),
+                   robotInstance.rotationalInertia(), stepDt, horizonSteps,
+                   heightFilterCutoffFrequency, pitchFilterCutoffFrequency),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }
 
 template <class RobotClass>
 LocalPlannerNode<RobotClass>::LocalPlannerNode(
-    std::shared_ptr<FootholdPlanner> footPlanner, float robotMass,
-    Mat3<float> rotationalInertia, float stepDt, int horizonSteps,
-    float heightFilterCutoffFrequency, float pitchFilterCutoffFrequency)
-    : prevTick(-1),
-      localPlanner(footPlanner, robotMass, rotationalInertia, stepDt,
-                   horizonSteps, heightFilterCutoffFrequency,
-                   pitchFilterCutoffFrequency),
+    std::shared_ptr<FootholdPlanner> footPlanner, float stepDt,
+    int horizonSteps, float heightFilterCutoffFrequency,
+    float pitchFilterCutoffFrequency)
+    : prevTick(-1), robotInstance(),
+      localPlanner(footPlanner, robotInstance.robotMass(),
+                   robotInstance.rotationalInertia(), stepDt, horizonSteps,
+                   heightFilterCutoffFrequency, pitchFilterCutoffFrequency),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }

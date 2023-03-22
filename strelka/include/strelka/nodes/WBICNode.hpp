@@ -17,6 +17,7 @@
 namespace strelka {
 namespace control {
 template <class RobotClass> class WBICNode {
+  RobotClass robotInstance;
   lcm::LCM lcm;
   control::WholeBodyImpulseController controller;
 
@@ -42,8 +43,8 @@ public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
   bool rolloverProtection(robots::Robot &robot);
   bool outputSafetyCheck(WholeBodyImpulseController::WBICOutput &wbicOutput);
-  WBICNode(robots::Robot &robot,
-           control::WholeBodyImpulseController::WBICParams &parameters);
+  WBICNode(control::WholeBodyImpulseController::WBICParams &parameters =
+               DEFAULT_WBIC_PARAMS);
   ~WBICNode();
   bool handle();
   void processLoop();

@@ -19,13 +19,14 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   DMat<float> trajectory(horizonSteps, 13);
   trajectory.setZero();
 
-  Vec3<float> currentRPY = rotation::quat2euler(robot.bodyToWorldQuat());
+  Vec3<float> bodyToWorldRPY = rotation::quat2euler(robot.bodyToWorldQuat());
   Mat3<float> bodyToWorldRot;
 
   rotation::quat2rot(robot.bodyToWorldQuat(), bodyToWorldRot);
+  Vec4<bool> footContacts = robot.footContacts();
 
   FOR_EACH_LEG {
-    if (robot.footContact(LEG_ID) || firstRun) {
+    if (footContacts(LEG_ID) || firstRun) {
       prevContactPosBody.block<1, 3>(LEG_ID, 0) =
           robot.footPositionTrunkFrame(LEG_ID).transpose();
       prevContactPosWorld.block<1, 3>(LEG_ID, 0) =
@@ -54,7 +55,8 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   for (int h = 0; h < horizonSteps; h++) {
     trajectory(h, 0) = command.desiredRPY()(0);
     trajectory(h, 1) = estimatedTerrainPitch;
-    trajectory(h, 2) = currentRPY(2) + dt * (h + 1) * desiredAngularVelocity(2);
+    trajectory(h, 2) =
+        bodyToWorldRPY(2) + dt * (h + 1) * desiredAngularVelocity(2);
 
     Mat3<float> rotation_h;
     Vec3<float> rpy_h = trajectory.block<1, 3>(h, 0).transpose();

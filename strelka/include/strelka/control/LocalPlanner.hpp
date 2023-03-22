@@ -2,11 +2,11 @@
 #define LOCAL_PLANNER_H
 
 #include <memory>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/macros.hpp>
 #include <strelka/control/BodyTrajectoryPlanner.hpp>
 #include <strelka/control/FootholdPlanner.hpp>
 #include <strelka/control/MPC.hpp>
+#include <strelka/robots/Robot.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 
 namespace strelka {

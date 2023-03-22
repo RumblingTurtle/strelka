@@ -18,6 +18,7 @@ namespace strelka {
 namespace control {
 
 template <class RobotClass> class LocalPlannerNode {
+  RobotClass robotInstance;
   lcm::LCM lcm;
 
   strelka_lcm_headers::HighLevelCommand *highCommand;
@@ -33,13 +34,11 @@ template <class RobotClass> class LocalPlannerNode {
 public:
   static constexpr float COMMAND_TIMEOUT_SECONDS = 0.5;
 
-  LocalPlannerNode(Gait initialGait, float robotMass,
-                   Mat3<float> rotationalInertia, float stepDt,
-                   int horizonSteps, float heightFilterCutoffFrequency,
+  LocalPlannerNode(Gait initialGait, float stepDt, int horizonSteps,
+                   float heightFilterCutoffFrequency,
                    float pitchFilterCutoffFrequency);
 
-  LocalPlannerNode(std::shared_ptr<FootholdPlanner> footPlanner,
-                   float robotMass, Mat3<float> rotationalInertia, float stepDt,
+  LocalPlannerNode(std::shared_ptr<FootholdPlanner> footPlanner, float stepDt,
                    int horizonSteps, float heightFilterCutoffFrequency,
                    float pitchFilterCutoffFrequency);
 

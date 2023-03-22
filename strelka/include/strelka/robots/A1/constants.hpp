@@ -39,6 +39,8 @@ const float FOOT_FORCE_THRESHOLD = 10.0;
 
 const Vec3<float> BODY_INERTIA{0.015853, 0.037799, 0.045654};
 
+const Mat3<float> BODY_INERTIA_MATRIX = BODY_INERTIA.asDiagonal();
+
 const float ROBOT_MASS = 12.0;
 const float TRUNK_MASS = 5.0;
 

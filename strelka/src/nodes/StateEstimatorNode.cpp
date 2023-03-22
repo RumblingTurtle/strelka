@@ -100,9 +100,10 @@ void StateEstimatorNode<RobotClass>::updateFootContactHeights(
     return;
   }
 
+  Vec4<bool> footContacts = robot.footContacts();
+
   FOR_EACH_LEG {
-    bool justHitTheGround =
-        !previousContacts(LEG_ID) && robot.footContact(LEG_ID);
+    bool justHitTheGround = !previousContacts(LEG_ID) && footContacts(LEG_ID);
 
     float footHeightWorldFrame =
         (robot.rotateBodyToWorldFrame(robot.footPositionTrunkFrame(LEG_ID)) +

@@ -6,11 +6,11 @@ namespace control {
 
 template <class RobotClass>
 WBICNode<RobotClass>::WBICNode(
-    robots::Robot &robot,
     control::WholeBodyImpulseController::WBICParams &parameters)
     // Dummy static robot instance is used here only to fetch some constants
-    : controller(robot, parameters), firstCommandRecieved(false),
-      lastCommandTimestamp(getWallTime()), firstStateMessageRecieved(false) {
+    : robotInstance(), controller(robotInstance, parameters),
+      firstCommandRecieved(false), lastCommandTimestamp(getWallTime()),
+      firstStateMessageRecieved(false) {
 
   lowCommandMessage = new strelka_lcm_headers::RobotLowCommand();
   currentCommandMessage = new strelka_lcm_headers::WbicCommand();
@@ -47,12 +47,13 @@ void WBICNode<RobotClass>::commandHandle(
 
 template <class RobotClass>
 bool WBICNode<RobotClass>::rolloverProtection(robots::Robot &robot) {
-  Vec3<float> currentRPY = robot.currentRPY();
+  Vec3<float> bodyToWorldRPY = robot.bodyToWorldRPY();
 
-  bool robotRolledOver = currentRPY(0) > M_PI_2 || currentRPY(1) > M_PI_2;
+  bool robotRolledOver =
+      bodyToWorldRPY(0) > M_PI_2 || bodyToWorldRPY(1) > M_PI_2;
   if (robotRolledOver) {
-    std::cout << "WBIC: Rollover protection \n RPY " << currentRPY.transpose()
-              << std::endl;
+    std::cout << "WBIC: Rollover protection \n RPY "
+              << bodyToWorldRPY.transpose() << std::endl;
     return true;
   }
   return false;

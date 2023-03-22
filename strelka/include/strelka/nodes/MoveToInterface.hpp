@@ -4,9 +4,9 @@
 #include <iostream>
 #include <lcm/lcm-cpp.hpp>
 #include <math.h>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/typedefs.hpp>
+#include <strelka/robots/Robot.hpp>
 #include <strelka_lcm_headers/RobotLowCommand.hpp>
 #include <strelka_lcm_headers/RobotRawState.hpp>
 
@@ -31,8 +31,7 @@ public:
  *
  */
 template <class RobotClass> class MoveToInterface {
-  // Instance needed only for gain constants queriying
-  robots::Robot &robotInstance;
+  RobotClass robotInstance;
   strelka_lcm_headers::RobotLowCommand commandMessage;
   lcm::LCM lcm;
 
@@ -63,8 +62,6 @@ template <class RobotClass> class MoveToInterface {
   };
 
 public:
-  MoveToInterface(robots::Robot &robot);
-
   void sendCommandMessage(const Vec12<float> &command);
   void setTorques(const Vec12<float> &torques);
 

@@ -12,9 +12,7 @@ protected:
 };
 
 TEST_P(A1MoveToInterfaceParametrizedTestFixture, SetDesiredAngles) {
-  strelka::robots::UnitreeA1 robot =
-      strelka::robots::UnitreeA1::createDummyA1RobotWithRawState();
-  MoveToInterface<strelka::robots::UnitreeA1> interface(robot);
+  MoveToInterface<strelka::robots::UnitreeA1> interface {};
   try {
     interface.moveToInit();
   } catch (const RobotStateTopicDoesNotExist &ex) {

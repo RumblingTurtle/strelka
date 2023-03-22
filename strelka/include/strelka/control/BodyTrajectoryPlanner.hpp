@@ -1,13 +1,13 @@
 #ifndef BODY_TRAJECTORY_PLANNER_H
 #define BODY_TRAJECTORY_PLANNER_H
 #include <iostream>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/macros.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
 #include <strelka/common/utilities.hpp>
 #include <strelka/filters/FirstOrderLPF.hpp>
+#include <strelka/robots/Robot.hpp>
 #include <strelka_messages/HighLevelCommand.hpp>
 
 namespace strelka {

@@ -2,8 +2,8 @@
 #define WHOLEBODYIMPEDANCE_CTRL_H
 
 #include <memory>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/typedefs.hpp>
+#include <strelka/robots/Robot.hpp>
 #include <strelka_messages/WBICCommand.hpp>
 
 template <typename T = float> class LocomotionCtrl;

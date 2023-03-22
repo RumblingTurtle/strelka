@@ -5,14 +5,11 @@
 #include <strelka/robots/A1/kinematics.hpp>
 
 #include <exception>
-#include <strelka/common/Robot.hpp>
 #include <strelka/common/constants.hpp>
 #include <strelka/common/macros.hpp>
 #include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
-
-#include <strelka_lcm_headers/RobotRawState.hpp>
-#include <strelka_lcm_headers/RobotState.hpp>
+#include <strelka/robots/Robot.hpp>
 
 namespace strelka {
 namespace robots {
@@ -21,6 +18,15 @@ public:
   const char *what() {
     return "UnitreeA1 robot has no state estimate. Build a UnitreeA1 class "
            "using strelka_lcm_headers::RobotState";
+  }
+};
+class StatelessRobotException : public std::exception {
+public:
+  const char *what() {
+    return "UnitreeA1 robot instance is constructed without any state message "
+           ". Build a UnitreeA1 class "
+           "using strelka_lcm_headers::RobotState or "
+           "strelka_lcm_headers::RobotRawState";
   }
 };
 /**
@@ -45,21 +51,18 @@ class UnitreeA1 : public Robot {
   Vec3<float> _positionWorldFrame;
   Vec3<float> _linearVelocityBodyFrame;
 
-  bool hasStateEstimates;
+  bool hasStateEstimates = false;
+  bool hasRawState = false;
 
 public:
-  ~UnitreeA1();
+  // Default constructed instance is used for constants
+  explicit UnitreeA1();
   UnitreeA1(const strelka_lcm_headers::RobotRawState *rawStateMessage);
   UnitreeA1(const strelka_lcm_headers::RobotState *robotStateMessage);
-
-  template <class MessageType>
-  void initRawStateEntries(const MessageType *message);
-  void initStateEstimateEntries(const strelka_lcm_headers::RobotState *message);
 
   Vec12<float> q() override;
   Vec12<float> dq() override;
 
-  bool footContact(int legId) override;
   Vec4<bool> footContacts() override;
 
   Vec3<float> gyroscopeBodyFrame() override;
@@ -81,37 +84,34 @@ public:
 
   Vec3<float> transformBodyToWorldFrame(Vec3<float> vector) override;
   Vec3<float> transformWorldToBodyFrame(Vec3<float> vector) override;
+  Eigen::Matrix<float, 12, 3> footJacobians() override;
 
-  Vec3<float> trunkToThighOffset(int legId) override;
-  float footRadius() override;
-
-  Vec3<float> currentRPY() override;
+  Vec3<float> bodyToWorldRPY() override;
 
   bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
                          int legId) override;
 
-  Vec3<float> bodyCOMPosition() override;
+  Vec3<float> trunkToThighOffset(int legId) override;
 
+  const float footRadius() override;
+  const float trunkMass() override;
+  const float robotMass() override;
+  Vec3<float> bodyToComOffset() override;
   Vec3<float> bodyDimensions() override;
-
   Vec3<float> legDimensions() override;
-
-  float trunkMass() override;
-
-  const Vec3<float> &positionGains() override;
-  const Vec3<float> &dampingGains() override;
-  const Vec3<float> &initAngles() override;
-  const Vec3<float> &standAngles() override;
-
-  float robotMass();
-
+  Vec3<float> positionGains() override;
+  Vec3<float> dampingGains() override;
+  Vec3<float> initAngles() override;
+  Vec3<float> standAngles() override;
   Mat3<float> rotationalInertia() override;
 
-  Eigen::Matrix<float, 12, 3> footJacobians() override;
+  template <class MessageType>
+  void initRawStateEntries(const MessageType *message);
+  void initStateEstimateEntries(const strelka_lcm_headers::RobotState *message);
 
   static UnitreeA1 &createDummyA1RobotWithStateEstimates();
   static UnitreeA1 &createDummyA1RobotWithRawState(
-      const Vec3<float> &motorAngles = A1::constants::STAND_ANGLES);
+      Vec3<float> motorAngles = A1::constants::STAND_ANGLES);
 };
 
 } // namespace robots

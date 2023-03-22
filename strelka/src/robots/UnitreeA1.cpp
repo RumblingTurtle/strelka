@@ -4,21 +4,21 @@ namespace strelka {
 
 namespace robots {
 
-UnitreeA1::~UnitreeA1(){};
+UnitreeA1::UnitreeA1() {}
 
-UnitreeA1::UnitreeA1(const strelka_lcm_headers::RobotState *robotStateMessage)
-    : hasStateEstimates(true) {
+UnitreeA1::UnitreeA1(const strelka_lcm_headers::RobotState *robotStateMessage) {
   initRawStateEntries(robotStateMessage);
   initStateEstimateEntries(robotStateMessage);
 }
 
-UnitreeA1::UnitreeA1(const strelka_lcm_headers::RobotRawState *rawStateMessage)
-    : hasStateEstimates(false) {
+UnitreeA1::UnitreeA1(
+    const strelka_lcm_headers::RobotRawState *rawStateMessage) {
   initRawStateEntries(rawStateMessage);
 }
 
 template <class MessageType>
 void UnitreeA1::initRawStateEntries(const MessageType *message) {
+  hasRawState = true;
   _bodyToWorldQuat =
       Eigen::Map<const Eigen::Matrix<float, 4, 1>>(message->quaternion, 4);
 
@@ -59,23 +59,101 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
 
 void UnitreeA1::initStateEstimateEntries(
     const strelka_lcm_headers::RobotState *message) {
+  hasStateEstimates = true;
   _positionWorldFrame = Eigen::Map<const Vec3<float>>(message->position, 3);
   _linearVelocityBodyFrame =
       Eigen::Map<const Vec3<float>>(message->velocityBody, 3);
 }
 
 Eigen::Matrix<float, 12, 3> UnitreeA1::footJacobians() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
   return _footJacobians;
 }
 
-Mat3<float> UnitreeA1::bodyToWorldMat() { return _bodyToWorldMat; }
+Mat3<float> UnitreeA1::bodyToWorldMat() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _bodyToWorldMat;
+}
 
 Vec3<float> UnitreeA1::rotateBodyToWorldFrame(Vec3<float> vector) {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
   return _bodyToWorldMat * vector;
 }
 
 Vec3<float> UnitreeA1::rotateWorldToBodyFrame(Vec3<float> vector) {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
   return _bodyToWorldMat.transpose() * vector;
+}
+
+Vec4<bool> UnitreeA1::footContacts() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _footContacts;
+}
+
+Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _footPositionsTrunkFrame.row(legId);
+}
+
+Vec3<float> UnitreeA1::footVelocityTrunkFrame(int legId) {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _footVelocitiesTrunkFrame.row(legId);
+}
+Vec3<float> UnitreeA1::gyroscopeBodyFrame() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _gyroscopeBodyFrame;
+}
+
+Vec3<float> UnitreeA1::accelerometerWorldFrame() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _accelerometerWorldFrame;
+}
+
+Vec12<float> UnitreeA1::q() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _q;
+};
+Vec12<float> UnitreeA1::dq() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _dq;
+};
+
+Quat<float> UnitreeA1::bodyToWorldQuat() {
+  if (!hasRawState) {
+    throw StatelessRobotException();
+  }
+  return _bodyToWorldQuat;
+};
+
+Vec3<float> UnitreeA1::bodyToWorldRPY() {
+  return rotation::quat2euler(bodyToWorldQuat());
+}
+
+Vec3<float> UnitreeA1::footPositionWorldFrame(int legId) {
+  return rotateBodyToWorldFrame(footPositionTrunkFrame(legId)) +
+         positionWorldFrame();
 }
 
 Vec3<float> UnitreeA1::transformBodyToWorldFrame(Vec3<float> vector) {
@@ -86,63 +164,28 @@ Vec3<float> UnitreeA1::transformWorldToBodyFrame(Vec3<float> vector) {
   return rotateWorldToBodyFrame(vector - positionWorldFrame());
 }
 
-bool UnitreeA1::footContact(int legId) { return _footContacts(legId); }
-
-Vec4<bool> UnitreeA1::footContacts() { return _footContacts; }
-
-Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {
-  return _footPositionsTrunkFrame.row(legId);
-}
-
-Vec3<float> UnitreeA1::footVelocityTrunkFrame(int legId) {
-  return _footVelocitiesTrunkFrame.row(legId);
-}
-
-Vec3<float> UnitreeA1::footPositionWorldFrame(int legId) {
-  return rotateBodyToWorldFrame(footPositionTrunkFrame(legId)) +
-         positionWorldFrame();
-}
-
-Vec3<float> UnitreeA1::gyroscopeBodyFrame() { return _gyroscopeBodyFrame; }
-
-Vec3<float> UnitreeA1::accelerometerWorldFrame() {
-  return _accelerometerWorldFrame;
-}
-
-Vec12<float> UnitreeA1::q() { return _q; };
-Vec12<float> UnitreeA1::dq() { return _dq; };
-
 Vec3<float> UnitreeA1::positionWorldFrame() {
-  if (hasStateEstimates) {
-    return _positionWorldFrame;
-  } else {
+  if (!hasStateEstimates) {
     throw NoStateEstimateException();
   }
+  return _positionWorldFrame;
 };
 
 Vec3<float> UnitreeA1::linearVelocityBodyFrame() {
-  if (hasStateEstimates) {
-    return _linearVelocityBodyFrame;
-  } else {
+  if (!hasStateEstimates) {
     throw NoStateEstimateException();
   }
+  return _linearVelocityBodyFrame;
 };
 
-Quat<float> UnitreeA1::bodyToWorldQuat() { return _bodyToWorldQuat; };
-
-Vec3<float> UnitreeA1::currentRPY() {
-  return rotation::quat2euler(bodyToWorldQuat());
+bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
+                                  int legId) {
+  Vec3<float> trunkFrameFootPosition =
+      rotateWorldToBodyFrame(footPositionWorldFrame - positionWorldFrame());
+  return A1::kinematics::trunkFrameIKCheck(trunkFrameFootPosition, legId);
 }
 
-Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
-  return Eigen::Map<const Vec3<float>>(
-      A1::constants::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
-}
-
-float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
-
-UnitreeA1 &
-UnitreeA1::createDummyA1RobotWithRawState(const Vec3<float> &motorAngles) {
+UnitreeA1 &UnitreeA1::createDummyA1RobotWithRawState(Vec3<float> motorAngles) {
   strelka_lcm_headers::RobotRawState dummyState{
       .quaternion = {1, 0, 0, 0},
       .gyro = {0, 0, 0},
@@ -171,58 +214,41 @@ UnitreeA1 &UnitreeA1::createDummyA1RobotWithStateEstimates() {
       .position = {0, 0, 0.25},
       .velocityBody = {0, 0, 0}};
 
-  memcpy(dummyState.q, A1::constants::STAND_ANGLES.data(), sizeof(float) * 12);
+  for (int motorId = 0; motorId < 12; motorId++) {
+    bool rightLeg = motorId % 6 == 0;
+    dummyState.q[motorId] =
+        -A1::constants::STAND_ANGLES[motorId % 3] * rightLeg +
+        A1::constants::STAND_ANGLES[motorId % 3] * (1 - rightLeg);
+  }
   static UnitreeA1 robot(&dummyState);
   return robot;
 }
 
-bool UnitreeA1::worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
-                                  int legId) {
-  Vec3<float> trunkFrameFootPosition =
-      rotateWorldToBodyFrame(footPositionWorldFrame - positionWorldFrame());
-  return A1::kinematics::trunkFrameIKCheck(trunkFrameFootPosition, legId);
+Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
+  return Eigen::Map<const Vec3<float>>(
+      A1::constants::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
 }
 
-Vec3<float> UnitreeA1::bodyCOMPosition() { return A1::constants::COM_OFFSET; }
+Vec3<float> UnitreeA1::bodyToComOffset() { return A1::constants::COM_OFFSET; }
 
-/**
- * @brief X Y Z dimensions of the body link
- *
- * @return Vec3<float>
- */
 Vec3<float> UnitreeA1::bodyDimensions() {
   return A1::constants::BODY_DIMENSIONS;
 }
 
-/**
- * @brief Thigh hip knee
- *
- * @return Vec3<float>
- */
 Vec3<float> UnitreeA1::legDimensions() { return A1::constants::LEG_LENGTH; }
 
-float UnitreeA1::trunkMass() { return A1::constants::TRUNK_MASS; }
-float UnitreeA1::robotMass() { return A1::constants::TRUNK_MASS; }
-
 Mat3<float> UnitreeA1::rotationalInertia() {
-  Mat3<float> inertia;
-  inertia << A1::constants::BODY_INERTIA(0), 0, 0, 0,
-      A1::constants::BODY_INERTIA(1), 0, 0, 0, A1::constants::BODY_INERTIA(2);
-  return inertia;
+  return A1::constants::BODY_INERTIA_MATRIX;
 }
 
-const Vec3<float> &UnitreeA1::positionGains() {
-  return A1::constants::POSITION_GAINS;
-}
-const Vec3<float> &UnitreeA1::dampingGains() {
-  return A1::constants::DAMPING_GAINS;
-}
-const Vec3<float> &UnitreeA1::initAngles() {
-  return A1::constants::INIT_ANGLES;
-};
-const Vec3<float> &UnitreeA1::standAngles() {
-  return A1::constants::STAND_ANGLES;
-};
+const float UnitreeA1::footRadius() { return A1::constants::FOOT_RADIUS; }
+const float UnitreeA1::trunkMass() { return A1::constants::TRUNK_MASS; }
+const float UnitreeA1::robotMass() { return A1::constants::TRUNK_MASS; }
+
+Vec3<float> UnitreeA1::positionGains() { return A1::constants::POSITION_GAINS; }
+Vec3<float> UnitreeA1::dampingGains() { return A1::constants::DAMPING_GAINS; }
+Vec3<float> UnitreeA1::initAngles() { return A1::constants::INIT_ANGLES; };
+Vec3<float> UnitreeA1::standAngles() { return A1::constants::STAND_ANGLES; };
 
 } // namespace robots
 } // namespace strelka

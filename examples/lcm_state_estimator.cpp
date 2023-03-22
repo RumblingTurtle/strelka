@@ -6,11 +6,8 @@ int main() {
   using namespace strelka::interfaces;
   using namespace strelka::robots;
   using namespace strelka::state_estimation;
-  UnitreeA1 robot = UnitreeA1::createDummyA1RobotWithRawState();
 
-  MoveToInterface<UnitreeA1> interface {
-    robot
-  };
+  MoveToInterface<UnitreeA1> interface {};
 
   interface.moveToInit();
   interface.moveToStand();
