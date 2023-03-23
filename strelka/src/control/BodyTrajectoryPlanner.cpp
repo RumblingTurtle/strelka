@@ -19,7 +19,7 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
   DMat<float> trajectory(horizonSteps, 13);
   trajectory.setZero();
 
-  Vec3<float> bodyToWorldRPY = rotation::quat2euler(robot.bodyToWorldQuat());
+  Vec3<float> bodyToWorldRPY = robot.bodyToWorldRPY();
   Mat3<float> bodyToWorldRot;
 
   rotation::quat2rot(robot.bodyToWorldQuat(), bodyToWorldRot);
@@ -27,26 +27,24 @@ DMat<float> BodyTrajectoryPlanner::getDesiredBodyTrajectory(
 
   FOR_EACH_LEG {
     if (footContacts(LEG_ID) || firstRun) {
-      prevContactPosBody.block<1, 3>(LEG_ID, 0) =
-          robot.footPositionTrunkFrame(LEG_ID).transpose();
-      prevContactPosWorld.block<1, 3>(LEG_ID, 0) =
-          robot.footPositionWorldFrame(LEG_ID).transpose();
+      prevContactPosBody.col(LEG_ID) = robot.footPositionTrunkFrame(LEG_ID);
+      prevContactPosWorld.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     }
   }
 
   // Fit least squares through last contact points
   Eigen::Matrix<float, 4, 3> A;
   A.setOnes();
-  A.block<4, 2>(0, 0) = prevContactPosBody.block<4, 2>(0, 0);
+  A.block<4, 2>(0, 0) = prevContactPosBody.block<2, 4>(0, 0).transpose();
 
-  Vec4<float> b = prevContactPosWorld.block<4, 1>(0, 2);
+  Vec4<float> b = prevContactPosBody.block<1, 4>(2, 0).transpose();
   Vec3<float> slopeCoefficients = A.colPivHouseholderQr().solve(b);
 
   float slopePitch = -slopeCoefficients(0);
   slopePitch = clamp<float>(slopePitch, -M_PI_2 * 0.6, M_PI_2 * 0.1);
   float estimatedTerrainPitch = pitchFilter.filter(slopePitch);
   float estimatedContactHeight =
-      heightFilter.filter(prevContactPosWorld.col(2).mean());
+      heightFilter.filter(prevContactPosWorld.row(2).mean());
 
   Vec3<float> desiredAngularVelocity =
       command.desiredAngularVelocityBodyFrame();

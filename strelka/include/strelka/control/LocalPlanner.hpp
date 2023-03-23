@@ -40,6 +40,8 @@ class LocalPlanner {
   Vec3<float> _desiredAccelerationBody;
 
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   LocalPlanner(Gait gait, float mpcBodyMass, const Mat3<float> bodyInertia,
                float stepDt = 0.02, int horizonSteps = 15,
                float heightFilterCutoffFrequency = 30.0,

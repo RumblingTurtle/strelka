@@ -6,7 +6,8 @@ FootholdPlanner::FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler)
     : _gaitScheduler(_gaitScheduler), updateContinuously(false) {
   FOR_EACH_LEG {
     _footholds[LEG_ID].reserve(5);
-    _currentFootPosition[LEG_ID] = Vec3<float>::Zero();
+    _currentFootPosition.setZero();
+    lastContactPosWorld.setZero();
   }
 }
 
@@ -16,9 +17,9 @@ FootholdPlanner::FootholdPlanner(FootholdPlanner &footholdPlanner)
     _footholds[LEG_ID] = footholdPlanner._footholds[LEG_ID];
     swingHeight[LEG_ID] = footholdPlanner.swingHeight[LEG_ID];
     swingBack[LEG_ID] = footholdPlanner.swingBack[LEG_ID];
-    _currentFootPosition[LEG_ID] = Vec3<float>::Zero();
+    _currentFootPosition.setZero();
+    lastContactPosWorld.setZero();
   }
-  lastContactPosWorld = footholdPlanner.lastContactPosWorld;
   firstRun = footholdPlanner.firstRun;
   updateContinuously = footholdPlanner.updateContinuously;
 }
@@ -87,7 +88,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
 
   Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
   FOR_EACH_LEG {
-    _currentFootPosition[LEG_ID] = robot.footPositionWorldFrame(LEG_ID);
+    _currentFootPosition.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     if (firstRun) {
       Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
       _footholds[LEG_ID].push_back(startPos);
@@ -102,14 +103,12 @@ void FootholdPlanner::calculateNextFootholdPositions(
     bool swingStarted = _gaitScheduler->swingStarted(LEG_ID);
 
     if (updateAsStance) {
-      lastContactPosWorld.block<1, 3>(LEG_ID, 0) =
-          robot.footPositionWorldFrame(LEG_ID).transpose();
+      lastContactPosWorld.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     }
 
     if (updateAsStance || swingStarted || updateContinuously) {
       _footholds[LEG_ID].clear();
-      _footholds[LEG_ID].push_back(
-          lastContactPosWorld.block<1, 3>(LEG_ID, 0).transpose());
+      _footholds[LEG_ID].push_back(lastContactPosWorld.col(LEG_ID));
 
       FOOTHOLD_PREDICTION_TYPE predictType;
       if (updateContinuously) {
@@ -280,7 +279,7 @@ void FootholdPlanner::getFootDesiredPVA(
 }
 Vec3<float> FootholdPlanner::currentFootPosition(int legId) {
   assert(legId >= 0 && legId < 4);
-  return _currentFootPosition[legId];
+  return _currentFootPosition.col(legId);
 }
 } // namespace control
 } // namespace strelka

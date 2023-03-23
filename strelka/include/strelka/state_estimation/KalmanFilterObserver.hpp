@@ -46,6 +46,7 @@ class KalmanFilterObserver {
   void initialize();
 
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   struct KalmanFilterObserverParams {
     float dt;
 

@@ -57,7 +57,8 @@ inline float speedupPhase(float t, float phaseAmount = 0.5,
  * @param order Bezier derivative order
  * @return Vec3<float> 3D point on a trajectory
  */
-inline Vec3<float> getSwingTrajectory(Vec3<float> pStart, Vec3<float> pEnd,
+inline Vec3<float> getSwingTrajectory(const Vec3<float> &pStart,
+                                      const Vec3<float> &pEnd,
                                       float swingHeight, float t,
                                       float swingDuration, bool swingBack,
                                       int order) {

@@ -18,14 +18,15 @@ namespace control {
  */
 class BodyTrajectoryPlanner {
 
-  Mat43<float> prevContactPosWorld;
-  Mat43<float> prevContactPosBody;
+  Mat34<float> prevContactPosWorld;
+  Mat34<float> prevContactPosBody;
   filters::FirstOrderLPF<float> heightFilter;
   filters::FirstOrderLPF<float> pitchFilter;
 
   bool firstRun;
 
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   /**
    * @param heightFilterCutoffFrequency Height lowpass filter cutoff frequency
    * in HZ

@@ -48,15 +48,15 @@ class FootholdPlanner {
 
   float swingHeight[4];
   bool swingBack[4];
-
-  Mat43<float> lastContactPosWorld;
-
   bool firstRun;
   bool updateContinuously;
 
-  Vec3<float> _currentFootPosition[4];
+  Mat34<float> lastContactPosWorld;
+  Mat34<float> _currentFootPosition;
 
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   std::shared_ptr<GaitScheduler> &gaitScheduler() { return _gaitScheduler; };
   /**
    * @brief Nominal foothold prediction types

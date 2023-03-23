@@ -38,12 +38,12 @@ void UnitreeA1::initRawStateEntries(const MessageType *message) {
         A1::kinematics::analyticalLegJacobian(_q.block<3, 1>(LEG_ID * 3, 0),
                                               LEG_ID);
 
-    _footPositionsTrunkFrame.row(LEG_ID) =
+    _footPositionsTrunkFrame.col(LEG_ID) =
         A1::kinematics::footPositionHipFrame(_q.block<3, 1>(LEG_ID * 3, 0),
                                              LEG_ID) +
         trunkToHipOffset;
 
-    _footVelocitiesTrunkFrame.row(LEG_ID) =
+    _footVelocitiesTrunkFrame.col(LEG_ID) =
         (_footJacobians.block<3, 3>(LEG_ID * 3, 0) *
          _dq.block<3, 1>(LEG_ID * 3, 0))
             .transpose();
@@ -104,14 +104,14 @@ Vec3<float> UnitreeA1::footPositionTrunkFrame(int legId) {
   if (!hasRawState) {
     throw StatelessRobotException();
   }
-  return _footPositionsTrunkFrame.row(legId);
+  return _footPositionsTrunkFrame.col(legId);
 }
 
 Vec3<float> UnitreeA1::footVelocityTrunkFrame(int legId) {
   if (!hasRawState) {
     throw StatelessRobotException();
   }
-  return _footVelocitiesTrunkFrame.row(legId);
+  return _footVelocitiesTrunkFrame.col(legId);
 }
 Vec3<float> UnitreeA1::gyroscopeBodyFrame() {
   if (!hasRawState) {

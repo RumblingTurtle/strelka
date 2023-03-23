@@ -38,9 +38,9 @@ class UnitreeA1 : public Robot {
   Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
   Quat<float> _bodyToWorldQuat;
-  Mat43<float> _footPositionsTrunkFrame;
   Vec4<bool> _footContacts;
-  Mat43<float> _footVelocitiesTrunkFrame;
+  Mat34<float> _footPositionsTrunkFrame;
+  Mat34<float> _footVelocitiesTrunkFrame;
   Vec3<float> _gyroscopeBodyFrame;
   Vec3<float> _accelerometerBodyFrame;
   Vec3<float> _accelerometerWorldFrame;
@@ -55,6 +55,7 @@ class UnitreeA1 : public Robot {
   bool hasRawState = false;
 
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   // Default constructed instance is used for constants
   explicit UnitreeA1();
   UnitreeA1(const strelka_lcm_headers::RobotRawState *rawStateMessage);
