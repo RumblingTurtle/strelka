@@ -95,8 +95,9 @@ public:
 
   /**
    * @brief Body to world rotation quaternion
+   * Scalar first
    */
-  virtual Quat<float> bodyToWorldQuat() = 0;
+  virtual Vec4<float> bodyToWorldQuat() = 0;
 
   /**
    * @brief Body to world rotation euler matrix

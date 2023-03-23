@@ -22,10 +22,10 @@ template <typename T> using Vec12 = Eigen::Matrix<T, 12, 1>;
 
 template <typename T> using Mat3 = typename Eigen::Matrix<T, 3, 3>;
 
-template <typename T> using Quat = typename Eigen::Matrix<T, 4, 1>;
-
-template <typename T> using Mat43 = typename Eigen::Matrix<T, 4, 3>;
 template <typename T> using Mat34 = typename Eigen::Matrix<T, 3, 4>;
+
+template <typename T, int Dim1, int Dim2>
+using FMat = typename Eigen::Matrix<T, Dim1, Dim2>;
 
 template <typename T>
 using DMat = typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;

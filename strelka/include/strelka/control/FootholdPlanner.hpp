@@ -131,11 +131,13 @@ public:
    */
   Vec3<float> currentFootPosition(int legId);
 
-  Vec3<float>
-  predictNextFootPos(Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
-                     Vec3<float> prevFootPosition, robots::Robot &robot,
-                     messages::HighLevelCommand &command, float feedbackGain,
-                     int legId, FOOTHOLD_PREDICTION_TYPE predictType);
+  Vec3<float> predictNextFootPos(const Vec3<float> &currentPosition,
+                                 const Mat3<float> &bodyToWorldRot,
+                                 const Vec3<float> &prevFootPosition,
+                                 robots::Robot &robot,
+                                 messages::HighLevelCommand &command,
+                                 float feedbackGain, int legId,
+                                 FOOTHOLD_PREDICTION_TYPE predictType);
 
   /**
    * @brief Get desired foot position velocity and acceleration in odometry
@@ -165,8 +167,9 @@ public:
    * @return Vec3<float> Bezier curve position in pStart and pEnd coordinate
    * frame
    */
-  Vec3<float> getDesiredTrajectoryPosition(Vec3<float> pStart, Vec3<float> pEnd,
-                                           float t, int legId);
+  Vec3<float> getDesiredTrajectoryPosition(const Vec3<float> &pStart,
+                                           const Vec3<float> &pEnd, float t,
+                                           int legId);
   /**
    * @brief Adjusts foothold according to some criterion
    *
@@ -175,9 +178,9 @@ public:
    *
    * @returns Vec3<float> Adjusted foothold position in world frame
    */
-  virtual Vec3<float> adjustFoothold(Vec3<float> nominalFootPosition,
-                                     Vec3<float> currentRobotPosition,
-                                     Mat3<float> currentRobotRotation,
+  virtual Vec3<float> adjustFoothold(const Vec3<float> &nominalFootPosition,
+                                     const Vec3<float> &currentRobotPosition,
+                                     const Mat3<float> &currentRobotRotation,
                                      int legId, robots::Robot &robot);
 };
 

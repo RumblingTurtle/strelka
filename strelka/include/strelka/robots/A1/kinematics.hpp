@@ -140,7 +140,8 @@ inline Mat3<float> analyticalLegJacobian(const Vec3<float> &angles, int legId) {
  *
  * @return bool true if the foot position is kinematically reachable
  */
-inline bool trunkFrameIKCheck(Vec3<float> footPositionTrunkFrame, int legId) {
+inline bool trunkFrameIKCheck(const Vec3<float> &footPositionTrunkFrame,
+                              int legId) {
   Vec3<float> footPosHipFrame =
       footPositionTrunkFrame -
       Eigen::Map<const Vec3<float>>(

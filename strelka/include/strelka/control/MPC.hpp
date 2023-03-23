@@ -19,62 +19,6 @@ namespace control {
  *
  */
 class MPC {
-  const float _bodyMass;
-  const Mat3<float> inertia_;
-  const Mat3<float> inv_inertia_;
-  const int planning_horizon_;
-  const float timestep_;
-
-  // 13 * horizon diagonal matrix.
-  SMat<float> qp_weights_;
-
-  // NUM_LEGS * 3 * horizon diagonal matrix.
-  const float alpha_;
-
-  // The following matrices will be updated for every call. However, their sizes
-  // can be determined at class initialization time.
-  DMat<float> _a_mat;           // 13 x 13
-  DMat<float> _b_mat;           // 13 x (NUM_LEGS * 3)
-  DMat<float> ab_concatenated_; // 13 + NUM_LEGS * 3 x 13 + NUM_LEGS * 3
-  DMat<float> _a_exp;           // same dimension as _a_mat
-  DMat<float> _b_exp;           // same dimension as _b_mat
-
-  // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
-  DMat<float> _a_qp;  // 13 * horizon x 13
-  DMat<float> _b_qp;  // 13 * horizon x NUM_LEGS * 3 * horizon sparse
-  DMat<float> _p_mat; // NUM_LEGS * 3 * horizon x NUM_LEGS * 3 * horizon
-  DVec<float> _q_vec; // NUM_LEGS * 3 * horizon vector
-
-  DMat<float> _b_exps; // 13 * horizon x (NUM_LEGS * 3 )
-
-  // Contains the constraint matrix and bounds.
-  DMat<float> _constraint;    // 5 * NUM_LEGS * horizon x 3 * NUM_LEGS * horizon
-  DVec<float> _constraint_lb; // 5 * NUM_LEGS * horizon
-  DVec<float> _constraint_ub; // 5 * NUM_LEGS * horizon
-
-  Vec4<float> _footFrictionCoefficients;
-  float kMaxScale;
-  float kMinScale;
-
-  DVec<float> qp_solution_;
-  ::OSQPWorkspace *workspace_;
-  // Whether optimizing for the first step
-  bool initial_run_;
-
-  void updateConstraints(DMat<bool> &contactTable);
-
-  DVec<float> &solveQP();
-
-  void updateObjectiveVector(robots::Robot &robot, DMat<float> &bodyTrajectory);
-
-  void computeABExponentials(robots::Robot &robot,
-                             DMat<float> &contactPositionsWorldFrameRotated,
-                             DMat<float> &bodyTrajectory);
-
-  void computeQpMatrices();
-
-  void fillQPWeights(const float *qp_weights);
-
 public:
   // 6 dof pose + 6 dof velocity + 1 gravity
   static constexpr int STATE_DIM = 13;
@@ -89,6 +33,66 @@ public:
   static constexpr float MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
                                             0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
+private:
+  const float _bodyMass;
+  const float alpha_;
+  const float timestep_;
+
+  float kMaxScale;
+  float kMinScale;
+
+  const int planning_horizon_;
+
+  const Mat3<float> inertia_;
+  const Mat3<float> inv_inertia_;
+  Vec4<float> _footFrictionCoefficients;
+
+  bool initial_run_;
+
+  // The following matrices will be updated for every call. However, their sizes
+  // can be determined at class initialization time.
+  FMat<float, STATE_DIM, STATE_DIM> _a_mat;
+  FMat<float, STATE_DIM, STATE_DIM> _a_exp;
+  FMat<float, STATE_DIM, ACTION_DIM> _b_mat;
+  FMat<float, STATE_DIM, ACTION_DIM> _b_exp;
+  FMat<float, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_concatenated_;
+
+  // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
+  DMat<float> _a_qp;  // 13 * horizon x 13
+  DMat<float> _b_qp;  // 13 * horizon x NUM_LEGS * 3 * horizon sparse
+  DMat<float> _p_mat; // NUM_LEGS * 3 * horizon x NUM_LEGS * 3 * horizon
+  DVec<float> _q_vec; // NUM_LEGS * 3 * horizon vector
+
+  DMat<float> _b_exps; // 13 * horizon x (NUM_LEGS * 3)
+
+  // Contains the constraint matrix and bounds.
+  DMat<float> _constraint;    // 5 * NUM_LEGS * horizon x 3 * NUM_LEGS * horizon
+  DVec<float> _constraint_lb; // 5 * NUM_LEGS * horizon
+  DVec<float> _constraint_ub; // 5 * NUM_LEGS * horizon
+
+  SMat<float> qp_weights_;
+  DVec<float> qp_solution_;
+
+  ::OSQPWorkspace *workspace_;
+  // Whether optimizing for the first step
+
+  void updateConstraints(const DMat<bool> &contactTable);
+
+  DVec<float> &solveQP();
+
+  void updateObjectiveVector(robots::Robot &robot,
+                             const DMat<float> &bodyTrajectory);
+
+  void
+  computeABExponentials(robots::Robot &robot,
+                        const DMat<float> &contactPositionsWorldFrameRotated,
+                        const DMat<float> &bodyTrajectory);
+
+  void computeQpMatrices();
+
+  void fillQPWeights(const float *qp_weights);
+
+public:
   MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
       float timestep);
 
@@ -110,9 +114,9 @@ public:
    *
    */
   DVec<float> &
-  computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
-                       DMat<float> &contactPositionsWorldFrameRotated,
-                       DMat<float> &bodyTrajectory);
+  computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
+                       const DMat<float> &contactPositionsWorldFrameRotated,
+                       const DMat<float> &bodyTrajectory);
 
   void reset();
 };

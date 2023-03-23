@@ -23,26 +23,27 @@ class KalmanFilterObserver {
   constexpr static int STATE_DIM = 18;
   constexpr static int SENSOR_DIM = 31;
 
-  Eigen::Matrix<float, STATE_DIM, 1> _xhat;
   Vec12<float> _ps;
   Vec12<float> _vs;
-  Eigen::Matrix<float, STATE_DIM, STATE_DIM> _A;
-  Eigen::Matrix<float, STATE_DIM, STATE_DIM> _Q0;
-  Eigen::Matrix<float, STATE_DIM, STATE_DIM> _P;
-  Eigen::Matrix<float, SENSOR_DIM, SENSOR_DIM> _R0;
-  Eigen::Matrix<float, STATE_DIM, 3> _B;
-  Eigen::Matrix<float, SENSOR_DIM, STATE_DIM> _C;
-  Eigen::Matrix<float, STATE_DIM, 1> state;
-  Eigen::Matrix<float, STATE_DIM, 1> covariance;
-  bool initialized;
+  FMat<float, STATE_DIM, STATE_DIM> _A;
+  FMat<float, STATE_DIM, STATE_DIM> _Q0;
+  FMat<float, STATE_DIM, STATE_DIM> _P;
+  FMat<float, SENSOR_DIM, SENSOR_DIM> _R0;
+  FMat<float, SENSOR_DIM, STATE_DIM> _C;
+  FMat<float, STATE_DIM, 3> _B;
+
+  Eigen::Matrix<float, STATE_DIM, 1> _xhat;
+  FMat<float, STATE_DIM, 1> state;
+  FMat<float, STATE_DIM, 1> covariance;
 
   /*Outputs*/
   Vec3<float> _position;
   Vec3<float> _velocityBody;
   Vec3<float> _velocityWorld;
   Vec12<float> _footPositionsWorld;
-  Eigen::Matrix3f _positionCovariance;
+  Mat3<float> _positionCovariance;
 
+  bool initialized;
   void initialize();
 
 public:
@@ -75,7 +76,8 @@ public:
   void setParameters(KalmanFilterObserverParams &);
 
   void update(robots::Robot &robot, bool useExternalOdometry,
-              Vec3<float> externalOdometryPosition, Vec4<float> contactHeights);
+              const Vec3<float> &externalOdometryPosition,
+              const Vec4<float> &contactHeights);
 
   void reset();
 };

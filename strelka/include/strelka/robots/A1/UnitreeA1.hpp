@@ -34,22 +34,23 @@ public:
  *
  */
 class UnitreeA1 : public Robot {
-
-  Eigen::Matrix<float, 12, 3> _footJacobians;
   Mat3<float> _bodyToWorldMat;
-  Quat<float> _bodyToWorldQuat;
-  Vec4<bool> _footContacts;
-  Mat34<float> _footPositionsTrunkFrame;
-  Mat34<float> _footVelocitiesTrunkFrame;
   Vec3<float> _gyroscopeBodyFrame;
   Vec3<float> _accelerometerBodyFrame;
   Vec3<float> _accelerometerWorldFrame;
-  Vec4<float> _footContactHeights;
-  Vec12<float> _q;
-  Vec12<float> _dq;
-
   Vec3<float> _positionWorldFrame;
   Vec3<float> _linearVelocityBodyFrame;
+
+  Vec4<float> _bodyToWorldQuat;
+  Vec4<bool> _footContacts;
+  Vec4<float> _footContactHeights;
+
+  Mat34<float> _footPositionsTrunkFrame;
+  Mat34<float> _footVelocitiesTrunkFrame;
+
+  Vec12<float> _q;
+  Vec12<float> _dq;
+  Eigen::Matrix<float, 12, 3> _footJacobians;
 
   bool hasStateEstimates = false;
   bool hasRawState = false;
@@ -77,7 +78,7 @@ public:
 
   Vec3<float> footPositionWorldFrame(int legId) override;
 
-  Quat<float> bodyToWorldQuat() override;
+  Vec4<float> bodyToWorldQuat() override;
   Mat3<float> bodyToWorldMat() override;
 
   Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector) override;

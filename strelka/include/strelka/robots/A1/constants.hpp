@@ -17,8 +17,6 @@ const Vec3<float> DAMPING_GAINS{1.0, 2.0, 2.0};
 const Vec3<float> STAND_ANGLES{0.0, 0.8, -1.65};
 const Vec3<float> INIT_ANGLES{0.25, 1.14, -2.72};
 
-const Vec3<float> TRUNK_TO_COM_OFFSET{-0.01, 0.002, 0.0};
-
 const float TRUNK_TO_HIP_OFFSETS[12] = {0.1805, -0.047,  0.0,     0.1805,
                                         0.047,  0.0,     -0.1805, -0.047,
                                         0.0,    -0.1805, 0.047,   0.0};
@@ -30,7 +28,8 @@ const float TRUNK_TO_THIGH_OFFSETS[12] = {0.1805, -0.1308, 0.0,     0.1805,
                                           0.1308, 0.0,     -0.1805, -0.1308,
                                           0.0,    -0.1805, 0.1308,  0.0};
 
-const Vec3<float> COM_OFFSET{-0.01, 0.002, 0.0};
+const Vec3<float> TRUNK_TO_COM_OFFSET{-0.01, 0.002, 0.0};
+
 const Vec3<float> BODY_DIMENSIONS{0.1805 * 2, 0.047 * 2, 0.01675 * 2};
 const Vec3<float> LEG_LENGTH{0.0838, 0.2, 0.2};
 

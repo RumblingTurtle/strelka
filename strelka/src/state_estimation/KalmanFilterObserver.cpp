@@ -70,8 +70,8 @@ void KalmanFilterObserver::initialize() {
 
 void KalmanFilterObserver::update(robots::Robot &robot,
                                   bool useExternalOdometry,
-                                  Vec3<float> externalOdometryPosition,
-                                  Vec4<float> contactHeights) {
+                                  const Vec3<float> &externalOdometryPosition,
+                                  const Vec4<float> &contactHeights) {
   if (!initialized) {
     throw UninitializedKalmanFilter();
   }

@@ -22,11 +22,8 @@ MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
          float timestep)
     : _bodyMass(mass), inertia_(inertia), inv_inertia_(inertia_.inverse()),
       planning_horizon_(planning_horizon), timestep_(timestep),
-      alpha_(MPC_ALPHA), _a_mat(STATE_DIM, STATE_DIM),
-      _b_mat(STATE_DIM, ACTION_DIM),
+      alpha_(MPC_ALPHA),
       qp_weights_(STATE_DIM * planning_horizon, STATE_DIM * planning_horizon),
-      ab_concatenated_(STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM),
-      _a_exp(STATE_DIM, STATE_DIM), _b_exp(STATE_DIM, ACTION_DIM),
       _a_qp(STATE_DIM * planning_horizon, STATE_DIM),
       _b_qp(STATE_DIM * planning_horizon, ACTION_DIM * planning_horizon),
       _p_mat(NUM_LEGS * planning_horizon * 3, NUM_LEGS * planning_horizon * 3),
@@ -63,9 +60,9 @@ void MPC::fillQPWeights(const float *qp_weights) {
 
 MPC::~MPC() { osqp_cleanup(workspace_); }
 
-void MPC::computeABExponentials(robots::Robot &robot,
-                                DMat<float> &contactPositionsWorldFrameRotated,
-                                DMat<float> &bodyTrajectory) {
+void MPC::computeABExponentials(
+    robots::Robot &robot, const DMat<float> &contactPositionsWorldFrameRotated,
+    const DMat<float> &bodyTrajectory) {
   // A mat calculation
   float avg_yaw = bodyTrajectory.block(0, 2, planning_horizon_, 1).mean();
   // The transformation of angular velocity to roll pitch yaw rate. Caveat:
@@ -170,7 +167,7 @@ void MPC::computeQpMatrices() {
 // re-initialized.
 void MPC::reset() { initial_run_ = true; }
 
-void MPC::updateConstraints(DMat<bool> &contactTable) {
+void MPC::updateConstraints(const DMat<bool> &contactTable) {
   float fz_max = _bodyMass * -constants::GRAVITY_CONSTANT * kMaxScale;
   float fz_min = _bodyMass * -constants::GRAVITY_CONSTANT * kMinScale;
   float friction_coeff = _footFrictionCoefficients[0];
@@ -223,6 +220,7 @@ DVec<float> &MPC::solveQP() {
   settings.verbose = false;
   settings.warm_start = true;
   settings.polish = false;
+  settings.scaling = 0;
   settings.adaptive_rho_interval = 25;
   settings.eps_abs = 1e-3;
   settings.eps_rel = 1e-3;
@@ -300,7 +298,7 @@ DVec<float> &MPC::solveQP() {
 }
 
 void MPC::updateObjectiveVector(robots::Robot &robot,
-                                DMat<float> &bodyTrajectory) {
+                                const DMat<float> &bodyTrajectory) {
   DVec<float> currentState(13);
   currentState.block<3, 1>(0, 0) = robot.bodyToWorldRPY();
   currentState.block<3, 1>(3, 0) = robot.positionWorldFrame();
@@ -312,20 +310,22 @@ void MPC::updateObjectiveVector(robots::Robot &robot,
       robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame());
 
   currentState(12) = constants::GRAVITY_CONSTANT;
-  // std::cout << currentState << std::endl << std::endl;
-  DMat<float> desiredStateTrajectory = bodyTrajectory.transpose();
-  DVec<float> flatDesiredStateTrajectory = Eigen::Map<DVec<float>>(
-      desiredStateTrajectory.data(), desiredStateTrajectory.size());
-  const DVec<float> state_diff =
-      _a_qp * currentState - flatDesiredStateTrajectory;
 
-  _q_vec = 2 * _b_qp.transpose() * (qp_weights_ * state_diff);
+  DMat<float> desiredStateTrajectory = bodyTrajectory.transpose();
+
+  const DVec<float> flatDesiredStateTrajectory = Eigen::Map<const DVec<float>>(
+      desiredStateTrajectory.data(), desiredStateTrajectory.size());
+
+  _q_vec.noalias() =
+      2 * _b_qp.transpose() *
+      (qp_weights_ * (_a_qp * currentState - flatDesiredStateTrajectory));
 }
 
 DVec<float> &
-MPC::computeContactForces(robots::Robot &robot, DMat<bool> &contactTable,
-                          DMat<float> &contactPositionsWorldFrameRotated,
-                          DMat<float> &bodyTrajectory) {
+MPC::computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
+                          const DMat<float> &contactPositionsWorldFrameRotated,
+                          const DMat<float> &bodyTrajectory) {
+
   computeABExponentials(robot, contactPositionsWorldFrameRotated,
                         bodyTrajectory);
 

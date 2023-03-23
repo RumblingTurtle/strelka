@@ -140,7 +140,7 @@ Vec12<float> UnitreeA1::dq() {
   return _dq;
 };
 
-Quat<float> UnitreeA1::bodyToWorldQuat() {
+Vec4<float> UnitreeA1::bodyToWorldQuat() {
   if (!hasRawState) {
     throw StatelessRobotException();
   }
@@ -229,7 +229,9 @@ Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
       A1::constants::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
 }
 
-Vec3<float> UnitreeA1::bodyToComOffset() { return A1::constants::COM_OFFSET; }
+Vec3<float> UnitreeA1::bodyToComOffset() {
+  return A1::constants::TRUNK_TO_COM_OFFSET;
+}
 
 Vec3<float> UnitreeA1::bodyDimensions() {
   return A1::constants::BODY_DIMENSIONS;

@@ -158,8 +158,8 @@ void FootholdPlanner::calculateNextFootholdPositions(
 }
 
 Vec3<float> FootholdPlanner::predictNextFootPos(
-    Vec3<float> currentPosition, Mat3<float> bodyToWorldRot,
-    Vec3<float> prevFootPosition, robots::Robot &robot,
+    const Vec3<float> &currentPosition, const Mat3<float> &bodyToWorldRot,
+    const Vec3<float> &prevFootPosition, robots::Robot &robot,
     messages::HighLevelCommand &command, float feedbackGain, int legId,
     FOOTHOLD_PREDICTION_TYPE predictType) {
   Vec3<float> trunkToThighOffset = robot.trunkToThighOffset(legId);
@@ -206,8 +206,10 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
 
   if (footholdCount(legId) == 1) {
     // Predicting all footholds on the horizon is too expensive
-    Vec3<float> adjustedFoothold = adjustFoothold(
-        predictedFootWorld, currentPosition, bodyToWorldRot, legId, robot);
+    Vec3<float> adjustedFoothold =
+        adjustFoothold(predictedFootWorld, currentPosition, bodyToWorldRot,
+                       legId, robot)
+            .eval();
 
     if (robot.worldFrameIKCheck(adjustedFoothold, legId)) {
       return adjustedFoothold;
@@ -221,17 +223,17 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
   }
 }
 
-Vec3<float> FootholdPlanner::adjustFoothold(Vec3<float> nominalFootPosition,
-                                            Vec3<float> currentRobotPosition,
-                                            Mat3<float> currentRobotRotation,
-                                            int legId, robots::Robot &robot) {
-  nominalFootPosition(2) = getFoothold(legId, 0)(2);
-  return nominalFootPosition;
+Vec3<float>
+FootholdPlanner::adjustFoothold(const Vec3<float> &nominalFootPosition,
+                                const Vec3<float> &currentRobotPosition,
+                                const Mat3<float> &currentRobotRotation,
+                                int legId, robots::Robot &robot) {
+  return Vec3<float>{nominalFootPosition(0), nominalFootPosition(1),
+                     getFoothold(legId, 0)(2)};
 };
 
-Vec3<float> FootholdPlanner::getDesiredTrajectoryPosition(Vec3<float> pStart,
-                                                          Vec3<float> pEnd,
-                                                          float t, int legId) {
+Vec3<float> FootholdPlanner::getDesiredTrajectoryPosition(
+    const Vec3<float> &pStart, const Vec3<float> &pEnd, float t, int legId) {
   return trajectory::getSwingTrajectory(pStart, pEnd, swingHeight[legId], t,
                                         _gaitScheduler->swingDuration(legId),
                                         swingBack[legId], 0);
