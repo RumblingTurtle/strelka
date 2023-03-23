@@ -97,6 +97,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
       Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
       _footholds[LEG_ID].push_back(startPos);
       _footholds[LEG_ID].push_back(startPos);
+      prevAdjustedFoothold.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
       firstRun = false;
     }
 
