@@ -6,11 +6,13 @@ namespace control {
 template <class RobotClass>
 LocalPlannerNode<RobotClass>::LocalPlannerNode(
     Gait initialGait, float stepDt, int horizonSteps,
-    float heightFilterCutoffFrequency, float pitchFilterCutoffFrequency)
+    float heightFilterCutoffFrequency, float pitchFilterCutoffFrequency,
+    bool updateFootholdsContinuously)
     : prevTick(-1), robotInstance(),
       localPlanner(initialGait, robotInstance.robotMass(),
                    robotInstance.rotationalInertia(), stepDt, horizonSteps,
-                   heightFilterCutoffFrequency, pitchFilterCutoffFrequency),
+                   heightFilterCutoffFrequency, pitchFilterCutoffFrequency,
+                   updateFootholdsContinuously),
       lastCommandTimestamp(getWallTime()), firstCommandRecieved(false) {
   setupProcessLoop();
 }

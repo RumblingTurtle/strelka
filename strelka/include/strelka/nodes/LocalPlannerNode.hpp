@@ -36,7 +36,8 @@ public:
 
   LocalPlannerNode(Gait initialGait, float stepDt, int horizonSteps,
                    float heightFilterCutoffFrequency,
-                   float pitchFilterCutoffFrequency);
+                   float pitchFilterCutoffFrequency,
+                   bool updateFootholdsContinuously);
 
   LocalPlannerNode(std::shared_ptr<FootholdPlanner> footPlanner, float stepDt,
                    int horizonSteps, float heightFilterCutoffFrequency,

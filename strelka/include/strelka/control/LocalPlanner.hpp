@@ -43,14 +43,15 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   LocalPlanner(Gait gait, float mpcBodyMass, const Mat3<float> bodyInertia,
-               float stepDt = 0.02, int horizonSteps = 15,
-               float heightFilterCutoffFrequency = 30.0,
-               float pitchFilterCutoffFrequency = 10);
+               float stepDt, int horizonSteps,
+               float heightFilterCutoffFrequency,
+               float pitchFilterCutoffFrequency,
+               bool updateFootholdsContinuously);
 
   LocalPlanner(std::shared_ptr<FootholdPlanner> footPlanner, float mpcBodyMass,
-               const Mat3<float> bodyInertia, float stepDt = 0.02,
-               int horizonSteps = 15, float heightFilterCutoffFrequency = 30.0,
-               float pitchFilterCutoffFrequency = 10);
+               const Mat3<float> bodyInertia, float stepDt, int horizonSteps,
+               float heightFilterCutoffFrequency,
+               float pitchFilterCutoffFrequency);
   /**
    * @brief Update desired trajectories and forces according to high level
    * command and robot state

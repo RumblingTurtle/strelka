@@ -2,12 +2,15 @@
 namespace strelka {
 namespace control {
 
-FootholdPlanner::FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler)
-    : _gaitScheduler(_gaitScheduler), updateContinuously(false) {
+FootholdPlanner::FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler,
+                                 bool updateFootholdsContinuously)
+    : _gaitScheduler(_gaitScheduler),
+      updateFootholdsContinuously(updateFootholdsContinuously) {
   FOR_EACH_LEG {
     _footholds[LEG_ID].reserve(5);
     _currentFootPosition.setZero();
     lastContactPosWorld.setZero();
+    prevAdjustedFoothold.setZero();
   }
 }
 
@@ -19,9 +22,10 @@ FootholdPlanner::FootholdPlanner(FootholdPlanner &footholdPlanner)
     swingBack[LEG_ID] = footholdPlanner.swingBack[LEG_ID];
     _currentFootPosition.setZero();
     lastContactPosWorld.setZero();
+    prevAdjustedFoothold.setZero();
   }
   firstRun = footholdPlanner.firstRun;
-  updateContinuously = footholdPlanner.updateContinuously;
+  updateFootholdsContinuously = footholdPlanner.updateFootholdsContinuously;
 }
 
 int FootholdPlanner::footholdCount(int legId) {
@@ -106,12 +110,12 @@ void FootholdPlanner::calculateNextFootholdPositions(
       lastContactPosWorld.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     }
 
-    if (updateAsStance || swingStarted || updateContinuously) {
+    if (updateAsStance || swingStarted || updateFootholdsContinuously) {
       _footholds[LEG_ID].clear();
       _footholds[LEG_ID].push_back(lastContactPosWorld.col(LEG_ID));
 
       FOOTHOLD_PREDICTION_TYPE predictType;
-      if (updateContinuously) {
+      if (updateFootholdsContinuously) {
         if (updateAsStance) {
           predictType = FOOTHOLD_PREDICTION_TYPE::SIMPLE;
         } else {
@@ -125,9 +129,16 @@ void FootholdPlanner::calculateNextFootholdPositions(
         }
       }
 
+      if (swingStarted) {
+        // Has to be reset at the start of each swing phase
+        prevAdjustedFoothold.col(LEG_ID) = lastContactPosWorld.col(LEG_ID);
+      }
+
       Vec3<float> predictedFootPosition = predictNextFootPos(
           robot.positionWorldFrame(), bodyToWorldRot, getFoothold(LEG_ID, 0),
           robot, command, FEEDBACK_GAIN, LEG_ID, predictType);
+
+      prevAdjustedFoothold.col(LEG_ID) = predictedFootPosition;
 
       _footholds[LEG_ID].push_back(predictedFootPosition);
 

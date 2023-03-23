@@ -49,10 +49,14 @@ class FootholdPlanner {
   float swingHeight[4];
   bool swingBack[4];
   bool firstRun;
-  bool updateContinuously;
 
   Mat34<float> lastContactPosWorld;
+  // Previous adjusted foothold for the current swing phase
   Mat34<float> _currentFootPosition;
+
+protected:
+  bool updateFootholdsContinuously;
+  Mat34<float> prevAdjustedFoothold;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -72,7 +76,9 @@ public:
    */
   enum class FOOTHOLD_PREDICTION_TYPE { SIMPLE, RAIBERT, CONTINUOUS };
 
-  FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler);
+  FootholdPlanner(std::shared_ptr<GaitScheduler> _gaitScheduler,
+                  bool updateFootholdsContinuously);
+
   FootholdPlanner(FootholdPlanner &footholdPlanner);
 
   /**

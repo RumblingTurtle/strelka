@@ -36,7 +36,7 @@ protected:
     robot = std::make_unique<UnitreeA1>(
         UnitreeA1::createDummyA1RobotWithStateEstimates());
     scheduler = std::make_shared<GaitScheduler>(TEST_GAIT);
-    footPlanner = std::make_shared<FootholdPlanner>(scheduler);
+    footPlanner = std::make_shared<FootholdPlanner>(scheduler, false);
   }
 
   void TearDown() override { delete command; }
