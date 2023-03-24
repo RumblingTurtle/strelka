@@ -13,8 +13,11 @@ It is **not** based on Robot Operating System (ROS). Instead it uses [Lightweigh
 To aid in development and testing, [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) includes a range of visualization and data-processing tools. These tools make it easy to visualize the robot's motion and sensor data, as well as to monitor the performance of the various control and planning algorithms. [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) also includes support for the Gazebo simulation environment, allowing users to easily test and validate their locomotion algorithms in a realistic simulated environment.
 
 Overall, *strelka* is an ideal framework for researchers and developers who are interested in experimenting with quadrupedal locomotion, and who are looking for a flexible and extensible software platform that can be easily customized to meet their specific needs.
+
 ## [Architechture overview](architecture.md)
+
 ## [Implementing your robot](defining_new_robots.md)
+
 # Requirements
 - Ubuntu (=18.04,20.04)
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) (tested and built on 3.3.7)
@@ -28,19 +31,29 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 sudo make install
 sudo ldconfig
 ```
+*Building the library in release mode is important to keep MPC's update rate high enough
+## Uninstall
+```
+cat ~/strelka/build/install_manifest.txt | sudo xargs rm 
+```
 
 ## Run tests
 ```
 cd build && ctest --vv
 ```
 
-## Uninstall
+# Examples: Unitree A1
+Real robot would require both [robot_low_command.lcm](strelka_messages/lcm/robot_low_command.lcm) and [robot_raw_state.lcm](strelka_messages/lcm/robot_raw_state.lcm) publishers. [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) provides full simulation support.
 ```
-cat ~/strelka/build/install_manifest.txt | sudo xargs rm 
+~/strelka/build/examples/lcm_high_command_publisher
+~/strelka/build/examples/a1_state_estimator
+~/strelka/build/examples/a1_wbic
+~/strelka/build/examples/a1_local_planner
 ```
-#  LCM message profiling
-Currently [lcm-mon](https://github.com/trehansiddharth/lcm-mon) does not support profiling with the message details. You can use my temporary fix for [lcm-mon](https://github.com/RumblingTurtle/lcm-mon/tree/lcm_gen_compatibility). 
+Also make sure to check out [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) for use of ROS and perception information with strelka library. 
 
+#  LCM message profiling
+[lcm-mon](https://github.com/trehansiddharth/lcm-mon) repo can be used to debug LCM messages
 ```
 lcm-mon -t ~/strelka/strelka_messages/lcm
 ```

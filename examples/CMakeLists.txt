@@ -4,9 +4,9 @@ SET(DEPENDENCY_LIBRARIES
     strelka
 )
 
-FILE(GLOB STRELKA_EXAMPLES_SOURCES LIST_DIRECTORIES true "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+FILE(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
-foreach(file_path ${STRELKA_EXAMPLES_SOURCES})
+foreach(file_path ${SRC_FILES})
     string( REPLACE ".cpp" "" new_name ${file_path} )
     get_filename_component(filename ${new_name} NAME)
     message("\t${file_path}")
