@@ -1,20 +1,35 @@
-/**
- * @file Robot.hpp
- * Common robot interface used for state estimation and control
- */
 #ifndef ROBOT_H
 #define ROBOT_H
+#include <strelka/common/constants.hpp>
+#include <strelka/common/macros.hpp>
+#include <strelka/common/rotation.hpp>
 #include <strelka/common/typedefs.hpp>
+
 #include <strelka_lcm_headers/RobotRawState.hpp>
 #include <strelka_lcm_headers/RobotState.hpp>
 
 namespace strelka {
 namespace robots {
+
+class NoStateEstimateException : public std::exception {
+public:
+  const char *what() {
+    return "UR has no state estimate. Build a UnitreeA1 class "
+           "using strelka_lcm_headers::RobotState";
+  }
+};
+class StatelessRobotException : public std::exception {
+public:
+  const char *what() {
+    return "Rt instance is constructed without any state message "
+           ". Build a Robot descendant class "
+           "using strelka_lcm_headers::RobotState or "
+           "strelka_lcm_headers::RobotRawState";
+  }
+};
 /**
  * @brief Common robot interface used for state estimation and control
  *
- * In order to use state_estimation and control packages you have to provide
- * implementations of this common interface.
  *
  * Leg notations
  * legId - name      - abb.
@@ -27,24 +42,60 @@ namespace robots {
  * All coordinate frames are right handed.
  */
 class Robot {
+protected:
+  Mat3<float> _bodyToWorldMat;
+  Vec3<float> _gyroscopeBodyFrame;
+  Vec3<float> _accelerometerBodyFrame;
+  Vec3<float> _accelerometerWorldFrame;
+  Vec3<float> _positionWorldFrame;
+  Vec3<float> _linearVelocityBodyFrame;
+
+  Vec4<float> _bodyToWorldQuat;
+  Vec4<bool> _footContacts;
+  Vec4<float> _footForces;
+
+  Mat34<float> _footPositionsTrunkFrame;
+  Mat34<float> _footVelocitiesTrunkFrame;
+
+  Vec12<float> _q;
+  Vec12<float> _dq;
+  Eigen::Matrix<float, 12, 3> _footJacobians;
+
+  bool hasStateEstimates = false;
+  bool hasRawState = false;
 
 public:
-  Robot(){};
-  virtual ~Robot(){};
+  explicit Robot(){};
+  /**
+   * @brief Updates robot state using the state messages
+   */
+  void update(const strelka_lcm_headers::RobotRawState *rawStateMessage);
+  void update(const strelka_lcm_headers::RobotState *robotStateMessage);
+
+  /**
+   * @brief RobotState and RobotRawState parsers
+   *
+   * @tparam MessageType
+   * @param message
+   */
+  template <class MessageType>
+  void processRawStateEntries(const MessageType *message);
+  void
+  processStateEstimateEntries(const strelka_lcm_headers::RobotState *message);
 
   /**
    * @brief Current angle configuration of the motors
    * 3 per each leg
    * FR-hip FR-thigh FR-knee ....
    */
-  virtual Vec12<float> q() = 0;
+  Vec12<float> q();
 
   /**
    * @brief Current velocity configuration of the motors
    * 3 per each leg
    * FR-hip FR-thigh FR-knee ....
    */
-  virtual Vec12<float> dq() = 0;
+  Vec12<float> dq();
 
   /**
    * @brief Returns contact states of the foot.
@@ -55,59 +106,59 @@ public:
    * @return Vec4<bool> true if leg is considered to be in contact and false
    * otherwise
    */
-  virtual Vec4<bool> footContacts() = 0;
+  Vec4<bool> footContacts();
 
   /**
    * @brief Angular velocity taken from IMU
    */
-  virtual Vec3<float> gyroscopeBodyFrame() = 0;
+  Vec3<float> gyroscopeBodyFrame();
 
   /**
    * @brief Acceleration taken from IMU
    */
-  virtual Vec3<float> accelerometerWorldFrame() = 0;
+  Vec3<float> accelerometerWorldFrame();
 
   /**
    * @brief Robot position in world frame
    */
-  virtual Vec3<float> positionWorldFrame() = 0;
+  Vec3<float> positionWorldFrame();
 
   /**
    * @brief Robot velocity in body frame
    */
-  virtual Vec3<float> linearVelocityBodyFrame() = 0;
+  Vec3<float> linearVelocityBodyFrame();
 
   /**
    * @brief Foot position in trunk frame
    */
-  virtual Vec3<float> footPositionTrunkFrame(int legId) = 0;
+  Vec3<float> footPositionTrunkFrame(int legId);
 
   /**
    * @brief Foot velocity in trunk frame. Usually calculated as
    * LegJacobian*LegMotorVelocities
    */
-  virtual Vec3<float> footVelocityTrunkFrame(int legId) = 0;
+  Vec3<float> footVelocityTrunkFrame(int legId);
 
   /**
    * @brief Foot position in world frame
    */
-  virtual Vec3<float> footPositionWorldFrame(int legId) = 0;
+  Vec3<float> footPositionWorldFrame(int legId);
 
   /**
    * @brief Body to world rotation quaternion
    * Scalar first
    */
-  virtual Vec4<float> bodyToWorldQuat() = 0;
+  Vec4<float> bodyToWorldQuat();
 
   /**
    * @brief Body to world rotation euler matrix
    */
-  virtual Mat3<float> bodyToWorldMat() = 0;
+  Mat3<float> bodyToWorldMat();
 
   /**
    * @brief Body to world rotation euler angles
    */
-  virtual Vec3<float> bodyToWorldRPY() = 0;
+  Vec3<float> bodyToWorldRPY();
 
   /**
    * @brief Rotates a given vector by current robot rotation estimate
@@ -117,7 +168,7 @@ public:
    * @param vector Vector in robot body frame
    * @return Vec3<float> Vector in world frame
    */
-  virtual Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector) = 0;
+  Vec3<float> rotateBodyToWorldFrame(Vec3<float> vector);
 
   /**
    * @brief Rotates a given vector by the transpose of the current robot
@@ -128,7 +179,7 @@ public:
    * @param vector Vector in robot body frame
    * @return Vec3<float> Vector in world frame
    */
-  virtual Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector) = 0;
+  Vec3<float> rotateWorldToBodyFrame(Vec3<float> vector);
 
   /**
    * @brief Transforms a given vector from body frame to world frame using state
@@ -137,7 +188,7 @@ public:
    * @param vector Vector in robot body frame
    * @return Vec3<float> Vector in world frame
    */
-  virtual Vec3<float> transformBodyToWorldFrame(Vec3<float> vector) = 0;
+  Vec3<float> transformBodyToWorldFrame(Vec3<float> vector);
 
   /**
    * @brief Transforms a given vector from world frame to body frame using state
@@ -146,14 +197,7 @@ public:
    * @param vector Vector in robot world frame
    * @return Vec3<float> Vector in body frame
    */
-  virtual Vec3<float> transformWorldToBodyFrame(Vec3<float> vector) = 0;
-
-  /**
-   * @brief Checks if the foot position in the world frame is kinematically
-   * reachable.
-   */
-  virtual bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
-                                 int legId) = 0;
+  Vec3<float> transformWorldToBodyFrame(Vec3<float> vector);
 
   /**
    * @brief Joint to end effector velocity mapping matrices
@@ -161,7 +205,7 @@ public:
    * @return Eigen::Matrix<float, 12, 3> Stacked 3x3 jacobian matrices for each
    * leg
    */
-  virtual Eigen::Matrix<float, 12, 3> footJacobians() = 0;
+  Eigen::Matrix<float, 12, 3> footJacobians();
 
   /*** CONSTANTS ***/
 
@@ -171,6 +215,13 @@ public:
    * Needed for estimation of the next nominal position when planning footholds
    */
   virtual Vec3<float> trunkToThighOffset(int legId) = 0;
+
+  /**
+   * @brief Offset from the center of the robot body to it's hip link.
+   *
+   * Needed for estimation of the next nominal position when planning footholds
+   */
+  virtual Vec3<float> trunkToHipOffset(int legId) = 0;
 
   /**
    * @brief Radius of the foot link.
@@ -232,6 +283,31 @@ public:
    * Note that the same values are used for every triplet representing each leg
    */
   virtual Vec3<float> dampingGains() = 0;
+
+  /*** Required implementations ***/
+
+  /**
+   * @brief Checks if the foot position in the world frame is kinematically
+   * reachable.
+   */
+  virtual bool worldFrameIKCheck(Vec3<float> footPositionWorldFrame,
+                                 int legId) = 0;
+
+  /**
+   * @brief Jacobian matrix calculation implementation
+   *
+   */
+  virtual Mat3<float> footJacobianImpl(int legId) = 0;
+
+  /**
+   * @brief Return foot position in trunk frame
+   */
+  virtual Vec3<float> footPositionTrunkFrameImpl(int legId) = 0;
+
+  /**
+   * @brief Estimate if a leg with a given legId is considered to be in contact
+   */
+  virtual bool estimateContactImpl(int legId) = 0;
 };
 } // namespace robots
 } // namespace strelka

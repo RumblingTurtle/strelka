@@ -47,7 +47,6 @@ void LocalPlannerNode<RobotClass>::stateHandle(
   }
 
   messages::HighLevelCommand command{highCommand};
-  RobotClass robot{messageIn};
 
   float dt = messageIn->tick;
 
@@ -62,7 +61,8 @@ void LocalPlannerNode<RobotClass>::stateHandle(
     return;
   }
 
-  localPlanner.update(robot, command, dt);
+  robotInstance.update(messageIn);
+  localPlanner.update(robotInstance, command, dt);
 
   FOR_EACH_LEG {
     wbicCommand->footState[LEG_ID] = localPlanner.footState(LEG_ID);

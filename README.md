@@ -13,8 +13,8 @@ It is **not** based on Robot Operating System (ROS). Instead it uses [Lightweigh
 To aid in development and testing, [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) includes a range of visualization and data-processing tools. These tools make it easy to visualize the robot's motion and sensor data, as well as to monitor the performance of the various control and planning algorithms. [*strelka_ros*](https://github.com/RumblingTurtle/strelka_ros) also includes support for the Gazebo simulation environment, allowing users to easily test and validate their locomotion algorithms in a realistic simulated environment.
 
 Overall, *strelka* is an ideal framework for researchers and developers who are interested in experimenting with quadrupedal locomotion, and who are looking for a flexible and extensible software platform that can be easily customized to meet their specific needs.
-## [Architechture overview](https://github.com/RumblingTurtle/strelka/wiki/Architechture-overview)
-## [Implementing your robot](https://github.com/RumblingTurtle/strelka/wiki/Implementing-your-robot)
+## [Architechture overview](architecture.md)
+## [Implementing your robot](defining_new_robots.md)
 # Requirements
 - Ubuntu (=18.04,20.04)
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page) (tested and built on 3.3.7)

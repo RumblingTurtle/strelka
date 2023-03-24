@@ -131,12 +131,13 @@ void StateEstimatorNode<RobotClass>::update(
   float dt = messageIn->tick - prevTick;
   prevTick = messageIn->tick;
 
-  RobotClass robot(messageIn);
+  robotInstance.update(messageIn);
   // TODO: Add external odometry listener
-  observer->update(robot, false, Vec3<float>::Zero(), contactHeightEstimates);
-  updateFootContactHeights(robot);
+  observer->update(robotInstance, false, Vec3<float>::Zero(),
+                   contactHeightEstimates);
+  updateFootContactHeights(robotInstance);
   propagateRobotRawState(messageIn, robotStateMsg);
-  fillStateEstimatorData(robot, observer, robotStateMsg);
+  fillStateEstimatorData(robotInstance, observer, robotStateMsg);
 
   if (filterWarmupTime > 0) {
     filterWarmupTime -= dt;

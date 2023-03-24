@@ -15,6 +15,7 @@ namespace strelka {
 namespace state_estimation {
 constexpr float STATE_ESTIMATOR_WARMUP_TIME = 3.0f; // Seconds
 template <class RobotClass> class StateEstimatorNode {
+  RobotClass robotInstance;
   lcm::LCM lcm;
   KalmanFilterObserver *observer;
   strelka_lcm_headers::RobotState *robotStateMsg;

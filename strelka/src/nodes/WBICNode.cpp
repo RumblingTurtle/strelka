@@ -100,9 +100,9 @@ template <class RobotClass> bool WBICNode<RobotClass>::handle() {
 
   if (firstCommandRecieved && firstStateMessageRecieved) {
     messages::WBICCommand currentCommand{currentCommandMessage};
-    RobotClass robot(currentRobotStateMessage);
+    robotInstance.update(currentRobotStateMessage);
 
-    if (rolloverProtection(robot)) {
+    if (rolloverProtection(robotInstance)) {
       return false;
     }
 
@@ -111,14 +111,14 @@ template <class RobotClass> bool WBICNode<RobotClass>::handle() {
       return false;
     }
 
-    controller.update(robot, currentCommand, wbicOutput);
+    controller.update(robotInstance, currentCommand, wbicOutput);
 
     if (outputSafetyCheck(wbicOutput)) {
       return false;
     }
 
-    Vec3<float> KP = robot.positionGains();
-    Vec3<float> KD = robot.dampingGains();
+    Vec3<float> KP = robotInstance.positionGains();
+    Vec3<float> KD = robotInstance.dampingGains();
 
     for (int motorId = 0; motorId < 12; motorId++) {
       lowCommandMessage->q[motorId] = wbicOutput.q[motorId];
