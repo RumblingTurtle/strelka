@@ -142,6 +142,11 @@ LocalPlanner &LocalPlannerNode<RobotClass>::getLocalPlanner() {
   return localPlanner;
 }
 
+template <class RobotClass>
+RobotClass &LocalPlannerNode<RobotClass>::getRobotInstance() {
+  return robotInstance;
+};
+
 } // namespace control
 
 #define LOCAL_PLANNER_NODE_HEADER

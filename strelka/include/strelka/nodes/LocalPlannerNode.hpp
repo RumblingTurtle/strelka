@@ -55,6 +55,8 @@ public:
 
   bool handle();
   void processLoop();
+
+  RobotClass &getRobotInstance();
 };
 } // namespace control
 } // namespace strelka

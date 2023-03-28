@@ -129,5 +129,9 @@ Vec3<float> &LocalPlanner::desiredAccelerationBody() {
 std::shared_ptr<FootholdPlanner> LocalPlanner::getFootPlanner() {
   return footPlanner;
 }
+
+std::shared_ptr<GaitScheduler> LocalPlanner::getGaitScheduler() {
+  return scheduler;
+}
 } // namespace control
 } // namespace strelka
