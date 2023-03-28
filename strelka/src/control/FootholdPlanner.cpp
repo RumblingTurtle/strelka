@@ -93,12 +93,12 @@ void FootholdPlanner::calculateNextFootholdPositions(
   Mat3<float> bodyToWorldRot = robot.bodyToWorldMat();
   FOR_EACH_LEG {
     _currentFootPosition.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
+    Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
     if (firstRun) {
-      Vec3<float> startPos = robot.footPositionWorldFrame(LEG_ID);
+      lastContactPosWorld.col(LEG_ID) = startPos;
       _footholds[LEG_ID].push_back(startPos);
       _footholds[LEG_ID].push_back(startPos);
       prevAdjustedFoothold.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
-      firstRun = false;
     }
 
     bool updateAsStance = _gaitScheduler->legInStance(LEG_ID) ||
@@ -167,6 +167,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
       }
     }
   }
+  firstRun = false;
 }
 
 Vec3<float> FootholdPlanner::predictNextFootPos(

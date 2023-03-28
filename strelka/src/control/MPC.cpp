@@ -220,7 +220,7 @@ DVec<float> &MPC::solveQP() {
   settings.verbose = false;
   settings.warm_start = true;
   settings.polish = false;
-  settings.scaling = 0;
+  // settings.scaling = 0;
   settings.adaptive_rho_interval = 25;
   settings.eps_abs = 1e-3;
   settings.eps_rel = 1e-3;

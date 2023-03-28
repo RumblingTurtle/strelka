@@ -97,7 +97,7 @@ bool GaitScheduler::legInSwing(int legId) {
 }
 
 bool GaitScheduler::legInEarlyContact(int legId) {
-  return currentLegState[legId] == LegState::STANCE;
+  return currentLegState[legId] == LegState::EARLY_CONTACT;
 }
 
 bool GaitScheduler::legInStance(int legId) {

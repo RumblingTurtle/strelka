@@ -84,27 +84,30 @@ static Gait PRONK = {.name = "pronk",
                      ._phaseOffset = {0, 0, 0, 0},
                      ._stationaryGait = false};
 
-/*
+static Gait WALK = {.name = "walk",
+                    ._dutyFactor = {0.75, 0.75, 0.75, 0.75},
+                    ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
+                    ._phaseOffset = {0.25, 0.75, 0.0, 0.5},
+                    ._stationaryGait = false};
+
 static Gait GALOP = {.name = "galop",
                      ._dutyFactor = {0.2, 0.2, 0.2, 0.2},
                      ._phaseDuration = {0.5, 0.5, 0.5, 0.5},
                      ._phaseOffset = {0.0, 0.8571, 0.3571, 0.5},
-                    ._stationaryGait = false};
+                     ._stationaryGait = false};
 
 static Gait BOUND = {.name = "bound",
                      ._dutyFactor = {0.3, 0.3, 0.3, 0.3},
                      ._phaseDuration = {0.3, 0.3, 0.3, 0.3},
                      ._phaseOffset = {0.0, 0.0, 0.414, 0.414},
-                    ._stationaryGait = false};
-*/
+                     ._stationaryGait = false};
+
 } // namespace GAITS
 
 const std::unordered_map<std::string, Gait &> GAITS_MAP = {
-    {"stand", GAITS::STAND},
-    {"step", GAITS::STEP},
-    {"trot", GAITS::TROT},
-    {"flytrot", GAITS::FLYTROT},
-    {"pronk", GAITS::PRONK}};
+    {"stand", GAITS::STAND},     {"step", GAITS::STEP},   {"trot", GAITS::TROT},
+    {"flytrot", GAITS::FLYTROT}, {"pronk", GAITS::PRONK}, {"walk", GAITS::WALK},
+    {"galop", GAITS::GALOP},     {"bound", GAITS::BOUND}};
 } // namespace strelka
 
 #endif // GAIT_H
