@@ -81,8 +81,9 @@ Vec3<float> UnitreeA1::trunkToHipOffset(int legId) {
 }
 
 Vec3<float> UnitreeA1::trunkToThighOffset(int legId) {
-  return Eigen::Map<const Vec3<float>>(
-      A1::constants::TRUNK_TO_THIGH_OFFSETS + legId * 3, 3);
+  return trunkToHipOffset(legId) +
+         Eigen::Map<const Vec3<float>>(
+             A1::constants::HIP_TO_THIGH_OFFSET + legId * 3, 3);
 }
 
 Vec3<float> UnitreeA1::bodyToComOffset() {

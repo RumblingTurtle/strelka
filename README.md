@@ -25,16 +25,17 @@ Overall, *strelka* is an ideal framework for researchers and developers who are 
 # Installation
 ## Build using CMake
 ```
+# Assuming you cloned the repo to ~/
 mkdir ~/strelka/build
 cd ~/strelka/build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 sudo make install
-sudo ldconfig
 ```
 *Building the library in release mode is important to keep MPC's update rate high enough
 ## Uninstall
 ```
-cat ~/strelka/build/install_manifest.txt | sudo xargs rm 
+cd ~/strelka/build
+sudo make uninstall
 ```
 
 ## Run tests

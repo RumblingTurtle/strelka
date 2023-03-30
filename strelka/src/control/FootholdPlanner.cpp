@@ -34,7 +34,7 @@ int FootholdPlanner::footholdCount(int legId) {
 }
 
 Vec3<float> FootholdPlanner::getFoothold(int legId, int footholdId) {
-  if (footholdId < footholdCount(legId)) {
+  if (footholdId >= 0 && footholdId < footholdCount(legId)) {
     return _footholds[legId][footholdId];
   }
   throw InvalidFootholdIdx();
@@ -55,10 +55,10 @@ DMat<float> FootholdPlanner::calculateWorldFrameRotatedFootholds(
     rotation::rpy2rot(bodyTrajectory.block<1, 3>(h, 0), bodyToWorldRot_h);
 
     FOR_EACH_LEG {
-      bool inStance = contactTable(LEG_ID, h);
+      bool nowInContact = contactTable(LEG_ID, h);
       if (h != 0) {
         bool wasInSwing = !contactTable(LEG_ID, h - 1);
-        if (wasInSwing && inStance) {
+        if (wasInSwing && nowInContact) {
           currentFootholdIdx[LEG_ID] += 1;
           bool calculateNewFoothold =
               footholdCount(LEG_ID) == currentFootholdIdx[LEG_ID];
@@ -101,33 +101,27 @@ void FootholdPlanner::calculateNextFootholdPositions(
       prevAdjustedFoothold.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     }
 
-    bool updateAsStance = _gaitScheduler->legInStance(LEG_ID) ||
-                          _gaitScheduler->legInEarlyContact(LEG_ID) ||
-                          _gaitScheduler->legLostContact(LEG_ID);
+    bool recomputeFoothold = _gaitScheduler->legInStance(LEG_ID) ||
+                             _gaitScheduler->legInEarlyContact(LEG_ID) ||
+                             _gaitScheduler->legLostContact(LEG_ID);
 
     bool swingStarted = _gaitScheduler->swingStarted(LEG_ID);
 
-    if (updateAsStance) {
+    if (recomputeFoothold) {
       lastContactPosWorld.col(LEG_ID) = robot.footPositionWorldFrame(LEG_ID);
     }
 
-    if (updateAsStance || swingStarted || updateFootholdsContinuously) {
+    if (recomputeFoothold || swingStarted || updateFootholdsContinuously) {
       _footholds[LEG_ID].clear();
       _footholds[LEG_ID].push_back(lastContactPosWorld.col(LEG_ID));
 
       FOOTHOLD_PREDICTION_TYPE predictType;
-      if (updateFootholdsContinuously) {
-        if (updateAsStance) {
-          predictType = FOOTHOLD_PREDICTION_TYPE::SIMPLE;
-        } else {
-          predictType = FOOTHOLD_PREDICTION_TYPE::CONTINUOUS;
-        }
+      if (recomputeFoothold) {
+        predictType = FOOTHOLD_PREDICTION_TYPE::SIMPLE;
+      } else if (updateFootholdsContinuously) {
+        predictType = FOOTHOLD_PREDICTION_TYPE::CONTINUOUS;
       } else {
-        if (updateAsStance) {
-          predictType = FOOTHOLD_PREDICTION_TYPE::SIMPLE;
-        } else {
-          predictType = FOOTHOLD_PREDICTION_TYPE::RAIBERT;
-        }
+        predictType = FOOTHOLD_PREDICTION_TYPE::RAIBERT;
       }
 
       if (swingStarted) {
@@ -171,7 +165,7 @@ void FootholdPlanner::calculateNextFootholdPositions(
 }
 
 Vec3<float> FootholdPlanner::predictNextFootPos(
-    const Vec3<float> &currentPosition, const Mat3<float> &bodyToWorldRot,
+    const Vec3<float> &currentRobotPosition, const Mat3<float> &bodyToWorldRot,
     const Vec3<float> &prevFootPosition, robots::Robot &robot,
     messages::HighLevelCommand &command, float feedbackGain, int legId,
     FOOTHOLD_PREDICTION_TYPE predictType) {
@@ -187,7 +181,7 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
 
   // TODO: implement hip offset
   Vec3<float> hipPosWorld =
-      bodyToWorldRot * trunkToThighOffset + currentPosition;
+      bodyToWorldRot * trunkToThighOffset + currentRobotPosition;
 
   Vec3<float> predictedFootWorld;
   switch (predictType) {
@@ -220,7 +214,7 @@ Vec3<float> FootholdPlanner::predictNextFootPos(
   if (footholdCount(legId) == 1) {
     // Predicting all footholds on the horizon is too expensive
     Vec3<float> adjustedFoothold =
-        adjustFoothold(predictedFootWorld, currentPosition, bodyToWorldRot,
+        adjustFoothold(predictedFootWorld, currentRobotPosition, bodyToWorldRot,
                        legId, robot)
             .eval();
 

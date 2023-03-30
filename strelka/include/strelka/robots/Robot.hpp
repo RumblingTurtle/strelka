@@ -61,8 +61,8 @@ protected:
   Vec12<float> _dq;
   Eigen::Matrix<float, 12, 3> _footJacobians;
 
-  bool hasStateEstimates = false;
-  bool hasRawState = false;
+  bool hasStateEstimates_ = false;
+  bool hasRawState_ = false;
 
 public:
   explicit Robot(){};
@@ -82,6 +82,8 @@ public:
   void processRawStateEntries(const MessageType *message);
   void
   processStateEstimateEntries(const strelka_lcm_headers::RobotState *message);
+  bool hasStateEstimates();
+  bool hasRawState();
 
   /**
    * @brief Current angle configuration of the motors

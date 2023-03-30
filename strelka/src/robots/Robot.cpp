@@ -15,8 +15,8 @@ void Robot::update(const strelka_lcm_headers::RobotRawState *rawStateMessage) {
 
 template <class MessageType>
 void Robot::processRawStateEntries(const MessageType *message) {
-  hasRawState = true;
-  hasStateEstimates = false;
+  hasRawState_ = true;
+  hasStateEstimates_ = false;
   _bodyToWorldQuat =
       Eigen::Map<const Eigen::Matrix<float, 4, 1>>(message->quaternion, 4);
 
@@ -50,89 +50,93 @@ void Robot::processRawStateEntries(const MessageType *message) {
 
 void Robot::processStateEstimateEntries(
     const strelka_lcm_headers::RobotState *message) {
-  hasStateEstimates = true;
+  hasStateEstimates_ = true;
   _positionWorldFrame = Eigen::Map<const Vec3<float>>(message->position, 3);
   _linearVelocityBodyFrame =
       Eigen::Map<const Vec3<float>>(message->velocityBody, 3);
 }
 
+bool Robot::hasStateEstimates() { return hasStateEstimates_; }
+
+bool Robot::hasRawState() { return hasRawState_; }
+
 Eigen::Matrix<float, 12, 3> Robot::footJacobians() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _footJacobians;
 }
 
 Mat3<float> Robot::bodyToWorldMat() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _bodyToWorldMat;
 }
 
 Vec3<float> Robot::rotateBodyToWorldFrame(Vec3<float> vector) {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _bodyToWorldMat * vector;
 }
 
 Vec3<float> Robot::rotateWorldToBodyFrame(Vec3<float> vector) {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _bodyToWorldMat.transpose() * vector;
 }
 
 Vec4<bool> Robot::footContacts() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _footContacts;
 }
 
 Vec3<float> Robot::footPositionTrunkFrame(int legId) {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _footPositionsTrunkFrame.col(legId);
 }
 
 Vec3<float> Robot::footVelocityTrunkFrame(int legId) {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _footVelocitiesTrunkFrame.col(legId);
 }
 Vec3<float> Robot::gyroscopeBodyFrame() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _gyroscopeBodyFrame;
 }
 
 Vec3<float> Robot::accelerometerWorldFrame() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _accelerometerWorldFrame;
 }
 
 Vec12<float> Robot::q() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _q;
 };
 Vec12<float> Robot::dq() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _dq;
 };
 
 Vec4<float> Robot::bodyToWorldQuat() {
-  if (!hasRawState) {
+  if (!hasRawState_) {
     throw StatelessRobotException();
   }
   return _bodyToWorldQuat;
@@ -156,14 +160,14 @@ Vec3<float> Robot::transformWorldToBodyFrame(Vec3<float> vector) {
 }
 
 Vec3<float> Robot::positionWorldFrame() {
-  if (!hasStateEstimates) {
+  if (!hasStateEstimates_) {
     throw NoStateEstimateException();
   }
   return _positionWorldFrame;
 };
 
 Vec3<float> Robot::linearVelocityBodyFrame() {
-  if (!hasStateEstimates) {
+  if (!hasStateEstimates_) {
     throw NoStateEstimateException();
   }
   return _linearVelocityBodyFrame;

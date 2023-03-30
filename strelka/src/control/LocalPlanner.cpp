@@ -76,10 +76,8 @@ void LocalPlanner::update(robots::Robot &robot,
   DMat<float> footholdTable = footPlanner->calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
-  DVec<float> forces = mpc.computeContactForces(robot, contactTable,
-                                                footholdTable, bodyTrajectory);
-
-  _mpcForces = -forces.block<12, 1>(0, 0);
+  _mpcForces = -mpc.computeContactForces(robot, contactTable, footholdTable,
+                                         bodyTrajectory);
 
   _desiredRpy = bodyTrajectory.block<1, 3>(0, 0);
   _desiredPositionBody = bodyTrajectory.block<1, 3>(0, 3);
@@ -93,7 +91,9 @@ void LocalPlanner::update(robots::Robot &robot,
                         scheduler->legLostContact(LEG_ID);
     _footState[LEG_ID] = useForceTask;
     if (scheduler->legLostContact(LEG_ID)) {
-      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 5;
+      _mpcForces(3 * LEG_ID, 0) = 0;
+      _mpcForces(3 * LEG_ID + 1, 0) = 0;
+      _mpcForces(3 * LEG_ID + 2, 0) = _mpcBodyMass * 10;
     }
   }
 
