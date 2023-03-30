@@ -6,10 +6,10 @@ print_pkg_header(strelka_messages)
 
 add_library(strelka_messages INTERFACE)
 target_include_directories(strelka_messages INTERFACE 
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
 install(DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
+  DESTINATION include)
+  
 print_pkg_footer()

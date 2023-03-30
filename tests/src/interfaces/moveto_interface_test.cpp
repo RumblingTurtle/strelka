@@ -16,10 +16,10 @@ TEST_P(A1MoveToInterfaceParametrizedTestFixture, SetDesiredAngles) {
   try {
     interface.moveToInit();
   } catch (const RobotStateTopicDoesNotExist &ex) {
-    GTEST_SKIP()
-        << "A1 Gazebo topic is not publishing. Default value of the topic name "
-           "is "
-        << strelka::constants::RAW_STATE_TOPIC_NAME;
+    GTEST_SKIP() << "RAW_STATE_TOPIC_NAME is not publishing. Default value of "
+                    "the topic name "
+                    "is "
+                 << strelka::constants::RAW_STATE_TOPIC_NAME;
   }
 
   sleep(1);

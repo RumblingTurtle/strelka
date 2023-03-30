@@ -43,12 +43,12 @@ install(TARGETS strelka strelka_messages
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  DESTINATION include)
 
 ################
 # Export targets
 ################
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+set(INCLUDE_INSTALL_DIR include)
 set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/cmake)
 
 # for build tree / in workspace
