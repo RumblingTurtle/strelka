@@ -229,6 +229,7 @@ Vec12<float> MPC::solveQP() {
   ::OSQPSettings settings;
   osqp_set_default_settings(&settings);
   settings.verbose = false;
+  settings.scaling = 0;
 
   ::OSQPData data;
   data.n = num_variables;
