@@ -28,7 +28,7 @@ void Robot::processRawStateEntries(const MessageType *message) {
   _gyroscopeBodyFrame = Eigen::Map<const Vec3<float>>(message->gyro, 3);
   _accelerometerBodyFrame = Eigen::Map<const Vec3<float>>(message->accel, 3);
 
-  _footForces = Eigen::Map<const Vec4<float>>(message->footForces, 3);
+  _footForces = Eigen::Map<const Vec4<float>>(message->footForces, 4);
 
   FOR_EACH_LEG {
     _footPositionsTrunkFrame.col(LEG_ID) = footPositionTrunkFrameImpl(LEG_ID);

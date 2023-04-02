@@ -54,7 +54,6 @@ private:
   FMat<float, STATE_DIM, STATE_DIM> _a_mat;
   FMat<float, STATE_DIM, STATE_DIM> _a_exp;
   FMat<float, STATE_DIM, ACTION_DIM> _b_mat;
-  FMat<float, STATE_DIM, ACTION_DIM> _b_exp;
   FMat<float, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_concatenated_;
 
   // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
@@ -70,15 +69,16 @@ private:
   DVec<float> _constraint_lb; // 5 * NUM_LEGS * horizon
   DVec<float> _constraint_ub; // 5 * NUM_LEGS * horizon
 
-  SMat<float> qp_weights_;
-  DVec<float> qp_solution_;
+  DMat<float> b_qp_T_Q; // 2*b_qp*qp_weights
+  FMat<float, STATE_DIM, STATE_DIM> qp_weights_block_;
+  Vec12<float> qp_solution_;
 
   ::OSQPWorkspace *workspace_;
   // Whether optimizing for the first step
 
   void updateConstraints(const DMat<bool> &contactTable);
 
-  DVec<float> &solveQP();
+  Vec12<float> solveQP();
 
   void updateObjectiveVector(robots::Robot &robot,
                              const DMat<float> &bodyTrajectory);
@@ -113,7 +113,7 @@ public:
    * See BodyTrajectoryPlanner for an example
    *
    */
-  DVec<float> &
+  Vec12<float>
   computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
                        const DMat<float> &contactPositionsWorldFrameRotated,
                        const DMat<float> &bodyTrajectory);

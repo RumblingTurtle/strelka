@@ -1,6 +1,6 @@
-
 #include <strelka/control/MPC.hpp>
 
+#include <iostream>
 #include <osqp/ctrlc.h>
 #include <osqp/osqp.h>
 
@@ -23,7 +23,7 @@ MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
     : _bodyMass(mass), inertia_(inertia), inv_inertia_(inertia_.inverse()),
       planning_horizon_(planning_horizon), timestep_(timestep),
       alpha_(MPC_ALPHA),
-      qp_weights_(STATE_DIM * planning_horizon, STATE_DIM * planning_horizon),
+      b_qp_T_Q(ACTION_DIM * planning_horizon, STATE_DIM * planning_horizon),
       _a_qp(STATE_DIM * planning_horizon, STATE_DIM),
       _b_qp(STATE_DIM * planning_horizon, ACTION_DIM * planning_horizon),
       _p_mat(NUM_LEGS * planning_horizon * 3, NUM_LEGS * planning_horizon * 3),
@@ -32,17 +32,19 @@ MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
                   ACTION_DIM * planning_horizon),
       _constraint_lb(CONSTRAINT_DIM * NUM_LEGS * planning_horizon),
       _constraint_ub(CONSTRAINT_DIM * NUM_LEGS * planning_horizon),
-      qp_solution_(3 * NUM_LEGS * planning_horizon), workspace_(0),
-      initial_run_(true), _b_exps(planning_horizon * STATE_DIM, ACTION_DIM),
+      workspace_(0), initial_run_(true),
+      _b_exps(planning_horizon * STATE_DIM, ACTION_DIM),
       kMaxScale(CONSTRAINT_MAX_SCALE), kMinScale(CONSTRAINT_MIN_SCALE),
       _footFrictionCoefficients(FRICTION_COEFFS) {
 
+  qp_weights_block_.setZero();
   fillQPWeights(MPC_WEIGHTS);
+  qp_solution_.setZero();
+  b_qp_T_Q.setZero();
   _a_mat.setZero();
   _b_mat.setZero();
   ab_concatenated_.setZero();
   _a_exp.setZero();
-  _b_exp.setZero();
   _a_qp.setZero();
   _b_qp.setZero();
   _constraint.setZero();
@@ -53,8 +55,8 @@ MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
 }
 
 void MPC::fillQPWeights(const float *qp_weights) {
-  for (int i = 0; i < MPC::STATE_DIM * planning_horizon_; i++) {
-    qp_weights_.insert(i, i) = qp_weights[i % MPC::STATE_DIM];
+  for (int i = 0; i < MPC::STATE_DIM; i++) {
+    qp_weights_block_(i, i) = qp_weights[i];
   }
 }
 
@@ -115,10 +117,15 @@ void MPC::computeABExponentials(
     ab_concatenated_.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM) =
         _b_mat * timestep_;
 
-    DMat<float> ab_exp = ab_concatenated_.exp();
+    FMat<float, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_exp =
+        ab_concatenated_.exp();
+
     if (h == 0) {
       _a_exp = ab_exp.block<STATE_DIM, STATE_DIM>(0, 0);
-      _b_exp = ab_exp.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM);
+      _a_qp.block<STATE_DIM, STATE_DIM>(0, 0) = _a_exp;
+    } else {
+      _a_qp.block<STATE_DIM, STATE_DIM>(h * STATE_DIM, 0) =
+          _a_exp * _a_qp.block<STATE_DIM, STATE_DIM>((h - 1) * STATE_DIM, 0);
     }
 
     _b_exps.block<STATE_DIM, ACTION_DIM>(h * STATE_DIM, 0) =
@@ -129,12 +136,6 @@ void MPC::computeABExponentials(
 void MPC::computeQpMatrices() {
   static DMat<float> alphaI =
       alpha_ * DMat<float>::Identity(NUM_LEGS * 3, NUM_LEGS * 3);
-
-  _a_qp.block<STATE_DIM, STATE_DIM>(0, 0) = _a_exp;
-  for (int i = 1; i < planning_horizon_; ++i) {
-    _a_qp.block<STATE_DIM, STATE_DIM>(i * STATE_DIM, 0) =
-        _a_exp * _a_qp.block<STATE_DIM, STATE_DIM>((i - 1) * STATE_DIM, 0);
-  }
 
   for (int i = 0; i < planning_horizon_; ++i) {
     // Diagonal block.
@@ -152,10 +153,22 @@ void MPC::computeQpMatrices() {
             _a_qp.block<STATE_DIM, STATE_DIM>((power - 1) * STATE_DIM, 0) *
             _b_exps.block<STATE_DIM, ACTION_DIM>(j * STATE_DIM, 0);
       }
+
+      b_qp_T_Q.block<ACTION_DIM, STATE_DIM>(j * ACTION_DIM, i * STATE_DIM) =
+          2.0f *
+          _b_qp.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, j * ACTION_DIM)
+              .transpose() *
+          qp_weights_block_;
     }
+
+    b_qp_T_Q.block<ACTION_DIM, STATE_DIM>(i * ACTION_DIM, i * STATE_DIM) =
+        2.0f *
+        _b_qp.block<STATE_DIM, ACTION_DIM>(i * STATE_DIM, i * ACTION_DIM)
+            .transpose() *
+        qp_weights_block_;
   }
 
-  _p_mat.noalias() = (_b_qp.transpose() * qp_weights_ * _b_qp) * 2.0;
+  _p_mat = b_qp_T_Q * _b_qp;
 
   for (int i = 0; i < planning_horizon_; ++i) {
     _p_mat.block<ACTION_DIM, ACTION_DIM>(i * ACTION_DIM, i * ACTION_DIM) +=
@@ -201,9 +214,7 @@ void MPC::updateConstraints(const DMat<bool> &contactTable) {
   }
 }
 
-DVec<float> &MPC::solveQP() {
-  static DVec<float> error_result;
-
+Vec12<float> MPC::solveQP() {
   DVec<float> objective_vector = _q_vec;
 
   Eigen::SparseMatrix<float, Eigen::ColMajor, long long> objective_matrix =
@@ -218,12 +229,6 @@ DVec<float> &MPC::solveQP() {
   ::OSQPSettings settings;
   osqp_set_default_settings(&settings);
   settings.verbose = false;
-  settings.warm_start = true;
-  settings.polish = false;
-  // settings.scaling = 0;
-  settings.adaptive_rho_interval = 25;
-  settings.eps_abs = 1e-3;
-  settings.eps_rel = 1e-3;
 
   ::OSQPData data;
   data.n = num_variables;
@@ -281,18 +286,16 @@ DVec<float> &MPC::solveQP() {
 
   if (osqp_solve(workspace_) != 0) {
     if (osqp_is_interrupted()) {
-      return error_result;
+      throw std::runtime_error("MPC: solver interrupted");
     }
   }
 
   if (workspace_->info->status_val != OSQP_SOLVED) {
-    return error_result;
+    std::cout << workspace_->info->status << std::endl;
+    throw std::runtime_error("MPC: OSQP solver error");
   }
 
-  Eigen::Map<DVec<float>> solution(qp_solution_.data(), qp_solution_.size());
-
-  solution = -Eigen::Map<const DVec<float>>(workspace_->solution->x,
-                                            workspace_->data->n);
+  qp_solution_ = -Eigen::Map<const Vec12<float>>(workspace_->solution->x, 12);
 
   return qp_solution_;
 }
@@ -316,12 +319,10 @@ void MPC::updateObjectiveVector(robots::Robot &robot,
   const DVec<float> flatDesiredStateTrajectory = Eigen::Map<const DVec<float>>(
       desiredStateTrajectory.data(), desiredStateTrajectory.size());
 
-  _q_vec.noalias() =
-      2 * _b_qp.transpose() *
-      (qp_weights_ * (_a_qp * currentState - flatDesiredStateTrajectory));
+  _q_vec = b_qp_T_Q * (_a_qp * currentState - flatDesiredStateTrajectory);
 }
 
-DVec<float> &
+Vec12<float>
 MPC::computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
                           const DMat<float> &contactPositionsWorldFrameRotated,
                           const DMat<float> &bodyTrajectory) {
@@ -334,8 +335,9 @@ MPC::computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
   updateObjectiveVector(robot, bodyTrajectory);
 
   updateConstraints(contactTable);
+  solveQP();
 
-  return solveQP();
+  return qp_solution_;
 }
 } // namespace control
 } // namespace strelka

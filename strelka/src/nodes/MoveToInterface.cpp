@@ -172,7 +172,6 @@ void MoveToInterface<RobotClass>::moveTo(const Vec3<float> &angles,
                                          float moveTime) {
   assert(moveTime > 0);
   Vec12<float> moveAngles;
-  moveAngles.resize(12);
   for (int motorId = 0; motorId < 12; motorId++) {
     bool rightLeg = motorId % 6 == 0;
     moveAngles[motorId] =

@@ -19,13 +19,10 @@ else()
     message( FATAL_ERROR "LCM was not found. https://github.com/lcm-proj/lcm" )
 endif (LCM_FOUND)
 
-# Used for OSQP
-add_definitions(-DDFLOAT) 
-
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -fPIC -fPIE")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -fPIC -fPIE -fno-omit-frame-pointer")
 set(CMAKE_CXX_FLAGS_DEBUG "-fPIC -fPIE")
 
-set(CMAKE_C_FLAGS_RELEASE "-O3  -march=native -std=gnu99 -I. -fPIC -fPIE")
+set(CMAKE_C_FLAGS_RELEASE "-O3  -march=native -std=gnu99 -I. -fPIC -fPIE  -fno-omit-frame-pointer")
 set(CMAKE_C_FLAGS_DEBUG "-fPIC -fPIE")
 
 add_subdirectory(third_party)
