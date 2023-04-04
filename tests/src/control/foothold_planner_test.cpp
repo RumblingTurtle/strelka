@@ -37,6 +37,7 @@ protected:
         UnitreeA1::createDummyA1RobotWithStateEstimates());
     scheduler = std::make_shared<GaitScheduler>(TEST_GAIT);
     footPlanner = std::make_shared<FootholdPlanner>(scheduler, false);
+    scheduler->step(dt, {1, 1, 1, 1});
   }
 
   void TearDown() override { delete command; }
@@ -44,8 +45,7 @@ protected:
 
 TEST_F(FootPlannerFixture, FootPositionsOverHorizon) {
 
-  DMat<bool> contactTable =
-      scheduler->getContactTable(dt, horizonSteps, {1, 1, 1, 1});
+  DMat<bool> contactTable = scheduler->getContactTable(dt, horizonSteps);
 
   footPlanner->calculateNextFootholdPositions(*robot, *command);
 

@@ -54,8 +54,9 @@ void GaitSequencer::step(float dt) {
   currentGaitTime += dt;
 
   if (currentGaitTime > sequence[gaitIdx].duration) {
+    float remainder = currentGaitTime - sequence[gaitIdx].duration;
     gaitIdx = (gaitIdx + 1) % sequence.size();
-    currentGaitTime = 0;
+    currentGaitTime = remainder;
   }
 
   updateLegState();

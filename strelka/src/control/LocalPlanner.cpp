@@ -65,8 +65,7 @@ void LocalPlanner::update(robots::Robot &robot,
   Vec4<bool> footContacts = robot.footContacts();
   scheduler->step(dt, footContacts);
 
-  DMat<bool> contactTable =
-      scheduler->getContactTable(_stepDt, _horizonSteps, footContacts);
+  DMat<bool> contactTable = scheduler->getContactTable(_stepDt, _horizonSteps);
 
   DMat<float> bodyTrajectory = bodyPlanner.getDesiredBodyTrajectory(
       robot, command, _stepDt, _horizonSteps);

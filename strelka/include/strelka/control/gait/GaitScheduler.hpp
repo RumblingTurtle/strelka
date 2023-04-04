@@ -49,11 +49,9 @@ public:
    *
    * @param dt Time per step
    * @param horizonSteps Step count
-   * @param currentContacts
    * @return DMat<bool> Expected contact table
    */
-  DMat<bool> getContactTable(float dt, int horizonSteps,
-                             Vec4<bool> currentContacts);
+  DMat<bool> getContactTable(float dt, int horizonSteps);
 
   bool isLegScheduledToSwing(int legId);
 

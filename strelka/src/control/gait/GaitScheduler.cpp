@@ -23,38 +23,16 @@ void GaitScheduler::reset() {
   }
 }
 
-DMat<bool> GaitScheduler::getContactTable(float dt, int horizonSteps,
-                                          Vec4<bool> currentContacts) {
+DMat<bool> GaitScheduler::getContactTable(float dt, int horizonSteps) {
   // TODO: assert matrix dims to 4xhorizonSteps
   DMat<bool> contactTable(4, horizonSteps);
   contactTable.setZero();
 
   GaitSequencer sequencerCopy = this->sequencer;
-  LegState lastState[4];
-  Vec4<bool> earlyContact = currentContacts;
 
   for (int h = 0; h < horizonSteps; h++) {
     for (int legId = 0; legId < 4; legId++) {
-      LegState currentState = sequencerCopy.legState[legId];
-
-      if (h == 0) {
-        lastState[legId] = currentState;
-      }
-
-      bool swingStarted = lastState[legId] == LegState::STANCE and
-                          currentState == LegState::SWING;
-
-      if (swingStarted) {
-        earlyContact[legId] = false;
-      }
-
-      if (earlyContact[legId]) {
-        contactTable(legId, h) = currentContacts[legId];
-      } else {
-        contactTable(legId, h) = currentState == LegState::STANCE;
-      }
-
-      lastState[legId] = currentState;
+      contactTable(legId, h) = sequencerCopy.legState[legId] != LegState::SWING;
     }
     sequencerCopy.step(dt * scale);
   }
@@ -71,6 +49,11 @@ void GaitScheduler::step(float dt, Vec4<bool> contacts) {
   memcpy(currentLegState, sequencer.legState, sizeof(LegState) * 4);
 
   for (int legId = 0; legId < 4; legId++) {
+    // Keep the leg in early contact until the swing phase stops
+    if (scheduledState[legId] == LegState::SWING &&
+        prevLegState[legId] == LegState::EARLY_CONTACT) {
+      currentLegState[legId] = LegState::EARLY_CONTACT;
+    }
 
     if (scheduledState[legId] == LegState::SWING && contacts[legId] &&
         normalizedPhase(legId) >= CONTACT_DETECTION_THRESHOLD) {
