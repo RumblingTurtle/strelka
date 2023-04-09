@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+    
+jobs:
+  build-and-test:
+      runs-on: ubuntu-20.04
+      container:
+        image: rumblingturtle/strelka_env:latest
+        options: -v ${{ github.workspace }}:/root/tmp --user root
+      steps:
+        - name: Checkout strelka
+          uses: actions/checkout@v3
+          with:
+            path: strelka
+            
+        - name: Checkout strelka_ros
+          uses: actions/checkout@v3
+          with:
+            repository: rumblingturtle/strelka_ros
+            path: strelka_ros
+            token: ${{ secrets.PAT }}
+        
+        - name: Build strelka and strelka_ros
+          run: /root/setup_repos_and_build.sh
+               
+        - name: Run strelka tests
+          run: /root/run_tests.sh
+            
