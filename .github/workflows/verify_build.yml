@@ -8,6 +8,7 @@ on:
     
 jobs:
   build-and-test:
+      name: Verify master on Pull Request or Push
       runs-on: ubuntu-20.04
       container:
         image: rumblingturtle/strelka_env:latest
@@ -23,11 +24,11 @@ jobs:
           with:
             repository: rumblingturtle/strelka_ros
             path: strelka_ros
-            token: ${{ secrets.PAT }}
+            token: ${{secrets.PAT}}
         
         - name: Build strelka and strelka_ros
-          run: /root/setup_repos_and_build.sh
+          run: bash -i /root/setup_repos_and_build.sh
                
         - name: Run strelka tests
-          run: /root/run_tests.sh
+          run: bash -i /root/run_tests.sh
             

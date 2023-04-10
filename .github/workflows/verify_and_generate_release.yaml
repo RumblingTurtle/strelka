@@ -1,0 +1,61 @@
+name: Upload Release Tag
+
+on:
+  push:
+    branches: [ "release" ]
+
+jobs:
+  build-test-relase:
+      name: Verify Release branch with version tag and publish .deb
+      runs-on: ubuntu-20.04
+      if: startsWith(github.ref, 'refs/tags/v')
+      container:
+        image: rumblingturtle/strelka_env:latest
+        options: -v ${{ github.workspace }}:/root/tmp --user root
+      steps:
+        - name: Checkout strelka
+          uses: actions/checkout@v3
+          with:
+            path: strelka
+            
+        - name: Checkout strelka_ros
+          uses: actions/checkout@v3
+          with:
+            repository: rumblingturtle/strelka_ros
+            path: strelka_ros
+            token: ${{secrets.PAT}}
+        
+        - name: Build strelka and strelka_ros
+          run: bash -i /root/setup_repos_and_build.sh
+               
+        - name: Run strelka tests
+          run: bash -i /root/run_tests.sh
+
+        - name: Generate .deb package
+          run: bash -i /root/generate_deb_package.sh  ${{ github.ref_name }} amd64
+
+        - name: Create Release
+          id: create_release
+          uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.PAT }}
+          with:
+            tag_name: ${{ github.ref_name }}
+            release_name: ${{ github.ref_name }}
+            draft: false
+            prerelease: false
+
+        - name: Get clean ref version
+          id: ref_version
+          run: echo "::set-output name=ver::$( echo $GITHUB_REF_NAME | cut -b 2- )"
+
+        - name: Upload Release Asset
+          id: upload-release-asset 
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.PAT }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+            asset_path: /github/home/strelka_${{ steps.ref_version.outputs.ver }}_amd64.deb
+            asset_name: strelka_${{ steps.ref_version.outputs.ver }}_amd64.deb
+            asset_content_type: application/vnd.debian.binary-package
