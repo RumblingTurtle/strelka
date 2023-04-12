@@ -10,6 +10,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(Macros)
+include(GNUInstallDirs)
 
 find_package(lcm REQUIRED)
 find_package(Eigen3 REQUIRED)

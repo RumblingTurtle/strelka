@@ -24,16 +24,18 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include 
     ${STRELKA_MESSAGES_INLCUDE_DIRS})
     
-target_include_directories(strelka PUBLIC   
-$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-$<INSTALL_INTERFACE:include>)
+target_include_directories(strelka 
+    PUBLIC   
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 target_include_directories(strelka PRIVATE ${DEPENDENCY_INCLUDE_DIRS})
 
 target_link_libraries(strelka lcm strelka_messages dl)
 
 #################
-# install targets
+# Install targets
 #################
 
 install(TARGETS strelka strelka_messages
@@ -42,45 +44,43 @@ install(TARGETS strelka strelka_messages
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(DIRECTORY include/
-  DESTINATION include)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-################
-# Export targets
-################
-set(INCLUDE_INSTALL_DIR include)
-set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/cmake)
+#################
+# Install target metadata
+#################
 
-# for build tree / in workspace
+set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/strelka)
+
 export(EXPORT strelkaTargets
   FILE ${CMAKE_CURRENT_BINARY_DIR}/strelkaTargets.cmake
   NAMESPACE strelka::)
-# exported targets
 install(EXPORT strelkaTargets
   FILE strelkaTargets.cmake
   NAMESPACE strelka::
   DESTINATION ${ConfigPackageLocation})
 
+#################
+# Generate configs
+#################
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/strelkaConfigVersion.cmake"
+    ${CMAKE_CURRENT_BINARY_DIR}/strelkaConfigVersion.cmake
     VERSION ${strelka_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
 
-# generate package configuration file
 configure_package_config_file(
-  ${CMAKE_PROJECT_NAME}Config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+  strelkaConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/strelkaConfig.cmake
   INSTALL_DESTINATION ${ConfigPackageLocation}
-  PATH_VARS INCLUDE_INSTALL_DIR)
+  PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
 
-# install the package configuration files
+# Install configs only when actually installing the package
 install(FILES 
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/strelkaConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/strelkaConfigVersion.cmake
   DESTINATION ${ConfigPackageLocation})
-
 
 ################
 # Uninstall library

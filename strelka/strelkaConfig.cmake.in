@@ -6,7 +6,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/strelkaTargets.cmake)
 
 # define INCLUDE_DIRS and LIBRARIES, required for catkin_package
-set_and_check(strelka_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set_and_check(strelka_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
 set(strelka_LIBRARIES strelka::strelka)
 
 
