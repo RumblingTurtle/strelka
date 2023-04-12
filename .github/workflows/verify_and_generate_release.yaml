@@ -2,13 +2,13 @@ name: Upload Release Tag
 
 on:
   push:
-    branches: [ "release" ]
-
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    
 jobs:
   build-test-relase:
       name: Verify Release branch with version tag and publish .deb
       runs-on: ubuntu-20.04
-      if: startsWith(github.ref, 'refs/tags/v')
       container:
         image: rumblingturtle/strelka_env:latest
         options: -v ${{ github.workspace }}:/root/tmp --user root
