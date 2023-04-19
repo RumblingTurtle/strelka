@@ -14,6 +14,11 @@ To aid in development and testing, [*strelka_ros*](https://github.com/RumblingTu
 
 Overall, *strelka* is an ideal framework for researchers and developers who are interested in experimenting with quadrupedal locomotion, and who are looking for a flexible and extensible software platform that can be easily customized to meet their specific needs.
 
+## YouTube Demo
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=NjJO0jSLSFc" target="_blank" >
+ <img src="http://img.youtube.com/vi/NjJO0jSLSFc/mqdefault.jpg" alt="Watch the demo" width="240" height="180" border="10"/>
+</a>
+
 ## [Architechture overview](architecture.md)
 
 ## [Implementing your robot](defining_new_robots.md)
