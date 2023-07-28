@@ -73,6 +73,12 @@ public:
   /*!
    * Initialize a floating base model with default gravity
    */
+  size_t num_act_joint;
+  size_t num_q;
+  size_t dim_config;
+  size_t num_leg;
+  size_t num_leg_joint;
+
   FloatingBaseModel() : _gravity(0, 0, -9.81) {}
   ~FloatingBaseModel() {}
 

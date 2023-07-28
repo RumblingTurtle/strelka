@@ -5,15 +5,15 @@
 
 template <typename T>
 WBC_Ctrl<T>::WBC_Ctrl(FloatingBaseModel<T> model)
-    : _full_config(cheetah::num_act_joint + 7), _tau_ff(cheetah::num_act_joint),
-      _des_jpos(cheetah::num_act_joint), _des_jvel(cheetah::num_act_joint) {
+    : _full_config(model.num_act_joint + 7), _tau_ff(model.num_act_joint),
+      _des_jpos(model.num_act_joint), _des_jvel(model.num_act_joint) {
   _iter = 0;
   _full_config.setZero();
 
   _model = model;
-  _kin_wbc = new KinWBC<T>(cheetah::dim_config);
+  _kin_wbc = new KinWBC<T>(model.dim_config);
 
-  _wbic = new WBIC<T>(cheetah::dim_config, &(_contact_list), &(_task_list));
+  _wbic = new WBIC<T>(model.dim_config, &(_contact_list), &(_task_list));
   _wbic_data = new WBIC_ExtraData<T>();
 
   _wbic_data->_W_floating = DVec<T>::Constant(6, 0.1);
@@ -21,14 +21,11 @@ WBC_Ctrl<T>::WBC_Ctrl(FloatingBaseModel<T> model)
   //_wbic_data->_W_floating[5] = 0.1;
   _wbic_data->_W_rf = DVec<T>::Constant(12, 1.);
 
-  _Kp_joint.resize(cheetah::num_leg_joint, 5.);
-  _Kd_joint.resize(cheetah::num_leg_joint, 1.5);
+  _Kp_joint.resize(model.num_leg_joint, 5.);
+  _Kd_joint.resize(model.num_leg_joint, 1.5);
 
-  //_Kp_joint_swing.resize(cheetah::num_leg_joint, 10.);
-  //_Kd_joint_swing.resize(cheetah::num_leg_joint, 1.5);
-
-  _state.q = DVec<T>::Zero(cheetah::num_act_joint);
-  _state.qd = DVec<T>::Zero(cheetah::num_act_joint);
+  _state.q = DVec<T>::Zero(model.num_act_joint);
+  _state.qd = DVec<T>::Zero(model.num_act_joint);
 }
 
 template <typename T> WBC_Ctrl<T>::~WBC_Ctrl() {
@@ -122,12 +119,6 @@ void WBC_Ctrl<T>::_UpdateModel(Quat<T> bodyOrientation, Vec3<T> bodyPosition,
   _grav = _model.getGravityForce();
   _coriolis = _model.getCoriolisForce();
   _Ainv = _A.inverse();
-
-  // pretty_print(bodyOrientation, std::cout, "Body Orientation");
-  // pretty_print(bodyPosition, std::cout, "Body Position");
-  // pretty_print(q, std::cout, "q vector");
-  // pretty_print(_A, std::cout, "A matrix");
-  // pretty_print(_grav, std::cout, "g vector");
 }
 
 template <typename T>

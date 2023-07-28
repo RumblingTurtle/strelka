@@ -71,32 +71,8 @@ public:
       _hipRotorInertia, _kneeRotorInertia, _bodyInertia;
   Vec3<T> _abadLocation, _abadRotorLocation, _hipLocation, _hipRotorLocation,
       _kneeLocation, _kneeRotorLocation;
-  FloatingBaseModel<T> buildModel();
   bool buildModel(FloatingBaseModel<T> &model);
   std::vector<ActuatorModel<T>> buildActuatorModels();
-
-  /*!
-   * Get if the i-th leg is on the left (+) or right (-) of the robot.
-   * @param leg : the leg index
-   * @return The side sign (-1 for right legs, +1 for left legs)
-   */
-  static T getSideSign(int leg) {
-    const T sideSigns[4] = {-1, 1, -1, 1};
-    assert(leg >= 0 && leg < 4);
-    return sideSigns[leg];
-  }
-
-  /*!
-   * Get location of the hip for the given leg in robot frame
-   * @param leg : the leg index
-   */
-  Vec3<T> getHipLocation(int leg) {
-    assert(leg >= 0 && leg < 4);
-    Vec3<T> pHip((leg == 0 || leg == 1) ? _abadLocation(0) : -_abadLocation(0),
-                 (leg == 1 || leg == 3) ? _abadLocation(1) : -_abadLocation(1),
-                 _abadLocation(2));
-    return pHip;
-  }
 };
 
 template <typename T, typename T2>

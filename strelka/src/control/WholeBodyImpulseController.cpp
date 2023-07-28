@@ -91,8 +91,16 @@ WholeBodyImpulseController::WholeBodyImpulseController(robots::Robot &robot,
   quadruped._kneeLocation = Vec3<float>(0, 0, -quadruped._hipLinkLength);
   quadruped._kneeRotorLocation = Vec3<float>(0, 0, 0);
 
+  FloatingBaseModel<float> model;
+  model.num_act_joint = 12;
+  model.num_q = 19;
+  model.dim_config = 18;
+  model.num_leg = 4;
+  model.num_leg_joint = 3;
+  quadruped.buildModel(model);
+
   wbic = new LocomotionCtrl<float>(
-      quadruped.buildModel(), parameters.Kp, parameters.Kd, parameters.Kp_kin,
+      model, parameters.Kp, parameters.Kd, parameters.Kp_kin,
       parameters.floating_W, parameters.rf_W, parameters.mu, parameters.max_fz);
 }
 
