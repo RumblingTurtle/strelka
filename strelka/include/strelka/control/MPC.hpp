@@ -24,28 +24,27 @@ public:
   static constexpr int STATE_DIM = 13;
   static constexpr int CONSTRAINT_DIM = 5;
   static constexpr int NUM_LEGS = 4;
-  static constexpr int ACTION_DIM = NUM_LEGS * 3;
+  // 6 for forces and 6 for moments
+  static constexpr int ACTION_PER_LEG = 3;
+  static constexpr int ACTION_DIM = NUM_LEGS * ACTION_PER_LEG;
 
   static constexpr float CONSTRAINT_MAX_SCALE = 10;
   static constexpr float CONSTRAINT_MIN_SCALE = 0.1;
-  static constexpr float MPC_ALPHA = 1e-5;
-  static constexpr float FRICTION_COEFFS[4] = {0.45, 0.45, 0.45, 0.45};
-  static constexpr float MPC_WEIGHTS[13] = {1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f,
-                                            0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
+  static constexpr float MPC_ALPHA_FORCE = 1e-5;
+  static constexpr float FRICTION_COEFF = 0.45;
+  // RPY , XYZ,  angular velocity, linear velocity
+  static constexpr float MPC_WEIGHTS[STATE_DIM] = {
+      1.0, 1.0, 0.0, 0.0, 0.0, 50.0, 0.0f, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0};
 
-private:
+  using SolutionVectorType = Eigen::Matrix<float, ACTION_DIM, 1>;
+
   const float _bodyMass;
-  const float alpha_;
   const float timestep_;
-
-  float kMaxScale;
-  float kMinScale;
 
   const int planning_horizon_;
 
   const Mat3<float> inertia_;
   const Mat3<float> inv_inertia_;
-  Vec4<float> _footFrictionCoefficients;
 
   bool initial_run_;
 
@@ -57,34 +56,34 @@ private:
   FMat<float, STATE_DIM + ACTION_DIM, STATE_DIM + ACTION_DIM> ab_concatenated_;
 
   // Contains all the power mats of _a_exp. Consider Eigen::SparseMatrix.
-  DMat<float> _a_qp;  // 13 * horizon x 13
-  DMat<float> _b_qp;  // 13 * horizon x NUM_LEGS * 3 * horizon sparse
-  DMat<float> _p_mat; // NUM_LEGS * 3 * horizon x NUM_LEGS * 3 * horizon
-  DVec<float> _q_vec; // NUM_LEGS * 3 * horizon vector
-
-  DMat<float> _b_exps; // 13 * horizon x (NUM_LEGS * 3)
+  DMat<float> _a_qp;   // STATE_DIM * horizon x STATE_DIM
+  DMat<float> _b_qp;   // STATE_DIM * horizon x ACTION_DIM * horizon sparse
+  DMat<float> _p_mat;  // ACTION_DIM * horizon x ACTION_DIM * horizon
+  DVec<float> _q_vec;  // ACTION_DIM * horizon vector
+  DVec<float> _u;      // ACTION_DIM * horizon vector
+  DMat<float> _b_exps; // STATE_DIM * horizon x ACTION_DIM
 
   // Contains the constraint matrix and bounds.
-  DMat<float> _constraint;    // 5 * NUM_LEGS * horizon x 3 * NUM_LEGS * horizon
-  DVec<float> _constraint_lb; // 5 * NUM_LEGS * horizon
-  DVec<float> _constraint_ub; // 5 * NUM_LEGS * horizon
+  DMat<float> _constraint; // CONSTRAINT_DIM * NUM_LEGS  * horizon x ACTION_DIM
+                           // * horizon
+  DVec<float> _constraint_lb; // CONSTRAINT_DIM * NUM_LEGS * horizon
+  DVec<float> _constraint_ub; // CONSTRAINT_DIM * NUM_LEGS * horizon
 
   DMat<float> b_qp_T_Q; // 2*b_qp*qp_weights
   FMat<float, STATE_DIM, STATE_DIM> qp_weights_block_;
-  Vec12<float> qp_solution_;
 
-  ::OSQPWorkspace *workspace_;
-  // Whether optimizing for the first step
+  SolutionVectorType qp_solution_;
+  ::OSQPWorkspace *workspace_ = nullptr;
 
   void updateConstraints(const DMat<bool> &contactTable);
 
-  Vec12<float> solveQP();
+  SolutionVectorType solveQP();
 
-  void updateObjectiveVector(robots::Robot &robot,
+  void updateObjectiveVector(const DVec<float> &currentState,
                              const DMat<float> &bodyTrajectory);
 
   void
-  computeABExponentials(robots::Robot &robot,
+  computeABExponentials(const DVec<float> &currentState,
                         const DMat<float> &contactPositionsWorldFrameRotated,
                         const DMat<float> &bodyTrajectory);
 
@@ -92,7 +91,6 @@ private:
 
   void fillQPWeights(const float *qp_weights);
 
-public:
   MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
       float timestep);
 
@@ -100,7 +98,7 @@ public:
   /**
    * @brief Compute reaction forces to
    *
-   * @param robot Object which implements Robot interface
+   * @param currentState Robot's current state
    *
    * @param contactTable Table of size 4xN with contact/no contact pattern per
    * each leg. See GaitScheduler's getContactTable for details
@@ -113,8 +111,9 @@ public:
    * See BodyTrajectoryPlanner for an example
    *
    */
-  Vec12<float>
-  computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
+  SolutionVectorType
+  computeContactForces(const DVec<float> &currentState,
+                       const DMat<bool> &contactTable,
                        const DMat<float> &contactPositionsWorldFrameRotated,
                        const DMat<float> &bodyTrajectory);
 

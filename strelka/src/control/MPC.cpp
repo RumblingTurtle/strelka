@@ -14,28 +14,24 @@ constexpr int MPC::ACTION_DIM;
 
 constexpr float MPC::CONSTRAINT_MAX_SCALE;
 constexpr float MPC::CONSTRAINT_MIN_SCALE;
-constexpr float MPC::MPC_ALPHA;
-constexpr float MPC::FRICTION_COEFFS[4];
-constexpr float MPC::MPC_WEIGHTS[13];
+constexpr float MPC::FRICTION_COEFF;
+constexpr float MPC::MPC_WEIGHTS[MPC::STATE_DIM];
 
 MPC::MPC(float mass, const Mat3<float> &inertia, int planning_horizon,
          float timestep)
     : _bodyMass(mass), inertia_(inertia), inv_inertia_(inertia_.inverse()),
       planning_horizon_(planning_horizon), timestep_(timestep),
-      alpha_(MPC_ALPHA),
       b_qp_T_Q(ACTION_DIM * planning_horizon, STATE_DIM * planning_horizon),
       _a_qp(STATE_DIM * planning_horizon, STATE_DIM),
       _b_qp(STATE_DIM * planning_horizon, ACTION_DIM * planning_horizon),
-      _p_mat(NUM_LEGS * planning_horizon * 3, NUM_LEGS * planning_horizon * 3),
-      _q_vec(NUM_LEGS * planning_horizon * 3),
+      _p_mat(ACTION_DIM * planning_horizon, ACTION_DIM * planning_horizon),
+      _q_vec(ACTION_DIM * planning_horizon),
       _constraint(CONSTRAINT_DIM * NUM_LEGS * planning_horizon,
                   ACTION_DIM * planning_horizon),
       _constraint_lb(CONSTRAINT_DIM * NUM_LEGS * planning_horizon),
       _constraint_ub(CONSTRAINT_DIM * NUM_LEGS * planning_horizon),
-      workspace_(0), initial_run_(true),
-      _b_exps(planning_horizon * STATE_DIM, ACTION_DIM),
-      kMaxScale(CONSTRAINT_MAX_SCALE), kMinScale(CONSTRAINT_MIN_SCALE),
-      _footFrictionCoefficients(FRICTION_COEFFS) {
+      workspace_(0), initial_run_(true), _u(ACTION_DIM * planning_horizon),
+      _b_exps(planning_horizon * STATE_DIM, ACTION_DIM) {
 
   qp_weights_block_.setZero();
   fillQPWeights(MPC_WEIGHTS);
@@ -63,7 +59,8 @@ void MPC::fillQPWeights(const float *qp_weights) {
 MPC::~MPC() { osqp_cleanup(workspace_); }
 
 void MPC::computeABExponentials(
-    robots::Robot &robot, const DMat<float> &contactPositionsWorldFrameRotated,
+    const DVec<float> &currentState,
+    const DMat<float> &contactPositionsWorldFrameRotated,
     const DMat<float> &bodyTrajectory) {
   // A mat calculation
   float avg_yaw = bodyTrajectory.block(0, 2, planning_horizon_, 1).mean();
@@ -74,7 +71,7 @@ void MPC::computeABExponentials(
   // order in the intrinsic frame.
   const float cos_yaw = cos(avg_yaw);
   const float sin_yaw = sin(avg_yaw);
-  const float pitch = robot.bodyToWorldRPY()(1);
+  const float pitch = currentState(1); // Pitch
   const float cos_pitch = cos(pitch);
   const float tan_pitch = tan(pitch);
   Mat3<float> angular_velocity_to_rpy_rate;
@@ -106,13 +103,13 @@ void MPC::computeABExponentials(
 
       skew_mat << 0, -zPos, yPos, zPos, 0, -xPos, -yPos, xPos, 0;
 
-      _b_mat.block<3, 3>(6, leg_id * 3) = inv_inertia_world * skew_mat;
+      _b_mat.block<3, 3>(6, leg_id * ACTION_PER_LEG) =
+          inv_inertia_world * skew_mat;
 
-      _b_mat(9, leg_id * 3) = 1 / _bodyMass;
-      _b_mat(10, leg_id * 3 + 1) = 1 / _bodyMass;
-      _b_mat(11, leg_id * 3 + 2) = 1 / _bodyMass;
+      _b_mat(9, leg_id * ACTION_PER_LEG) = 1 / _bodyMass;
+      _b_mat(10, leg_id * ACTION_PER_LEG + 1) = 1 / _bodyMass;
+      _b_mat(11, leg_id * ACTION_PER_LEG + 2) = 1 / _bodyMass;
     }
-
     // Exponentiation
     ab_concatenated_.block<STATE_DIM, ACTION_DIM>(0, STATE_DIM) =
         _b_mat * timestep_;
@@ -134,8 +131,8 @@ void MPC::computeABExponentials(
 }
 
 void MPC::computeQpMatrices() {
-  static DMat<float> alphaI =
-      alpha_ * DMat<float>::Identity(NUM_LEGS * 3, NUM_LEGS * 3);
+  DMat<float> alphaI =
+      DMat<float>::Identity(ACTION_DIM, ACTION_DIM) * MPC_ALPHA_FORCE;
 
   for (int i = 0; i < planning_horizon_; ++i) {
     // Diagonal block.
@@ -181,22 +178,21 @@ void MPC::computeQpMatrices() {
 void MPC::reset() { initial_run_ = true; }
 
 void MPC::updateConstraints(const DMat<bool> &contactTable) {
-  float fz_max = _bodyMass * -constants::GRAVITY_CONSTANT * kMaxScale;
-  float fz_min = _bodyMass * -constants::GRAVITY_CONSTANT * kMinScale;
-  float friction_coeff = _footFrictionCoefficients[0];
+  float fz_max =
+      _bodyMass * -constants::GRAVITY_CONSTANT * CONSTRAINT_MAX_SCALE;
+  float fz_min =
+      _bodyMass * -constants::GRAVITY_CONSTANT * CONSTRAINT_MIN_SCALE;
 
   for (int i = 0; i < planning_horizon_; ++i) {
     for (int j = 0; j < MPC::NUM_LEGS; ++j) {
       const int row = (i * MPC::NUM_LEGS + j) * MPC::CONSTRAINT_DIM;
+
       _constraint_lb(row) = 0;
       _constraint_lb(row + 1) = 0;
       _constraint_lb(row + 2) = 0;
       _constraint_lb(row + 3) = 0;
       _constraint_lb(row + 4) = fz_min * contactTable(j, i);
-
-      const float friction_ub =
-          (friction_coeff + 1) * fz_max * contactTable(j, i);
-
+      const float friction_ub = 2 * fz_max * contactTable(j, i);
       _constraint_ub(row) = friction_ub;
       _constraint_ub(row + 1) = friction_ub;
       _constraint_ub(row + 2) = friction_ub;
@@ -206,15 +202,18 @@ void MPC::updateConstraints(const DMat<bool> &contactTable) {
   }
 
   for (int i = 0; i < planning_horizon_ * MPC::NUM_LEGS; ++i) {
-    _constraint.block<MPC::CONSTRAINT_DIM, 3>(i * MPC::CONSTRAINT_DIM, i * 3)
+    _constraint.block<MPC::CONSTRAINT_DIM, ACTION_PER_LEG>(
+        i * MPC::CONSTRAINT_DIM, i * ACTION_PER_LEG)
         << -1,
-        0, _footFrictionCoefficients[0], 1, 0, _footFrictionCoefficients[1], 0,
-        -1, _footFrictionCoefficients[2], 0, 1, _footFrictionCoefficients[3], 0,
-        0, 1;
+        0, FRICTION_COEFF,     //
+        1, 0, FRICTION_COEFF,  //
+        0, -1, FRICTION_COEFF, //
+        0, 1, FRICTION_COEFF,  //
+        0, 0, 1;               //
   }
 }
 
-Vec12<float> MPC::solveQP() {
+MPC::SolutionVectorType MPC::solveQP() {
   DVec<float> objective_vector = _q_vec;
 
   Eigen::SparseMatrix<float, Eigen::ColMajor, long long> objective_matrix =
@@ -266,7 +265,7 @@ Vec12<float> MPC::solveQP() {
 
   const int return_code = 0;
 
-  if (workspace_ == 0) {
+  if (initial_run_) {
     osqp_setup(&workspace_, &data, &settings);
     initial_run_ = false;
   } else {
@@ -296,25 +295,17 @@ Vec12<float> MPC::solveQP() {
     throw std::runtime_error("MPC: OSQP solver error");
   }
 
-  qp_solution_ = -Eigen::Map<const Vec12<float>>(workspace_->solution->x, 12);
-
+  qp_solution_ = Eigen::Map<const MPC::SolutionVectorType>(
+      workspace_->solution->x, ACTION_DIM);
+  /*
+_u =
+  DVec<float>::Map(workspace_->solution->x, ACTION_DIM * planning_horizon_);
+*/
   return qp_solution_;
 }
 
-void MPC::updateObjectiveVector(robots::Robot &robot,
+void MPC::updateObjectiveVector(const DVec<float> &currentState,
                                 const DMat<float> &bodyTrajectory) {
-  DVec<float> currentState(13);
-  currentState.block<3, 1>(0, 0) = robot.bodyToWorldRPY();
-  currentState.block<3, 1>(3, 0) = robot.positionWorldFrame();
-
-  currentState.block<3, 1>(6, 0) =
-      robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame());
-
-  currentState.block<3, 1>(9, 0) =
-      robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame());
-
-  currentState(12) = constants::GRAVITY_CONSTANT;
-
   DMat<float> desiredStateTrajectory = bodyTrajectory.transpose();
 
   const DVec<float> flatDesiredStateTrajectory = Eigen::Map<const DVec<float>>(
@@ -323,21 +314,28 @@ void MPC::updateObjectiveVector(robots::Robot &robot,
   _q_vec = b_qp_T_Q * (_a_qp * currentState - flatDesiredStateTrajectory);
 }
 
-Vec12<float>
-MPC::computeContactForces(robots::Robot &robot, const DMat<bool> &contactTable,
+MPC::SolutionVectorType
+MPC::computeContactForces(const DVec<float> &currentState,
+                          const DMat<bool> &contactTable,
                           const DMat<float> &contactPositionsWorldFrameRotated,
                           const DMat<float> &bodyTrajectory) {
+  assert(currentState.rows() == STATE_DIM);
+  assert(contactTable.rows() == NUM_LEGS);
+  assert(contactTable.cols() == planning_horizon_);
+  assert(contactPositionsWorldFrameRotated.rows() == NUM_LEGS);
+  assert(contactPositionsWorldFrameRotated.cols() == planning_horizon_ * 3);
+  assert(bodyTrajectory.rows() == planning_horizon_);
+  assert(bodyTrajectory.cols() == STATE_DIM);
 
-  computeABExponentials(robot, contactPositionsWorldFrameRotated,
+  computeABExponentials(currentState, contactPositionsWorldFrameRotated,
                         bodyTrajectory);
-
   computeQpMatrices();
-
-  updateObjectiveVector(robot, bodyTrajectory);
-
+  updateObjectiveVector(currentState, bodyTrajectory);
   updateConstraints(contactTable);
   solveQP();
-
+  /*
+  DVec<float> state_horizon = _a_qp * currentState + _b_qp * _u;
+  */
   return qp_solution_;
 }
 } // namespace control

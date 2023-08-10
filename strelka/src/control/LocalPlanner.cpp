@@ -75,8 +75,19 @@ void LocalPlanner::update(robots::Robot &robot,
   DMat<float> footholdTable = footPlanner->calculateWorldFrameRotatedFootholds(
       robot, command, bodyTrajectory, contactTable);
 
-  _mpcForces = -mpc.computeContactForces(robot, contactTable, footholdTable,
-                                         bodyTrajectory);
+  DVec<float> current_state(MPC::STATE_DIM);
+  current_state.block<3, 1>(0, 0) = robot.bodyToWorldRPY();
+  current_state.block<3, 1>(3, 0) = robot.positionWorldFrame();
+
+  current_state.block<3, 1>(6, 0) =
+      robot.rotateBodyToWorldFrame(robot.gyroscopeBodyFrame());
+
+  current_state.block<3, 1>(9, 0) =
+      robot.rotateBodyToWorldFrame(robot.linearVelocityBodyFrame());
+  current_state(12) = constants::GRAVITY_CONSTANT;
+
+  _mpcForces = mpc.computeContactForces(current_state, contactTable,
+                                        footholdTable, bodyTrajectory);
 
   _desiredRpy = bodyTrajectory.block<1, 3>(0, 0);
   _desiredPositionBody = bodyTrajectory.block<1, 3>(0, 3);
